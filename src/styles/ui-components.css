@@ -1,0 +1,289 @@
+/* Table of contents
+––––––––––––––––––––––––––––––––––––––––––––––––––
+-- Base Styles
+- Button
+- Card
+- Dropdown
+- Input
+- tabs
+*/
+
+/* Base Styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+:root {
+  --black: #000;
+  --color1: #d1410c;
+  --color2: #3d64ff;
+  --dark-gray: #555;
+  --font-size-normal: clamp(0.88rem, calc(0.83rem + 0.22vw), 1rem);
+  --font-size-small: clamp(0.75rem, calc(0.71rem + 0.22vw), 0.88rem);
+  --font-size-big: clamp(1rem, calc(0.96rem + 0.22vw), 1.13rem);
+  --gray: #c3c3c3;
+  --gray-font: #6f7287;
+  --light-black: #3f4e4f;
+  --light-gray: #f8f7fa;
+  --medium-gray: #bbb;
+  --white: #fff;
+}
+
+html {
+  font-family: 'Raleway', sans-serif;
+}
+
+img {
+  height: auto;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+svg {
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+}
+
+p {
+  font-size: var(--font-size-normal);
+  line-height: 1.2;
+}
+
+/* Button
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-button {
+  background-color: var(--white);
+  border-radius: 4px;
+  border: 1px solid var(--medium-gray);
+  color: var(--dark-gray);
+  cursor: pointer;
+  display: inline-block;
+  font-size: var(--font-size-normal);
+  font-weight: bold;
+  height: 38px;
+  line-height: 38px;
+  max-width: 100%;
+  padding: 0 10px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.ui-button:hover {
+  border: 1px solid var(--color2);
+  color: var(--color2);
+}
+
+.ui-button.block {
+  display: block;
+  width: 100%;
+}
+
+.ui-button.primary {
+  background-color: var(--color1);
+  border: none;
+  color: var(--white);
+}
+
+.ui-button.primary:hover {
+  opacity: 0.9;
+}
+
+/* Card
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-card {
+  background-color: var(--white);
+}
+
+.ui-card.hoverable {
+  transition: box-shadow 0.2s ease;
+}
+
+.ui-card.hoverable:hover {
+  box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
+    0 5px 12px 4px rgb(0 0 0 / 9%);
+}
+
+.ui-card .header .cover {
+  position: relative;
+}
+
+.ui-card .cover .like-button {
+  background-color: var(--white);
+  border-radius: 50%;
+  border: 1px solid var(--medium-gray);
+  bottom: -20px;
+  cursor: pointer;
+  height: 40px;
+  padding: 0.5rem;
+  position: absolute;
+  right: 15px;
+  transition: background-color 0.3s ease-in-out;
+  width: 40px;
+}
+
+.ui-card .cover .like-button:hover {
+  background-color: var(--light-gray);
+}
+
+.ui-card .header .title {
+  font-size: var(--font-size-big);
+  font-weight: bold;
+  padding: 0.8rem 0.8rem 0 0.8rem;
+}
+
+.ui-card .body {
+  padding: 0.8rem;
+}
+
+@media (min-width: 48rem) {
+  .ui-card .cover .like-button {
+    height: 50px;
+    padding: 0.8rem;
+    right: 25px;
+    width: 50px;
+  }
+}
+
+/* Dropdown
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-dropdown {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  z-index: 1000000;
+}
+
+.ui-dropdown .items {
+  background-color: var(--white);
+  box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
+    0 5px 12px 4px rgb(0 0 0 / 9%);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  transform: translateY(-10%);
+  transition: all 0.5s ease-in-out;
+  width: 200px;
+}
+
+.ui-dropdown .items.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.ui-dropdown .items.is-not-active {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10%);
+}
+
+.ui-dropdown .item {
+  padding: 1rem;
+  transition: background-color 0.5s ease;
+}
+
+.ui-dropdown .item:hover {
+  background-color: var(--light-gray);
+}
+
+/* Input
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-input {
+  position: relative;
+  width: 100%;
+}
+
+.ui-input .addon-before {
+  align-items: center;
+  bottom: 0;
+  color: var(--light-gray);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  padding: 0.6rem;
+  position: absolute;
+  width: 20%;
+}
+
+.ui-input input {
+  background-color: var(--light-gray);
+  border-radius: 5px;
+  border: 1px solid transparent;
+  outline: none;
+  padding: 0.8rem;
+  transition: border 0.2s ease;
+  padding-left: 20%;
+  font-family: 'Raleway', sans-serif;
+  font-weight: bold;
+  width: 100%;
+}
+
+.ui-input input:focus {
+  border: 1px solid var(--color2);
+}
+
+@media (min-width: 62rem) {
+  .ui-input .addon-before {
+    padding: 0.8rem;
+  }
+}
+
+/* Tabs
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-tabs {
+  align-items: center;
+  display: flex;
+  list-style: none;
+  overflow-x: auto;
+  padding: 0;
+}
+
+.ui-tabs::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 1px;
+  height: 1px;
+}
+
+.ui-tabs::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: var(--gray);
+}
+
+.ui-tabs .tab {
+  border-bottom: 2px solid transparent;
+  color: #3f4e4f;
+  cursor: pointer;
+  font-size: var(--font-size-normal);
+  font-weight: bold;
+  margin-right: 32px;
+  padding-bottom: 0.8rem;
+  white-space: nowrap;
+}
+
+.ui-tabs .tab:last-of-type {
+  margin-right: 0;
+}
+
+.ui-tabs .tab:hover {
+  color: var(--black);
+  border-color: var(--black);
+}
+
+.ui-tabs .tab.is-active {
+  border-bottom: 2px solid var(--color2);
+  color: var(--color2);
+}
+
+.ui-tabs + .active-content {
+  margin-top: 2rem;
+}
