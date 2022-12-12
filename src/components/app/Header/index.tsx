@@ -46,8 +46,8 @@ export default function Header() {
   return (
     <>
       <header>
-        <nav className="row vertical-gutter-8">
-          <div className="col-8 col-md-6 row vertical-gutter-8">
+        <nav className="row vg-8">
+          <div className="col-8 col-md-6 row vg-8">
             <Link href="/" className="logo col-7 col-sm-6 col-md-6 col-lg-5">
               Yourtickets
             </Link>

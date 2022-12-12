@@ -15,7 +15,7 @@ export default function Home() {
         <Image
           src="/assets/home-banner.jpg"
           alt="banner"
-          width={700}
+          width={1200}
           height={700}
           style={{
             width: '100%',
@@ -51,7 +51,7 @@ export default function Home() {
       </section>
 
       <section className="select container">
-        <div className="row horizontal-gutter-8">
+        <div className="row hg-8">
           <div className="title col-12 col-sm-3 col-lg-2">Popular in</div>
           <div className="col-12 col-sm-9 col-lg-10 row">
             <div className="icon col-2 col-sm-1">
