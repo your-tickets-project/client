@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import useVW from 'hooks/useVW';
 import { breakPoints, colors, fluidFont } from 'styles/variables';
 
@@ -73,7 +74,9 @@ const asideLinks = [
 ];
 
 export default function Footer() {
+  const router = useRouter();
   const vw = useVW();
+
   return (
     <>
       <footer>
@@ -91,7 +94,7 @@ export default function Footer() {
             ))}
           </div>
         )}
-        <aside className="row horizontal-gutter-16">
+        <aside className="row hg-16">
           <p className="title col-12 col-md-3">2022 © Yourtickets</p>
           <div className="links col-12 col-md-6">
             {asideLinks.map((link, i) => (
@@ -107,6 +110,7 @@ export default function Footer() {
         footer {
           background-color: ${colors.color3};
           color: ${colors.white};
+          margin-bottom: ${router.pathname === '/event/[slug]' ? '118px' : '0'};
           padding: 1rem;
         }
 
@@ -147,6 +151,9 @@ export default function Footer() {
         }
 
         @media (min-width: ${breakPoints.md}) {
+          footer {
+            margin-bottom: 0;
+          }
         }
       `}</style>
     </>

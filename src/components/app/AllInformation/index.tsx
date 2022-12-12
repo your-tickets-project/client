@@ -101,7 +101,7 @@ export default function AllInformation() {
   return (
     <>
       <h3>Check out treding categories</h3>
-      <div className="category-cards row vertical-gutter-8 horizontal-gutter-8">
+      <div className="category-cards row vg-8 hg-8">
         {categoryCards.map(({ key, Icon, title }) => (
           <div key={key} className="category-card col-12 col-md-3 row">
             <div className="icon-container col-2 col-md-4">
@@ -116,73 +116,99 @@ export default function AllInformation() {
 
       <section className="cards">
         <h3>Events in Mexico</h3>
-        <div className="row horizontal-gutter-32 vertical-gutter-8">
-          {events.map(({ src, title, fromDate, location, price, slug }, i) => (
-            <div key={`${src}-${i}`} className="card col-12 col-md-6 col-xl-3">
-              <Link href={`/event/${slug}`}>
-                <Card
-                  cover={
-                    src ? (
-                      <Image
-                        src={src}
-                        alt="0"
-                        width={700}
-                        height={700}
-                        style={{ width: '100%', height: 'auto' }}
-                        placeholder="blur"
-                        blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                          shimmer('100%', '100%')
-                        )}`}
-                      />
-                    ) : undefined
-                  }
-                  hoverable
-                  style={{ height: '100%' }}
-                >
-                  <p className="title">{title}</p>
-                  <p className="date">{formatDate({ date: fromDate })}</p>
-                  <p className="location">{location}</p>
-                  <p className="price">{price}</p>
-                </Card>
-              </Link>
-            </div>
-          ))}
+        <div className="row hg-32 vg-8">
+          {events.map(
+            (
+              {
+                id,
+                src,
+                title,
+                fromDate,
+                short_location: location,
+                price,
+                slug,
+              },
+              i
+            ) => (
+              <div key={id} className="card col-12 col-md-6 col-xl-3">
+                <Link href={`/event/${slug}`}>
+                  <Card
+                    cover={
+                      src ? (
+                        <Image
+                          src={src}
+                          alt="0"
+                          width={700}
+                          height={700}
+                          style={{ width: '100%', height: 'auto' }}
+                          placeholder="blur"
+                          blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                            shimmer('100%', '100%')
+                          )}`}
+                        />
+                      ) : undefined
+                    }
+                    hoverable
+                    style={{ height: '100%' }}
+                  >
+                    <p className="title">{title}</p>
+                    <p className="date">{formatDate({ date: fromDate })}</p>
+                    <p className="location">{location}</p>
+                    <p className="price">{price}</p>
+                  </Card>
+                </Link>
+              </div>
+            )
+          )}
         </div>
       </section>
 
       <section className="cards">
         <h3>More events</h3>
-        <div className="row horizontal-gutter-32 vertical-gutter-8">
-          {events.map(({ src, title, fromDate, location, price, slug }, i) => (
-            <div key={`${src}-${i}`} className="card col-12 col-md-6 col-xl-3">
-              <Link href={`/event/${slug}`}>
-                <Card
-                  cover={
-                    src ? (
-                      <Image
-                        src={src}
-                        alt="0"
-                        width={700}
-                        height={700}
-                        style={{ width: '100%', height: 'auto' }}
-                        placeholder="blur"
-                        blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                          shimmer('100%', '100%')
-                        )}`}
-                      />
-                    ) : undefined
-                  }
-                  hoverable
-                  style={{ height: '100%' }}
-                >
-                  <p className="title">{title}</p>
-                  <p className="date">{formatDate({ date: fromDate })}</p>
-                  <p className="location">{location}</p>
-                  <p className="price">{price}</p>
-                </Card>
-              </Link>
-            </div>
-          ))}
+        <div className="row hg-32 vg-8">
+          {events.map(
+            (
+              {
+                id,
+                src,
+                title,
+                fromDate,
+                short_location: location,
+                price,
+                slug,
+              },
+              i
+            ) => (
+              <div key={id} className="card col-12 col-md-6 col-xl-3">
+                <Link href={`/event/${slug}`}>
+                  <Card
+                    cover={
+                      src ? (
+                        <Image
+                          src={src}
+                          alt="0"
+                          width={700}
+                          height={700}
+                          style={{ width: '100%', height: 'auto' }}
+                          placeholder="blur"
+                          blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                            shimmer('100%', '100%')
+                          )}`}
+                        />
+                      ) : undefined
+                    }
+                    hoverable
+                    style={{ height: '100%' }}
+                  >
+                    <p className="title">{title}</p>
+                    <p className="date">{formatDate({ date: fromDate })}</p>
+                    <p className="location">{location}</p>
+                    <p className="price">{price}</p>
+                  </Card>
+                </Link>
+              </div>
+            )
+          )}
         </div>
         <div className="button-container">
           <Button block>See More</Button>
