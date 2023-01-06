@@ -1,12 +1,13 @@
 import Image from 'next/image';
 // components
-import { SelectArrowIcon } from 'components/icons';
-import { Button, Tabs } from 'components/ui';
-import Layout from 'components/Layout';
-import AllInformation from 'components/app/AllInformation';
+import { SelectArrowIcon } from 'client/components/icons';
+import { Button, Tabs } from 'client/components/ui';
+import Layout from 'client/components/Layout';
+import AllInformation from 'client/components/app/AllInformation';
+// helpers
+import { shimmer, toBase64 } from 'client/helpers';
 // styles
-import { breakPoints, colors } from 'styles/variables';
-import { shimmer, toBase64 } from 'helpers';
+import { breakPoints, colors } from 'client/styles/variables';
 
 export default function Home() {
   return (

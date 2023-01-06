@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 // components
-import { Button, Divider, Modal, Select, Tag } from 'components/ui';
+import { Button, Divider, Modal, Select, Tag } from 'client/components/ui';
 import {
   BikeIcon,
   BusIcon,
@@ -17,18 +17,18 @@ import {
   TwitterIcon,
   UploadIcon,
   WalkIcon,
-} from 'components/icons';
-import Layout from 'components/Layout';
+} from 'client/components/icons';
+import Layout from 'client/components/Layout';
 // helpers
-import { shimmer, toBase64 } from 'helpers';
+import { shimmer, toBase64 } from 'client/helpers';
 // hooks
-import useVW from 'hooks/useVW';
+import useVW from 'client/hooks/useVW';
 // interfaces
 import { EventType } from 'interfaces';
 // services
-import { getEventData } from 'services/events';
+import { getEventData } from 'client/services/events';
 // styles
-import { breakPoints, colors, fluidFont } from 'styles/variables';
+import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
 export default function Event() {
   const router = useRouter();
