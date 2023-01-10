@@ -4,7 +4,11 @@ import type { AppProps } from 'next/app';
 import toast, { Toaster } from 'react-hot-toast';
 import { Provider, useSelector } from 'react-redux';
 import { RootState, store } from 'client/store';
-import { authLogOut, authCheckUser } from 'client/store/actions/auth';
+import {
+  authLogOut,
+  authCheckUser,
+  authLoading,
+} from 'client/store/actions/auth';
 // services
 import { checkUser } from 'client/services/auth';
 // styles
@@ -31,20 +35,26 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
-  const { accessToken } = useSelector((state: RootState) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
+  const { accessToken, isLoading } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(false);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!accessToken) return;
+    if (loading) return;
+    if (!accessToken) {
+      authLoading();
+      return;
+    }
     const queryAPI = async () => {
       try {
         const res = await checkUser();
         authCheckUser({ user: res.data.user });
+        authLoading();
       } catch (error: any) {
         authLogOut();
         toast.error(error?.response?.data?.message || 'Internal server error');
@@ -52,7 +62,9 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     };
     queryAPI();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, [loading]);
+
+  if (isLoading) return null;
 
   return <>{children}</>;
 };

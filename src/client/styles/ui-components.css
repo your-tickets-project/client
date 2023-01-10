@@ -60,15 +60,17 @@ p {
 /* Button
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .ui-button {
+  align-items: center;
   background-color: var(--white);
   border-radius: 4px;
   border: 1px solid var(--medium-gray);
   color: var(--dark-gray);
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
   font-size: var(--font-size-normal);
   font-weight: bold;
   height: 38px;
+  justify-content: center;
   line-height: 38px;
   max-width: 100%;
   padding: 0 10px;
@@ -84,7 +86,7 @@ p {
 }
 
 .ui-button.block {
-  display: block;
+  display: flex;
   width: 100%;
 }
 
@@ -96,6 +98,21 @@ p {
 
 .ui-button.primary:hover {
   opacity: 0.9;
+}
+
+.ui-button.link {
+  border: none;
+  color: var(--color2);
+}
+
+.ui-button.link:hover {
+  background-color: var(--light-gray);
+}
+
+.ui-button .ui-button-icon {
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
 }
 
 /* Card
@@ -230,7 +247,7 @@ p {
 }
 
 .ui-form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .ui-form-group-label {
