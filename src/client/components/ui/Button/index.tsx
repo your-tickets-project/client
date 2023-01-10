@@ -1,12 +1,13 @@
 import React from 'react';
 
 interface Props {
-  children: React.ReactNode;
-  type?: 'primary';
-  htmlType?: 'button' | 'reset' | 'submit';
   block?: boolean;
-  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  htmlType?: 'button' | 'reset' | 'submit';
+  icon?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+  style?: React.CSSProperties;
+  type?: 'primary' | 'link';
 }
 
 export const Button = ({
@@ -16,6 +17,7 @@ export const Button = ({
   block,
   style,
   onClick,
+  icon,
 }: Props) => {
   return (
     <button
@@ -24,7 +26,8 @@ export const Button = ({
       style={style}
       onClick={onClick}
     >
-      {children}
+      {icon && <div className="ui-button-icon">{icon}</div>}{' '}
+      <div>{children}</div>
     </button>
   );
 };

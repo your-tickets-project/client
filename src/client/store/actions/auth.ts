@@ -17,3 +17,5 @@ export const authCheckUser = ({ user }: { user: UserType }) => {
 };
 
 export const authLogOut = () => store.dispatch(authSlice.actions.logOut());
+
+export const authLoading = () => store.dispatch(authSlice.actions.loading());

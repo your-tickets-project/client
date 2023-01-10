@@ -30,7 +30,9 @@ export const Select = ({
 }: Props) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isShowOptions, setIsShowOptions] = useState(false);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(
+    options.find((option) => option.value === defaultValue)?.value
+  );
 
   useEffect(() => {
     setIsLoaded(true);
