@@ -9,20 +9,24 @@ import CountDownTimer from 'client/components/app/CountDownTimer';
 import useVW from 'client/hooks/useVW';
 // interfaces
 import { EventType } from 'interfaces';
-import { formatDate, formatTime, shimmer, toBase64 } from 'client/helpers';
+import {
+  formatDate,
+  formatShortLocation,
+  formatTime,
+  shimmer,
+  toBase64,
+} from 'client/helpers';
 // redux
 import { useSelector } from 'react-redux';
 import { RootState } from 'client/store';
 // styles
-import { colors, fluidFont } from 'client/styles/variables';
+import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
 interface Props {
   event: EventType;
   handleShowModal: (state: boolean) => void;
   isShowModal: boolean;
 }
-
-type CheckoutType = 'pre_sale' | 'checkout' | 'success';
 
 // eslint-disable-next-line no-unused-vars
 enum CHECKOUT_STATES {
@@ -33,6 +37,11 @@ enum CHECKOUT_STATES {
   // eslint-disable-next-line no-unused-vars
   SUCCESS = 'success',
 }
+
+type CheckoutType =
+  | CHECKOUT_STATES.PRE_SALE
+  | CHECKOUT_STATES.CHECKOUT
+  | CHECKOUT_STATES.SUCCESS;
 
 export default function CheckoutModal({
   event,
@@ -47,73 +56,87 @@ export default function CheckoutModal({
   const [checkout, setCheckout] = useState<CheckoutType>(
     CHECKOUT_STATES.PRE_SALE
   );
+  const [showLeave, setShowLeave] = useState(false);
+  const [timeEnd, setTimeEnd] = useState(false);
 
   const handleFinish = async (values: any) => {
     setCheckout(CHECKOUT_STATES.SUCCESS);
   };
 
+  const handleCloseModal = () => {
+    handleShowModal(false);
+
+    setTimeout(() => {
+      setShowLeave(false);
+      setTimeEnd(false);
+      setCheckout(CHECKOUT_STATES.PRE_SALE);
+    }, 500);
+  };
+
   return (
     <>
       <Modal
-        title={null}
+        bodyStyle={{ padding: '0' }}
         footer={null}
         isShowModal={isShowModal}
         onCancel={() => {
-          setCheckout(CHECKOUT_STATES.PRE_SALE);
-          handleShowModal(false);
+          if (checkout === CHECKOUT_STATES.CHECKOUT) {
+            setShowLeave(true);
+            return;
+          }
+          handleCloseModal();
         }}
       >
         <div className="modal row">
           <div className="ticket-info col-12 col-md-7">
             {checkout === CHECKOUT_STATES.PRE_SALE && (
               <>
-                <div className="title">
-                  <h4>{event.title}</h4>
-                  <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
-                    {formatDate({ date: event.fromDate })}
-                  </p>
-                  <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
-                    {formatTime({
-                      fromDate: event.fromDate,
-                      toDate: event.toDate,
-                    })}
-                  </p>
-                </div>
-                <div className="body">
-                  <div className="row vg-8">
-                    <div className="col-7">
-                      <h4>{event.ticket_description}</h4>
-                      <p>{event.price}</p>
-                    </div>
-                    <div className="col-5">
-                      <Select
-                        placeholder="N° tickets"
-                        defaultValue={'1'}
-                        options={[
-                          { key: 1, label: '1', value: '1' },
-                          { key: 2, label: '2', value: '2' },
-                          { key: 3, label: '3', value: '3' },
-                          { key: 4, label: '4', value: '4' },
-                          { key: 5, label: '5', value: '5' },
-                        ]}
-                        handleChange={(value) => setTicketsNumber(+value)}
-                      />
-                    </div>
-                  </div>
-                  {event.event_ticket_description && (
-                    <p className="ticket-description">
-                      {event.event_ticket_description}
+                <div className="info-container">
+                  <div className="title">
+                    <h4>{event.title}</h4>
+                    <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
+                      {formatDate({ date: event.date_start })}
                     </p>
-                  )}
-                  <p className="brand">
-                    Offered by <span>YourTickets</span>
-                  </p>
+                    <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
+                      {`${formatTime({
+                        time: event.time_start,
+                      })} - ${formatTime({ time: event.time_end })}`}
+                    </p>
+                  </div>
+                  <div className="body">
+                    <div className="row vg-8">
+                      <div className="col-7">
+                        <h4>{event.event_ticket_info.name}</h4>
+                        <p>{event.event_ticket_info.price || 'Free'}</p>
+                      </div>
+                      <div className="col-5">
+                        <Select
+                          placeholder="N° tickets"
+                          value="1"
+                          options={[
+                            { key: 1, label: '1', value: '1' },
+                            { key: 2, label: '2', value: '2' },
+                            { key: 3, label: '3', value: '3' },
+                            { key: 4, label: '4', value: '4' },
+                            { key: 5, label: '5', value: '5' },
+                          ]}
+                          onChange={(e) => setTicketsNumber(+e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    {event.event_ticket_info.description && (
+                      <p className="ticket-description">
+                        {event.event_ticket_info.description}
+                      </p>
+                    )}
+                    <p className="brand">
+                      Offered by <span>YourTickets</span>
+                    </p>
+                  </div>
                 </div>
                 <div className="footer">
                   <p className="price">
-                    {event.price.toLowerCase() === 'free'
-                      ? event.price
-                      : `$${event.price}`}
+                    {event.event_ticket_info.price || 'Free'}
                   </p>
                   <Button
                     block
@@ -128,151 +151,162 @@ export default function CheckoutModal({
 
             {checkout === CHECKOUT_STATES.CHECKOUT && (
               <>
-                <div className="title">
-                  <h4 style={{ textAlign: 'center' }}>Checkout</h4>
-                  <p
-                    style={{
-                      color: colors.grayFont,
-                      margin: '0.2rem 0',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <CountDownTimer minutes={1} />
-                  </p>
-                </div>
-                <div className="body">
-                  <Form
-                    onFinish={handleFinish}
-                    initialValues={{
-                      first_name: user?.first_name ?? '',
-                      last_name: user?.last_name ?? '',
-                      email: user?.email ?? '',
-                      phone_number: '',
-                    }}
-                  >
-                    <h4 style={{ textAlign: 'center' }}>Contact information</h4>
-                    <div style={{ marginTop: '1rem' }} className="row vg-8">
-                      <div className="col-12 col-md-6">
-                        <Form.Item
-                          label="First name"
-                          name="first_name"
-                          rules={{
-                            required: true,
-                            type: 'string',
-                            message: 'First name is required',
-                          }}
-                        >
-                          <Input type="text" />
-                        </Form.Item>
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <Form.Item
-                          label="Last name"
-                          name="last_name"
-                          rules={{
-                            required: true,
-                            type: 'string',
-                            message: 'Last name is required',
-                          }}
-                        >
-                          <Input type="text" />
-                        </Form.Item>
-                      </div>
-                      <div className="col-12">
-                        <Form.Item
-                          label="Email"
-                          name="email"
-                          rules={{
-                            required: true,
-                            type: 'email',
-                            message: 'email is required',
-                          }}
-                        >
-                          <Input type="email" />
-                        </Form.Item>
-                      </div>
-                      <div className="col-12">
-                        <Form.Item
-                          label="Phone number"
-                          name="phone_number"
-                          rules={{
-                            required: true,
-                            type: 'string',
-                            message: 'Phone number is required',
-                          }}
-                        >
-                          <Input type="text" />
-                        </Form.Item>
-                      </div>
-                    </div>
-                    <p className="brand">
-                      Offered by <span>YourTickets</span>
+                <div className="info-container">
+                  <div className="title">
+                    <h4 style={{ textAlign: 'center' }}>Checkout</h4>
+                    <p
+                      style={{
+                        color: colors.grayFont,
+                        margin: '0.2rem 0',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <CountDownTimer
+                        minutes={30}
+                        preffix="Time left"
+                        onTimeEnd={() => setTimeEnd(true)}
+                      />
                     </p>
-                    <div className="footer">
-                      <p className="price">
-                        {event.price.toLowerCase() === 'free'
-                          ? event.price
-                          : `$${event.price}`}
+                  </div>
+                  <div className="body">
+                    <Form
+                      onFinish={handleFinish}
+                      initialValues={{
+                        first_name: user?.first_name ?? '',
+                        last_name: user?.last_name ?? '',
+                        email: user?.email ?? '',
+                        phone_number: '',
+                      }}
+                    >
+                      <h4 style={{ textAlign: 'center' }}>
+                        Contact information
+                      </h4>
+                      <div style={{ marginTop: '1rem' }} className="row vg-8">
+                        <div className="col-12 col-md-6">
+                          <Form.Item
+                            label="First name"
+                            name="first_name"
+                            rules={{
+                              required: true,
+                              type: 'string',
+                              message: 'First name is a required field',
+                            }}
+                          >
+                            <Input type="text" />
+                          </Form.Item>
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <Form.Item
+                            label="Last name"
+                            name="last_name"
+                            rules={{
+                              required: true,
+                              type: 'string',
+                              message: 'Last name is a required field',
+                            }}
+                          >
+                            <Input type="text" />
+                          </Form.Item>
+                        </div>
+                        <div className="col-12">
+                          <Form.Item
+                            label="Email"
+                            name="email"
+                            rules={{
+                              required: true,
+                              type: 'email',
+                            }}
+                          >
+                            <Input type="email" />
+                          </Form.Item>
+                        </div>
+                        <div className="col-12">
+                          <Form.Item
+                            label="Phone number"
+                            name="phone_number"
+                            rules={{
+                              required: true,
+                              type: 'string',
+                              message: 'Phone number is a required field',
+                            }}
+                          >
+                            <Input type="text" />
+                          </Form.Item>
+                        </div>
+                      </div>
+                      <p className="brand">
+                        Offered by <span>YourTickets</span>
                       </p>
-                      <Button block type="primary" htmlType="submit">
-                        Register
-                      </Button>
-                    </div>
-                  </Form>
+                      <div className="footer">
+                        <p className="price">
+                          {event.event_ticket_info.price || 'Free'}
+                        </p>
+                        <Button block type="primary" htmlType="submit">
+                          Register
+                        </Button>
+                      </div>
+                    </Form>
+                  </div>
                 </div>
               </>
             )}
 
             {checkout === CHECKOUT_STATES.SUCCESS && (
               <>
-                <div className="title">
-                  <div style={{ height: '50px' }}>
-                    <CheckCircleIcon fill={colors.success} />
+                <div className="info-container">
+                  <div className="title">
+                    <div style={{ height: '50px' }}>
+                      <CheckCircleIcon fill={colors.success} />
+                    </div>
+                    <h4 style={{ marginTop: '.5rem', textAlign: 'center' }}>
+                      thanks for your order!
+                    </h4>
+                    <p
+                      style={{
+                        color: colors.color1,
+                        fontWeight: 'bold',
+                        margin: '0',
+                        marginTop: '.5rem',
+                        textAlign: 'center',
+                      }}
+                    >
+                      YourTickets
+                    </p>
                   </div>
-                  <h4 style={{ marginTop: '.5rem', textAlign: 'center' }}>
-                    thanks for your order!
-                  </h4>
-                  <p
-                    style={{
-                      color: colors.color1,
-                      fontWeight: 'bold',
-                      margin: '0',
-                      marginTop: '.5rem',
-                      textAlign: 'center',
-                    }}
-                  >
-                    YourTickets
-                  </p>
-                </div>
-                <div className="body">
-                  <p style={{ margin: '0' }}>You go to</p>
-                  <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
-                  <div style={{ marginTop: '1rem' }} className="row hg-24">
-                    <div className="col-12">
-                      <p style={{ fontWeight: 'bold', margin: '0' }}>
-                        {ticketsNumber} TICKET(S) SENT TO
-                      </p>
-                      <p style={{ margin: '0' }}>{user?.email}</p>
-                    </div>
-                    <div className="col-12">
-                      <p style={{ fontWeight: 'bold', margin: '0' }}>
-                        DATE AND TIME
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        {formatDate({ date: event.fromDate })}
-                      </p>
-                    </div>
-                    <div className="col-12">
-                      <p style={{ fontWeight: 'bold', margin: '0' }}>
-                        Location
-                      </p>
-                      <p style={{ margin: 0 }}>{event.short_location}</p>
-                    </div>
-                    <div className="col-12">
-                      <p style={{ fontWeight: 'bold', margin: '0' }}>
-                        Ticket number
-                      </p>
-                      <p style={{ margin: 0 }}>#123456789</p>
+                  <div className="body">
+                    <p style={{ margin: '0' }}>You go to</p>
+                    <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
+                    <div style={{ marginTop: '1rem' }} className="row hg-24">
+                      <div className="col-12">
+                        <p style={{ fontWeight: 'bold', margin: '0' }}>
+                          {ticketsNumber} TICKET(S) SENT TO
+                        </p>
+                        <p style={{ margin: '0' }}>{user?.email}</p>
+                      </div>
+                      <div className="col-12">
+                        <p style={{ fontWeight: 'bold', margin: '0' }}>
+                          DATE AND TIME
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          {formatDate({ date: event.date_start })}
+                        </p>
+                      </div>
+                      <div className="col-12">
+                        <p style={{ fontWeight: 'bold', margin: '0' }}>
+                          Location
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          {formatShortLocation({
+                            location: event.event_location,
+                          })}
+                        </p>
+                      </div>
+                      <div className="col-12">
+                        <p style={{ fontWeight: 'bold', margin: '0' }}>
+                          Ticket number
+                        </p>
+                        <p style={{ margin: 0 }}>#123456789</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -294,7 +328,7 @@ export default function CheckoutModal({
               <div className="order-summary">
                 <div>
                   <Image
-                    src={event.src}
+                    src={event.cover_image_url}
                     alt="0"
                     width={1800}
                     height={700}
@@ -308,26 +342,63 @@ export default function CheckoutModal({
                 {checkout !== CHECKOUT_STATES.SUCCESS && (
                   <div className="order-summary-info">
                     <p className="order-summary-title">Order Summary</p>
-                    <div className="row">
+                    <div className="row vg-8">
                       <p className="col-8">
-                        {ticketsNumber} x {event.ticket_description}
+                        {ticketsNumber} x {event.event_ticket_info.name}
                       </p>
                       <p className="col-4">
-                        {event.price.toLowerCase() === 'free'
-                          ? '$0.00'
-                          : event.price}
+                        {event.event_ticket_info.price || 'Free'}
                       </p>
                     </div>
                     <div className="total row">
                       <p className="total-word col-8">Total</p>
                       <p className="total-price col-4">
-                        {event.price.toLowerCase() === 'free'
-                          ? '$0.00'
-                          : event.price}
+                        {event.event_ticket_info.price || 'Free'}
                       </p>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {showLeave && (
+            <div className="full-size">
+              <div className="content">
+                <h3>Leave checkout?</h3>
+                <p>
+                  Are you sure you want to leave checkout? The items you have
+                  selected may not be available later.
+                </p>
+                <div className="action row hg-16 vg-md-16">
+                  <div className="col-12 col-md-6">
+                    <Button block onClick={() => setShowLeave(false)}>
+                      Stay
+                    </Button>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <Button block type="primary" onClick={handleCloseModal}>
+                      Leave
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {timeEnd && (
+            <div className="full-size">
+              <div className="content">
+                <h3>Time Limit Reached</h3>
+                <p>
+                  Your reservation has been released. Please re-start your
+                  purchase.
+                </p>
+                <div className="action">
+                  <Button type="link" block onClick={handleCloseModal}>
+                    Back to tickets
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -336,39 +407,49 @@ export default function CheckoutModal({
       <style jsx>{`
         .modal {
           height: 90vh;
-        }
-
-        .modal .ticket-info {
           position: relative;
         }
 
-        .modal .title {
+        .ticket-info {
+          height: 100%;
+          position: relative;
+        }
+
+        .info-container {
+          display: flex;
+          flex-direction: column;
+          max-height: 100%;
+        }
+
+        .title {
           border-bottom: 1px solid ${colors.black};
+          flex: 0 0 auto;
           padding: 0.8rem 2rem 0.8rem 0.8rem;
         }
 
-        .modal .body {
-          height: 400px;
+        .body {
+          flex: 1;
+          margin-bottom: 6.75rem;
           overflow-y: auto;
           padding: 1.5rem 1rem 0;
         }
 
-        .modal .body .ticket-description {
+        .body .ticket-description {
           color: ${colors.grayFont};
           margin-top: 0;
         }
 
-        .modal .body .brand {
+        .body .brand {
           color: ${colors.grayFont};
           margin-top: 2rem;
         }
 
-        .modal .body .brand span {
+        .body .brand span {
           font-size: ${fluidFont.big};
           font-weight: bold;
         }
 
-        .modal .ticket-info .footer {
+        .footer {
           background-color: ${colors.white};
           border-top: 1px solid #000;
           bottom: 0;
@@ -379,35 +460,74 @@ export default function CheckoutModal({
           width: 100%;
         }
 
-        .modal .footer .price {
+        .footer .price {
           color: ${colors.grayFont};
           font-size: ${fluidFont.big};
           font-weight: bold;
           margin-top: 0;
         }
 
-        .modal .order-summary {
+        .order-summary {
           background-color: ${colors.lightGray};
           height: 100%;
         }
 
-        .modal .order-summary-info {
+        .order-summary-info {
           padding: 1.5rem 1rem;
         }
 
-        .modal .order-summary-title {
+        .order-summary-title {
           font-weight: bold;
           margin-top: 0;
         }
 
-        .modal .order-summary-info .total {
+        .order-summary-info .total {
           margin-top: 4rem;
         }
 
-        .modal .order-summary-info .total-word,
-        .modal .order-summary-info .total-price {
+        .order-summary-info .total-word,
+        .order-summary-info .total-price {
           font-size: ${fluidFont.big};
           font-weight: bold;
+        }
+
+        .full-size {
+          align-items: center;
+          background-color: ${colors.white};
+          bottom: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          left: 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          z-index: 2000;
+        }
+
+        .full-size .content {
+          text-align: center;
+          width: 80%;
+        }
+
+        .full-size .content p {
+          color: ${colors.grayFont};
+        }
+
+        .full-size .content .action {
+          margin-top: 1rem;
+        }
+
+        @media (min-width: ${breakPoints.md}) {
+          .full-size .content {
+            width: 60%;
+          }
+        }
+
+        @media (min-width: ${breakPoints.lg}) {
+          .full-size .content {
+            width: 50%;
+          }
         }
       `}</style>
     </>

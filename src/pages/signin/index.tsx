@@ -66,26 +66,29 @@ export default function SignIn() {
           <Form.Item
             label="First name"
             name="first_name"
-            rules={{ required: true, message: 'First name is required' }}
+            rules={{
+              required: true,
+              message: 'First name is a required field',
+            }}
           >
             <Input type="text" />
           </Form.Item>
           <Form.Item
             label="Last name"
             name="last_name"
-            rules={{ required: true, message: 'Last name is required' }}
+            rules={{ required: true, message: 'Last name is a required field' }}
           >
             <Input type="text" />
           </Form.Item>
           <Form.Item
             label="Password"
             name="password"
-            rules={{ required: true, message: 'Password is required' }}
+            rules={{ required: true, message: 'Password is a required field' }}
           >
             <Input type="password" />
           </Form.Item>
           <Button htmlType="submit" type="primary" block>
-            Enviar
+            Send
           </Button>
         </Form>
       </section>

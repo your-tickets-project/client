@@ -17,8 +17,6 @@ import { breakPoints } from 'client/styles/variables';
 
 interface FormTypes {
   email: string;
-  first_name: string;
-  last_name: string;
   password: string;
 }
 
@@ -62,17 +60,17 @@ export default function LogIn() {
               type: 'email',
             }}
           >
-            <Input type="text" />
+            <Input type="email" />
           </Form.Item>
           <Form.Item
             label="Password"
             name="password"
-            rules={{ required: true, message: 'Password is required' }}
+            rules={{ required: true, message: 'Password is a required field' }}
           >
             <Input type="password" />
           </Form.Item>
           <Button htmlType="submit" type="primary" block>
-            Enviar
+            Send
           </Button>
         </Form>
       </section>

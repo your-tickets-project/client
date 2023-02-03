@@ -24,6 +24,7 @@ import CheckoutModal from 'client/components/app/CheckoutModal';
 import {
   dayAndMonth,
   formatDate,
+  formatLongLocation,
   formatTime,
   shimmer,
   toBase64,
@@ -31,7 +32,7 @@ import {
 // interfaces
 import { EventType } from 'interfaces';
 // services
-import { getEventData } from 'client/services/events';
+import { getEvent } from 'client/services/event';
 // redux
 import { RootState } from 'client/store';
 import { useSelector } from 'react-redux';
@@ -42,27 +43,35 @@ export default function Event() {
   const router = useRouter();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-  const [event, setEvent] = useState<null | EventType>(null);
+  const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState<EventType | undefined>(undefined);
   const [isShowModal, setIsShowModal] = useState(false);
 
   useEffect(() => {
-    if (!router.isReady) return;
-    const { slug } = router.query;
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
     const queryAPI = async () => {
+      const { slug } = router.query;
+
       try {
-        const res = await getEventData({ slug: slug as string });
-        if (!res.data) {
+        const res = await getEvent({ slug: slug as string });
+        if (!res.data.event) {
           router.replace('/');
           return;
         }
 
-        setEvent(res.data);
+        setEvent(res.data.event);
       } catch (error) {
         router.replace('/');
       }
     };
     queryAPI();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   if (!event) return null;
 
@@ -70,7 +79,7 @@ export default function Event() {
     <Layout>
       <div className="banner">
         <Image
-          src={event.src}
+          src={event.cover_image_url}
           alt="0"
           width={1800}
           height={700}
@@ -93,20 +102,20 @@ export default function Event() {
       <div className="container row vg-md-8">
         <div className="col-12 col-md-8">
           <section className="event-title">
-            <p className="date">{dayAndMonth({ date: event.fromDate })}</p>
+            <p className="date">{dayAndMonth({ date: event.date_start })}</p>
             <h3 className="title">{event.title}</h3>
-            {event.sub_title && <p className="sub-title">{event.sub_title}</p>}
-            {event.sponsor && <p className="sponsor">{event.sponsor}</p>}
-            {event.followers && (
-              <div className="followers row vg-8">
-                <div className="followers-info col-6 col-sm-4 col-lg-3">
-                  {event.followers} followers
-                </div>
-                <div className="col-6 col-sm-4 col-md-3">
-                  <Button block>Follow</Button>
-                </div>
+            {event.summary && <p className="summary">{event.summary}</p>}
+            <p className="sponsor">
+              Secretaria de Educación del Estado de Jalisco
+            </p>
+            <div className="followers row vg-8">
+              <div className="followers-info col-6 col-sm-4 col-lg-3">
+                21033 followers
               </div>
-            )}
+              <div className="col-6 col-sm-4 col-md-3">
+                <Button block>Follow</Button>
+              </div>
+            </div>
           </section>
 
           <section className="location">
@@ -121,12 +130,11 @@ export default function Event() {
                 <div className="col-9 col-sm-10">
                   <p className="title">Date and time</p>
                   <div className="info">
-                    <p>{formatDate({ date: event.fromDate })}</p>
+                    <p>{formatDate({ date: event.date_start })}</p>
                     <p>
-                      {formatTime({
-                        fromDate: event.fromDate,
-                        toDate: event.toDate,
-                      })}
+                      {`${formatTime({
+                        time: event.time_start,
+                      })} - ${formatTime({ time: event.time_end })}`}
                     </p>
                   </div>
                 </div>
@@ -141,7 +149,9 @@ export default function Event() {
                 <div className="col-9 col-sm-10">
                   <p className="title">Location</p>
                   <div className="info">
-                    <p>{event.long_location}</p>
+                    <p>
+                      {formatLongLocation({ location: event.event_location })}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -180,30 +190,19 @@ export default function Event() {
             </div>
           </section>
 
-          <section className="information">
-            <h3>About this event</h3>
-            <p>{event.information}</p>
-            {event.announcement && (
-              <Image
-                src={event.announcement}
-                alt="0"
-                width={1200}
-                height={700}
-                style={{ width: '100%', height: 'auto' }}
-                placeholder="blur"
-                blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                  shimmer('100%', '100%')
-                )}`}
-              />
-            )}
-          </section>
+          {event.description && (
+            <section className="information">
+              <h3>About this event</h3>
+              <div dangerouslySetInnerHTML={{ __html: event.description }} />
+            </section>
+          )}
 
           <section className="tags">
             <h3>Tags</h3>
             <div className="tags-container">
-              {event.tags.map((tag, i) => (
-                <div key={`${tag}-i`} className="tag">
-                  <Tag>{tag}</Tag>
+              {event.event_tag.map(({ name, id }) => (
+                <div key={id} className="tag">
+                  <Tag>{name}</Tag>
                 </div>
               ))}
             </div>
@@ -233,7 +232,9 @@ export default function Event() {
           <Divider />
 
           <section className="sponsor">
-            <h4 className="title">{event.sponsor}</h4>
+            <h4 className="title">
+              Secretaria de Educación del Estado de Jalisco
+            </h4>
             <p className="event">{event.title}</p>
             <div className="actions row">
               <div className="col-6">
@@ -250,11 +251,7 @@ export default function Event() {
         <div className="aside-container col-12 col-md-4">
           <aside>
             <div className="get-tickets">
-              <p className="title">
-                {`${event.price.toLowerCase() === 'free' ? '' : 'From'} ${
-                  event.price
-                }`}
-              </p>
+              <p className="title">{event.event_ticket_info.price || 'Free'}</p>
               <Button
                 type="primary"
                 block
@@ -357,7 +354,7 @@ export default function Event() {
         }
 
         .event-title .date,
-        .event-title .sub-title {
+        .event-title .summary {
           font-size: ${fluidFont.big};
           font-weight: bold;
         }

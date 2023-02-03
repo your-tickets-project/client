@@ -2,10 +2,15 @@ import { NextApiResponse } from 'next';
 import { NextHandler } from 'next-connect';
 import { NextApiRequestExtended } from 'server/router';
 // data
-import { create, login } from 'server/data';
+import { createUser, login } from 'server/data/user/user.data';
+// exceptions
+import { BadRequestException } from 'server/exceptions';
+// http status codes
+import { CREATED_STATUS, OK_STATUS } from 'server/constants/http.status';
 // utils
 import { generateJWT } from 'server/utils';
 // validations
+import { validationsOptions } from 'server/validations/validationOptions';
 import { loginDto, signinDto } from 'server/validations/auth';
 
 export const validateSignIn = async (
@@ -14,32 +19,20 @@ export const validateSignIn = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await signinDto.validate(req.body, {
-      stripUnknown: true,
-      strict: true,
-      abortEarly: false,
-    });
-    next();
-  } catch (error) {
-    return res.status(400).json({ error, message: 'Invalid body' });
+    req.body = await signinDto.validate(req.body, validationsOptions);
+  } catch (err: any) {
+    throw new BadRequestException('Invalid body', err.errors);
   }
+
+  await next();
 };
 
 export const signIn = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
 ) => {
-  try {
-    await create({ data: req.body });
-    res.status(201).json({ message: 'User created successfully' });
-  } catch (error: any) {
-    if (error.message === 'This email is already being used') {
-      res.status(400).json({ message: error.message });
-      return;
-    }
-
-    res.status(500).json({ message: 'Internal server error' });
-  }
+  await createUser({ data: req.body });
+  res.status(CREATED_STATUS).json({ message: 'User created successfully' });
 };
 
 export const validateLogIn = async (
@@ -48,33 +41,25 @@ export const validateLogIn = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await loginDto.validate(req.body, {
-      stripUnknown: true,
-      strict: true,
-      abortEarly: false,
-    });
-    next();
-  } catch (error) {
-    return res.status(400).json({ error, message: 'Invalid body' });
+    req.body = await loginDto.validate(req.body, validationsOptions);
+  } catch (err: any) {
+    throw new BadRequestException('Invalid body', err.errors);
   }
+
+  await next();
 };
 
 export const logIn = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
 ) => {
-  try {
-    const user = await login({ data: req.body });
-    const accessToken = generateJWT({ id: user.id });
-    res.status(200).json({ accessToken, message: 'Log in successfully', user });
-  } catch (error: any) {
-    if (error.message === 'Invalid email or password') {
-      res.status(400).json({ message: error.message });
-      return;
-    }
+  const user = await login({ data: req.body });
+  const accessToken = generateJWT({ id: user.id });
 
-    res.status(500).json({ message: 'Internal server error' });
-  }
+  delete user.password;
+  res
+    .status(OK_STATUS)
+    .json({ accessToken, message: 'Log in successfully', user });
 };
 
 export const checkUser = async (
@@ -82,5 +67,5 @@ export const checkUser = async (
   res: NextApiResponse
 ) => {
   delete req.user?.password;
-  res.status(200).json({ user: req.user });
+  res.status(OK_STATUS).json({ user: req.user });
 };

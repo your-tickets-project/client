@@ -1,6 +1,6 @@
 // controllers
 import { logIn, validateLogIn } from 'server/controllers/auth/auth.controller';
 // router
-import router from 'server/router';
+import { errorHandler, router } from 'server/router';
 
-export default router().use(validateLogIn).post(logIn);
+export default router().post(validateLogIn, logIn).handler(errorHandler());

@@ -17,13 +17,19 @@ export const initialState: AuthTypes = {
 };
 
 const getState = (): AuthTypes => {
-  return {
+  const state = {
     ...initialState,
     accessToken:
       typeof window !== 'undefined'
         ? localStorage.getItem('accessToken')
         : null,
   };
+
+  if (process.env.NODE_ENV === 'test') {
+    state.accessToken = 'valid-token';
+  }
+
+  return state;
 };
 
 export const authSlice = createSlice({

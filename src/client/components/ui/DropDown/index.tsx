@@ -16,13 +16,19 @@ export const DropDown = ({ children, items, style }: Props) => {
       onClick={() => setIsActive(!isActive)}
     >
       <div>{children}</div>
-      <div className={`items ${isActive ? 'is-active' : 'is-not-active'}`}>
-        {items.map(({ key, item }) => (
-          <div key={key} className="item">
-            {item}
-          </div>
-        ))}
-      </div>
+      {!!items.length && (
+        <ul
+          className={`ui-dropdown-items ${
+            isActive ? 'is-active' : 'is-not-active'
+          }`}
+        >
+          {items.map(({ key, item }) => (
+            <li key={key} className="ui-dropdown-item">
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

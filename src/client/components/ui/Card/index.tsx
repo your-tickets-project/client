@@ -11,6 +11,7 @@ interface Props {
 
 const HeartIcon = (props: { fill?: string }) => (
   <svg viewBox="0 0 24 24" xmlSpace="preserve" {...props}>
+    <title>heart-icon</title>
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -25,19 +26,19 @@ export const Card = ({ cover, title, children, hoverable, style }: Props) => {
       className={`ui-card ${hoverable ? 'hoverable' : ''}`}
       style={style}
     >
-      <div className="header">
+      <div className="ui-card-header">
         {cover && (
-          <div className="cover">
+          <div className="ui-card-cover">
             {' '}
-            <div className="like-button">
+            <div className="ui-card-like-button">
               <HeartIcon />
             </div>
             {cover}
           </div>
         )}
-        {title && <div className="title">{title}</div>}
+        {title && <div className="ui-card-title">{title}</div>}
       </div>
-      <aside className="body">{children}</aside>
+      <aside className="ui-card-body">{children}</aside>
     </article>
   );
 };

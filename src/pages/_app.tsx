@@ -1,16 +1,11 @@
 /// <reference types="styled-jsx" />
-import React, { useEffect, useState } from 'react';
 import type { AppProps } from 'next/app';
-import toast, { Toaster } from 'react-hot-toast';
-import { Provider, useSelector } from 'react-redux';
-import { RootState, store } from 'client/store';
-import {
-  authLogOut,
-  authCheckUser,
-  authLoading,
-} from 'client/store/actions/auth';
-// services
-import { checkUser } from 'client/services/auth';
+import { Toaster } from 'react-hot-toast';
+// components
+import AuthGuard from 'client/components/app/AuthGuard';
+// redux
+import { Provider } from 'react-redux';
+import { store } from 'client/store';
 // styles
 import globalStyles from 'client/styles/globals';
 import 'client/styles/grid.css';
@@ -33,38 +28,3 @@ export default function App({ Component, pageProps }: AppProps) {
     </Provider>
   );
 }
-
-const AuthGuard = ({ children }: { children: React.ReactNode }) => {
-  const { accessToken, isLoading } = useSelector(
-    (state: RootState) => state.auth
-  );
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    if (loading) return;
-    if (!accessToken) {
-      authLoading();
-      return;
-    }
-    const queryAPI = async () => {
-      try {
-        const res = await checkUser();
-        authCheckUser({ user: res.data.user });
-        authLoading();
-      } catch (error: any) {
-        authLogOut();
-        toast.error(error?.response?.data?.message || 'Internal server error');
-      }
-    };
-    queryAPI();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
-
-  if (isLoading) return null;
-
-  return <>{children}</>;
-};

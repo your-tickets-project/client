@@ -9,7 +9,7 @@ export interface Store {
 }
 
 interface FormProps {
-  onFinish: (values: any) => void;
+  onFinish?: (values: any) => void;
   children: React.ReactNode;
   initialValues?: Store;
 }
@@ -21,7 +21,7 @@ interface ItemProps {
   rules?: {
     required?: boolean;
     message?: string;
-    type?: 'string' | 'number' | 'boolean' | 'email';
+    type?: 'string' | 'number' | 'email';
   };
 }
 
@@ -34,13 +34,13 @@ export const Form = ({ children, initialValues, onFinish }: FormProps) => {
     initialValues: initialValues ?? {},
     validationSchema: Yup.object(validations),
     onSubmit: async (data) => {
-      onFinish(data);
+      onFinish?.(data);
     },
   });
 
   return (
     <FormContext.Provider value={{ formik, setValidations }}>
-      <form className="ui-form" onSubmit={formik.handleSubmit}>
+      <form className="ui-form" role="form" onSubmit={formik.handleSubmit}>
         {children}
       </form>
     </FormContext.Provider>
@@ -52,7 +52,7 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
 
   const formContext = useContext(FormContext);
   if (!formContext) {
-    throw new Error('This <Item> must be used within a <Form> component');
+    throw new Error('This <Item/> must be used within a <Form/> component');
   }
 
   const { formik, setValidations } = formContext;
@@ -72,7 +72,7 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
   return (
     <div className="ui-form-group">
       <label
-        className={`ui-form-group-label ${
+        className={`ui-form-label ${
           rules?.required ? 'is-required' : 'is-not-required'
         }`}
         htmlFor={name}
@@ -83,9 +83,9 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
         name,
         error: formik.errors[name]?.length,
         onChange: formik.handleChange,
-        value: formik.values[name],
+        value: formik.values[name] || '',
       })}
-      {rules?.required && formik.errors[name]?.length && (
+      {formik.errors[name]?.length && (
         <span className="ui-form-error">
           {rules?.message || formik.errors[name]}
         </span>
@@ -113,13 +113,6 @@ const yupTypeValidation = {
   },
   number({ required }: { required: boolean }) {
     const validation = Yup.number();
-    if (required) {
-      return validation.required();
-    }
-    return validation;
-  },
-  boolean({ required }: { required: boolean }) {
-    const validation = Yup.boolean();
     if (required) {
       return validation.required();
     }
