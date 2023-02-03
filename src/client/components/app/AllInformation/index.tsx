@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 // components
 import {
   ControlIcon,
@@ -12,15 +10,15 @@ import {
   PhotoIcon,
   ShoesIcon,
 } from 'client/components/icons';
-import { Button, Card } from 'client/components/ui';
-// helpers
-import { shimmer, toBase64 } from 'client/helpers';
+import { Button } from 'client/components/ui';
+import Cards from 'client/components/app/Cards';
 // interfaces
 import { EventType } from 'interfaces';
 // services
-import { getEventsData } from 'client/services/events';
+import { getEvents } from 'client/services/event';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
+import toast from 'react-hot-toast';
 
 const categoryCards = [
   {
@@ -66,37 +64,26 @@ const categoryCards = [
 ];
 
 export default function AllInformation() {
+  const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<EventType[]>([]);
 
   useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
     const queryAPI = async () => {
       try {
-        const res = await getEventsData();
-        setEvents(res.data);
-      } catch (error) {
-        // console.log(error);
+        const res = await getEvents();
+        setEvents(res.data.events);
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || 'Internal server error');
       }
     };
     queryAPI();
-  }, []);
-
-  const formatDate = ({ date }: { date: string }) => {
-    const d = new Date(date);
-    if (d.toString() === 'Invalid Date') {
-      return date;
-    }
-
-    const weekDay = new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-    }).format(d);
-    const day = d.getDate();
-    const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
-      d
-    );
-    const time = d.toLocaleTimeString();
-
-    return `${weekDay}, ${month} ${day}, ${time.toUpperCase()}`;
-  };
+  }, [loading]);
 
   return (
     <>
@@ -114,99 +101,14 @@ export default function AllInformation() {
         ))}
       </div>
 
-      <section className="cards">
+      <section>
         <h3>Events in Mexico</h3>
-        <div className="row hg-32 vg-md-8">
-          {events.map(
-            ({
-              id,
-              src,
-              title,
-              fromDate,
-              short_location: location,
-              price,
-              slug,
-            }) => (
-              <div key={id} className="card col-12 col-md-6 col-xl-3">
-                <Link href={`/event/${slug}`}>
-                  <Card
-                    cover={
-                      src ? (
-                        <Image
-                          src={src}
-                          alt="0"
-                          width={700}
-                          height={700}
-                          style={{ width: '100%', height: 'auto' }}
-                          placeholder="blur"
-                          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                            shimmer('100%', '100%')
-                          )}`}
-                        />
-                      ) : undefined
-                    }
-                    hoverable
-                    style={{ height: '100%' }}
-                  >
-                    <p className="title">{title}</p>
-                    <p className="date">{formatDate({ date: fromDate })}</p>
-                    <p className="location">{location}</p>
-                    <p className="price">{price}</p>
-                  </Card>
-                </Link>
-              </div>
-            )
-          )}
-        </div>
+        <Cards events={events} />
       </section>
 
-      <section className="cards">
+      <section>
         <h3>More events</h3>
-        <div className="row hg-32 vg-8">
-          {events.map(
-            (
-              {
-                id,
-                src,
-                title,
-                fromDate,
-                short_location: location,
-                price,
-                slug,
-              },
-              i
-            ) => (
-              <div key={id} className="card col-12 col-md-6 col-xl-3">
-                <Link href={`/event/${slug}`}>
-                  <Card
-                    cover={
-                      src ? (
-                        <Image
-                          src={src}
-                          alt="0"
-                          width={700}
-                          height={700}
-                          style={{ width: '100%', height: 'auto' }}
-                          placeholder="blur"
-                          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                            shimmer('100%', '100%')
-                          )}`}
-                        />
-                      ) : undefined
-                    }
-                    hoverable
-                    style={{ height: '100%' }}
-                  >
-                    <p className="title">{title}</p>
-                    <p className="date">{formatDate({ date: fromDate })}</p>
-                    <p className="location">{location}</p>
-                    <p className="price">{price}</p>
-                  </Card>
-                </Link>
-              </div>
-            )
-          )}
-        </div>
+        <Cards events={events} />
         <div className="button-container">
           <Button block>See More</Button>
         </div>
@@ -258,42 +160,6 @@ export default function AllInformation() {
           .category-card .icon {
             height: 50%;
             width: 50%;
-          }
-        }
-
-        .cards div.row {
-          background-color: ${colors.lightGray};
-          padding: 0.8rem;
-        }
-
-        .card .title {
-          color: ${colors.black};
-          font-size: ${fluidFont.big};
-          font-weight: bold;
-        }
-
-        .card .date {
-          color: ${colors.color1};
-          font-weight: bold;
-        }
-
-        .card .location,
-        .card .price {
-          color: ${colors.grayFont};
-          font-weight: bold;
-        }
-
-        .cards .button-container {
-          align-items: center;
-          display: flex;
-          justify-content: center;
-          width: 60%;
-          margin: 1rem auto;
-        }
-
-        @media (min-width: ${breakPoints.md}) {
-          .cards .button-container {
-            width: 40%;
           }
         }
       `}</style>

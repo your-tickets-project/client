@@ -24,12 +24,12 @@ interface DeleteParams {
   queryValues?: (string | number)[];
 }
 
-export const dbSelect = async ({
+export const dbSelect = async <T = any>({
   query,
   queryIdentifiers,
   queryValues,
   nestTables,
-}: SelectParams) => {
+}: SelectParams): Promise<T> => {
   const values: any = [];
   if (queryIdentifiers) {
     values.push(queryIdentifiers);
@@ -44,7 +44,7 @@ export const dbSelect = async ({
     { sql: query, nestTables },
     values
   );
-  return result;
+  return result as any as T;
 };
 
 export const dbInsert = async ({ query, data }: InsertParams) => {

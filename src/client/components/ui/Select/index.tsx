@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
 interface Props {
-  defaultValue?: string | number;
-  placeholder?: string;
+  value?: string | number;
+  name?: string;
   options: {
     key: number;
     label: string;
     value: string | number;
     disabled?: boolean;
   }[];
-  handleChange: (value: string | number) => void;
+  placeholder?: string;
+  onChange?: (e: { target: { name?: string; value: string | number } }) => void;
 }
 
 const SelectArrowIcon = (props: { fill?: string }) => (
@@ -23,15 +24,16 @@ const SelectArrowIcon = (props: { fill?: string }) => (
 );
 
 export const Select = ({
-  defaultValue,
-  placeholder,
+  value,
+  name,
   options,
-  handleChange,
+  placeholder,
+  onChange,
 }: Props) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setIsLoaded] = useState(false);
   const [isShowOptions, setIsShowOptions] = useState(false);
-  const [value, setValue] = useState(
-    options.find((option) => option.value === defaultValue)?.value
+  const [selectedOption, setSelectedOption] = useState(
+    options.find((option) => option.value === value)
   );
 
   useEffect(() => {
@@ -39,54 +41,63 @@ export const Select = ({
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (defaultValue === undefined) return;
-    handleChange(defaultValue);
+    if (!loading) return;
+    if (value === undefined || selectedOption === undefined) return;
+    onChange?.({ target: { name, value: selectedOption.value } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+  }, [loading]);
 
   return (
-    <div className="ui-select" onClick={() => setIsShowOptions(!isShowOptions)}>
-      <div className="selector">
-        <div className={`value-container`}>
-          {value !== undefined && (
-            <div
-              className={`value ${
-                isShowOptions ? 'is-active' : 'is-not-active'
-              }`}
-            >
-              {value}
-            </div>
-          )}
-          {value === undefined && placeholder?.length && (
-            <div className="placeholder">{placeholder}</div>
-          )}
-        </div>
-
+    <div className="ui-select">
+      <div
+        className="ui-select-container"
+        onClick={() => setIsShowOptions(!isShowOptions)}
+      >
+        <input
+          type="text"
+          className={`ui-select-input ${
+            isShowOptions ? 'is-active' : 'is-not-active'
+          }`}
+          placeholder={placeholder}
+          value={selectedOption?.label}
+          id={name}
+          name={name}
+          role="combobox"
+          aria-controls={undefined}
+          aria-expanded={undefined}
+          readOnly
+          disabled
+        />
         <div className="ui-select-icon">
           <SelectArrowIcon />
         </div>
       </div>
-      <div
-        className={`options ${isShowOptions ? 'is-active' : 'is-not-active'}`}
-      >
-        {options.map(({ key, label, value: optionValue }) => (
-          <div
-            key={key}
-            className={`option ${
-              optionValue === value ? 'is-active' : 'is-not-active'
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setValue(optionValue);
-              handleChange(optionValue);
-              setIsShowOptions(false);
-            }}
-          >
-            {label}
-          </div>
-        ))}
-      </div>
+
+      {!!options.length && (
+        <ul
+          className={`ui-select-options ${
+            isShowOptions ? 'is-active' : 'is-not-active'
+          }`}
+        >
+          {options.map((option) => (
+            <li
+              key={option.key}
+              className={`ui-select-option ${
+                option.label === selectedOption?.label
+                  ? 'is-active'
+                  : 'is-not-active'
+              }`}
+              onClick={() => {
+                setSelectedOption(option);
+                setIsShowOptions(false);
+                onChange?.({ target: { name, value: option.value } });
+              }}
+            >
+              {option.label}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

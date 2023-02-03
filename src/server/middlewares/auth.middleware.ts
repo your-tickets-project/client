@@ -2,7 +2,9 @@ import { NextApiResponse } from 'next';
 import { NextHandler } from 'next-connect';
 import { NextApiRequestExtended } from 'server/router';
 // data
-import { findById } from 'server/data';
+import { findUserById } from 'server/data/user/user.data';
+// exceptions
+import { ForbiddenException, UnauthorizedException } from 'server/exceptions';
 // utils
 import { verifyJWT } from 'server/utils';
 
@@ -16,18 +18,18 @@ export const authMiddleware = async (
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return res.status(401).json({
-      message: 'There is not token in the request',
-    });
+    throw new UnauthorizedException(
+      'You must provide the authorization header'
+    );
   }
 
   const authToken = authorization as string;
   const [init, token] = authToken.split(' ');
 
   if (init !== 'Bearer') {
-    return res
-      .status(403)
-      .json({ messsage: 'The Authorization header does not contain Bearer' });
+    throw new ForbiddenException(
+      'The authorization header does not contain the word Bearer'
+    );
   }
 
   try {
@@ -36,9 +38,15 @@ export const authMiddleware = async (
       iat: number;
       exp: number;
     };
-    req.user = await findById({ id: payload.id });
-    next();
+
+    const authUser = await findUserById({ id: payload.id });
+    if (!authUser) {
+      throw new Error();
+    }
+
+    req.user = authUser;
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid token' });
+    throw new UnauthorizedException('Invalid token');
   }
+  await next();
 };

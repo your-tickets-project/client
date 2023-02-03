@@ -5,7 +5,7 @@ interface Props {
   children?: React.ReactNode;
   htmlType?: 'button' | 'reset' | 'submit';
   icon?: React.ReactNode;
-  onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   style?: React.CSSProperties;
   type?: 'primary' | 'link';
 }
@@ -26,7 +26,11 @@ export const Button = ({
       style={style}
       onClick={onClick}
     >
-      {icon && <div className="ui-button-icon">{icon}</div>}{' '}
+      {icon && (
+        <div data-testid="ui-button-icon-element" className="ui-button-icon">
+          {icon}
+        </div>
+      )}{' '}
       <div>{children}</div>
     </button>
   );
