@@ -16,5 +16,11 @@ global.matchMedia =
   };
 
 jest.mock('next/router', () => ({
-  useRouter: jest.fn(() => ({})),
+  useRouter() {
+    return {
+      query: { slug: 'valid-slug' },
+      push: jest.fn(),
+      replace: jest.fn(),
+    };
+  },
 }));

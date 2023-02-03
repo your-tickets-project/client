@@ -9,7 +9,8 @@
     "prepare": "husky install",
     "start": "next start",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "changelog": "conventional-changelog -i CHANGELOG.md -s -r 0"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.1",
