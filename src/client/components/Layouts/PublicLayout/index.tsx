@@ -8,7 +8,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export default function Layout({ children }: Props) {
+export default function PublicLayout({ children }: Props) {
   return (
     <>
       <Head>

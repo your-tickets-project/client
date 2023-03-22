@@ -1,5 +1,5 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/auth/signin';
+import handler from 'pages/api/v1/auth/signin';
 // fixtures
 import { createUser } from 'fixtures/user.fixture';
 // http status codes
@@ -17,7 +17,7 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('POST route -- /api/auth/signin -- success request', () => {
+describe('POST route -- /api/v1/auth/signin -- success request', () => {
   test('create a user successfully', async () => {
     const user = createUser();
 
@@ -36,18 +36,18 @@ describe('POST route -- /api/auth/signin -- success request', () => {
     });
 
     expect(res.statusCode).toBe(CREATED_STATUS);
-    expect(res.body).toEqual({ message: 'User created successfully' });
+    expect(res.body).toEqual({ message: 'User created successfully.' });
   });
 });
 
-describe('POST route -- /api/auth/signin -- bad request', () => {
+describe('POST route -- /api/v1/auth/signin -- bad request', () => {
   test('empty body sent', async () => {
     const res = await request({ handler, method: 'POST', body: {} });
 
     expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
-      message: 'Invalid body',
+      message: 'Invalid body.',
       error: 'Bad Request',
       errors: [
         'email is a required field',
@@ -75,7 +75,7 @@ describe('POST route -- /api/auth/signin -- bad request', () => {
     expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
-      message: 'Invalid body',
+      message: 'Invalid body.',
       error: 'Bad Request',
       errors: ['email must be a valid email'],
     });
@@ -102,7 +102,7 @@ describe('POST route -- /api/auth/signin -- bad request', () => {
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
       error: 'Bad Request',
-      message: 'This email is already being used',
+      message: 'This email is already being used.',
     });
   });
 });

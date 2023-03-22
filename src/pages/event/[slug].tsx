@@ -18,7 +18,7 @@ import {
   UploadIcon,
   WalkIcon,
 } from 'client/components/icons';
-import Layout from 'client/components/Layout';
+import PublicLayout from 'client/components/Layouts/PublicLayout';
 import CheckoutModal from 'client/components/app/CheckoutModal';
 // helpers
 import {
@@ -32,16 +32,15 @@ import {
 // interfaces
 import { EventType } from 'interfaces';
 // services
-import { getEvent } from 'client/services/event';
-// redux
-import { RootState } from 'client/store';
-import { useSelector } from 'react-redux';
+import { getEventBySlug } from 'client/services/event.service';
+// store
+import { AuthSelector } from 'client/store/selectors';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
-export default function Event() {
+export default function EventPage() {
   const router = useRouter();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = AuthSelector();
 
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<EventType | undefined>(undefined);
@@ -58,12 +57,7 @@ export default function Event() {
       const { slug } = router.query;
 
       try {
-        const res = await getEvent({ slug: slug as string });
-        if (!res.data.event) {
-          router.replace('/');
-          return;
-        }
-
+        const res = await getEventBySlug({ slug: slug as string });
         setEvent(res.data.event);
       } catch (error) {
         router.replace('/');
@@ -76,10 +70,10 @@ export default function Event() {
   if (!event) return null;
 
   return (
-    <Layout>
+    <PublicLayout>
       <div className="banner">
         <Image
-          src={event.cover_image_url}
+          src={event.event_detail.cover_image_url}
           alt="0"
           width={1800}
           height={700}
@@ -104,7 +98,9 @@ export default function Event() {
           <section className="event-title">
             <p className="date">{dayAndMonth({ date: event.date_start })}</p>
             <h3 className="title">{event.title}</h3>
-            {event.summary && <p className="summary">{event.summary}</p>}
+            {event.event_detail.summary && (
+              <p className="summary">{event.event_detail.summary}</p>
+            )}
             <p className="sponsor">
               Secretaria de Educación del Estado de Jalisco
             </p>
@@ -190,10 +186,14 @@ export default function Event() {
             </div>
           </section>
 
-          {event.description && (
+          {event.event_detail.description && (
             <section className="information">
               <h3>About this event</h3>
-              <div dangerouslySetInnerHTML={{ __html: event.description }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: event.event_detail.description,
+                }}
+              />
             </section>
           )}
 
@@ -202,7 +202,7 @@ export default function Event() {
             <div className="tags-container">
               {event.event_tag.map(({ name, id }) => (
                 <div key={id} className="tag">
-                  <Tag>{name}</Tag>
+                  <Tag hoverable>{name}</Tag>
                 </div>
               ))}
             </div>
@@ -453,6 +453,6 @@ export default function Event() {
           width: 60%;
         }
       `}</style>
-    </Layout>
+    </PublicLayout>
   );
 }

@@ -13,8 +13,8 @@ import {
   INTERNAL_SERVER_ERROR_STATUS,
 } from 'server/constants/http.status';
 // mocks
-import PublicWrapper from 'client/mocks/PublicWrapper';
 import { server } from 'client/mocks/server';
+import { PublicWrapper } from 'client/mocks/Wrappers';
 
 beforeAll(() => server.listen());
 
@@ -124,7 +124,7 @@ describe('<SignIn/> check validations', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Internal server error')).toBeInTheDocument();
+      expect(screen.getByText('Internal server error.')).toBeInTheDocument();
     });
   }, 10_000);
 });

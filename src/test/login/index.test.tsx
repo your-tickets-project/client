@@ -7,7 +7,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { rest } from 'msw';
-import LogIn from 'pages/login';
+import LoginPage from 'pages/login';
 // fixtures
 import { createUser } from 'fixtures/user.fixture';
 // http status codes
@@ -16,13 +16,13 @@ import {
   OK_STATUS,
 } from 'server/constants/http.status';
 // mocks
-import PublicWrapper from 'client/mocks/PublicWrapper';
 import { server } from 'client/mocks/server';
+import { PublicWrapper } from 'client/mocks/Wrappers';
 
 beforeAll(() => server.listen());
 
 beforeEach(() => {
-  render(<LogIn />, { wrapper: PublicWrapper });
+  render(<LoginPage />, { wrapper: PublicWrapper });
 });
 
 afterEach(() => server.resetHandlers());
@@ -39,7 +39,7 @@ const submitForm = () => {
   fireEvent.click(screen.getByRole('button', { name: /Send/i }));
 };
 
-describe('<LogIn/> success integration', () => {
+describe('<LoginPage/> success integration', () => {
   it(`should send the form successfully`, async () => {
     server.use(
       rest.post(`auth/login`, async (req, res, ctx) => {
@@ -48,7 +48,7 @@ describe('<LogIn/> success integration', () => {
           ctx.status(OK_STATUS),
           ctx.json({
             accessToken: 'valid-token',
-            message: 'Log in successfully',
+            message: 'Log in successfully.',
             user: { id, email, first_name, last_name },
           })
         );
@@ -60,12 +60,12 @@ describe('<LogIn/> success integration', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Log in successfully')).toBeInTheDocument();
+      expect(screen.getByText('Log in successfully.')).toBeInTheDocument();
     });
   }, 10_000);
 });
 
-describe('<LogIn/> check validations', () => {
+describe('<LoginPage/> check validations', () => {
   it(`should validate required fields`, async () => {
     expect(
       screen.queryByText('email is a required field')
@@ -112,7 +112,7 @@ describe('<LogIn/> check validations', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Internal server error')).toBeInTheDocument();
+      expect(screen.getByText('Internal server error.')).toBeInTheDocument();
     });
   }, 10_000);
 });

@@ -15,6 +15,8 @@ global.matchMedia =
     };
   };
 
+HTMLCanvasElement.prototype.getContext = jest.fn();
+
 jest.mock('next/router', () => ({
   useRouter() {
     return {

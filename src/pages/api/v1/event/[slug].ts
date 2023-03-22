@@ -1,6 +1,6 @@
 // controllers
-import { getEvent } from 'server/controllers/event/event.controller';
+import { getEventBySlug } from 'server/controllers/event/event.controller';
 // router
 import { errorHandler, router } from 'server/router';
 
-export default router().get(getEvent).handler(errorHandler());
+export default router().get(getEventBySlug).handler(errorHandler());

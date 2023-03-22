@@ -1,8 +1,9 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/event/[slug]';
+import handler from 'pages/api/v1/event/[slug]';
 // fixtures
 import {
   createEvent,
+  createEventDetail,
   createEventTag,
   createEventTicketInfo,
   createLocation,
@@ -11,6 +12,7 @@ import {
 import {
   BAD_REQUEST_STATUS,
   INTERNAL_SERVER_ERROR_STATUS,
+  NOT_FOUND_STATUS,
   OK_STATUS,
 } from 'server/constants/http.status';
 // mocks
@@ -23,10 +25,11 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('GET route -- /api/event/[slug] -- success request', () => {
+describe('GET route -- /api/v1/event/[slug] -- success request', () => {
   test('returns the data', async () => {
     const eventData = {
       event: createEvent(),
+      event_detail: createEventDetail(),
       event_location: createLocation(),
       event_ticket_info: createEventTicketInfo(),
     };
@@ -62,6 +65,7 @@ describe('GET route -- /api/event/[slug] -- success request', () => {
     expect(res.body).toEqual({
       event: {
         ...eventData.event,
+        event_detail: eventData.event_detail,
         event_location: eventData.event_location,
         event_ticket_info: eventData.event_ticket_info,
         event_tag: [RowData[0].event_tag, RowData[1].event_tag],
@@ -74,20 +78,22 @@ describe('GET route -- /api/event/[slug] -- success request', () => {
     dbSelect.mockReturnValueOnce(Promise.resolve([]));
     const res = await request({ handler, query: { slug: 'invalid-slug' } });
 
-    expect(res.statusCode).toBe(OK_STATUS);
+    expect(res.statusCode).toBe(NOT_FOUND_STATUS);
     expect(res.body).toEqual({
-      event: null,
+      error: 'Not Found',
+      message: 'Event not found.',
+      statusCode: NOT_FOUND_STATUS,
     });
   });
 });
 
-describe('GET route -- /api/event/[slug] -- bad request', () => {
+describe('GET route -- /api/v1/event/[slug] -- bad request', () => {
   test('slug is required', async () => {
     const res = await request({ handler });
 
     expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
     expect(res.body).toEqual({
-      message: 'Slug is required',
+      message: 'Slug is required.',
       error: 'Bad Request',
       statusCode: BAD_REQUEST_STATUS,
     });

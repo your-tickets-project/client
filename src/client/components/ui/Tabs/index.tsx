@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const Tabs = ({ items }: Props) => {
-  const [active, setActive] = useState<null | Item>(null);
+  const [active, setActive] = useState<Item | undefined>();
 
   useEffect(() => {
     if (!items.length) return;
@@ -22,12 +22,12 @@ export const Tabs = ({ items }: Props) => {
   return (
     <div className="ui-tabs">
       {!!items.length && (
-        <ul className="ui-tabs-container">
+        <ul className="ui-tabs_container">
           {items.map(({ key, label, children }) => (
             <li
               key={key}
-              className={`ui-tabs-tab ${
-                active?.key === key ? 'is-active' : 'is-not-active'
+              className={`ui-tabs_tab ${
+                active?.key === key ? 'active' : 'not-active'
               }`}
               onClick={() => setActive({ key, label, children })}
             >
@@ -36,7 +36,7 @@ export const Tabs = ({ items }: Props) => {
           ))}
         </ul>
       )}
-      <div className="ui-tabs-active">{active && active.children}</div>
+      <div className="ui-tabs_active">{active && active.children}</div>
     </div>
   );
 };

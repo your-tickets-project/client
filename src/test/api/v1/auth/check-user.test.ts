@@ -1,5 +1,5 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/auth/check-user';
+import handler from 'pages/api/v1/auth/check-user';
 // fixtures
 import { createUser } from 'fixtures/user.fixture';
 // http status codes
@@ -20,7 +20,7 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('POST route -- /api/auth/check-user -- success request', () => {
+describe('POST route -- /api/v1/auth/check-user -- success request', () => {
   test('checks user successfully', async () => {
     const user = createUser();
     const token = generateJWT({ id: user.id });
@@ -45,7 +45,7 @@ describe('POST route -- /api/auth/check-user -- success request', () => {
   });
 });
 
-describe('POST route -- /api/auth/check-user -- bad request', () => {
+describe('POST route -- /api/v1/auth/check-user -- bad request', () => {
   test('authorization header not sent', async () => {
     const res = await request({ handler });
 

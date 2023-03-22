@@ -88,7 +88,7 @@ describe('when the user wants to close the modal', () => {
   test('should close the modal clicking on the overlay', async () => {
     expect(screen.getByText('test title')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('ui-modal-overlay-element'));
+    fireEvent.click(screen.getByTestId('ui-modal_overlay-element'));
 
     await waitFor(
       () => {
@@ -132,7 +132,7 @@ describe('when the developer wants to execute the actions', () => {
   });
 
   test('should call the onCancel function', () => {
-    fireEvent.click(screen.getByTestId('ui-modal-overlay-element'));
+    fireEvent.click(screen.getByTestId('ui-modal_overlay-element'));
     fireEvent.click(screen.getByTitle('close-icon'));
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     expect(handleCancel).toHaveBeenCalledTimes(3);

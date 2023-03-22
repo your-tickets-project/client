@@ -27,7 +27,7 @@ export default function Cards({ events }: Props) {
         <div className="row hg-32 vg-md-8">
           {events.map(
             ({
-              cover_image_url: coverImageUrl,
+              event_detail: { cover_image_url: coverImageUrl },
               date_start: dateStart,
               event_location: location,
               event_ticket_info: eventTicketInfo,

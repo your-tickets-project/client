@@ -34,20 +34,26 @@ export interface EventTicketInfoType {
   maximum_quantity: number;
 }
 
-export interface EventInfoType {
+export interface EventDetailType {
   id: number;
-  title: string;
-  slug: string;
-  date_start: Date;
-  date_end: Date;
-  time_start: string;
-  time_end: string;
+  event_id: number;
   cover_image_url: string;
   summary: string;
   description: string | null;
 }
 
-export interface EventType extends EventInfoType {
+export interface EventBasicInfoType {
+  id: number;
+  title: string;
+  slug: string;
+  date_start: string;
+  date_end: string;
+  time_start: string;
+  time_end: string;
+}
+
+export interface EventType extends EventBasicInfoType {
+  event_detail: EventDetailType;
   event_location: EventLocationType;
   event_ticket_info: EventTicketInfoType;
   event_tag: EventTagType[];

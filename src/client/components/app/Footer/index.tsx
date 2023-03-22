@@ -82,7 +82,7 @@ export default function Footer() {
   return (
     <>
       <footer>
-        {vw !== null && vw >= 768 && (
+        {vw >= 768 && (
           <div className="options row">
             {options.map(({ title, options }, i) => (
               <div key={`${title}-${i}`} className="option col-3">

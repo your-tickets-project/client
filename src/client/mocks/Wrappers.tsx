@@ -2,7 +2,7 @@ import React from 'react';
 import { Toaster } from 'react-hot-toast';
 // components
 import AuthGuard from 'client/components/app/AuthGuard';
-// redux
+// store
 import { Provider } from 'react-redux';
 import { store } from 'client/store';
 
@@ -11,7 +11,7 @@ interface Props {
   isAuthenticated?: boolean;
 }
 
-export default function PrivateWrapper({ children }: Props) {
+export const PrivateWrapper = ({ children }: Props) => {
   return (
     <Provider store={store}>
       <AuthGuard>
@@ -24,4 +24,17 @@ export default function PrivateWrapper({ children }: Props) {
       </AuthGuard>
     </Provider>
   );
-}
+};
+
+export const PublicWrapper = ({ children }: Props) => {
+  return (
+    <Provider store={store}>
+      <Toaster
+        position="top-center"
+        containerStyle={{ top: '12%', textAlign: 'center' }}
+        toastOptions={{ duration: 2500 }}
+      />
+      {children}
+    </Provider>
+  );
+};

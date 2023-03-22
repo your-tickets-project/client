@@ -1,10 +1,14 @@
 import React from 'react';
 
-export interface Props {
+interface Props {
   addonBefore?: React.ReactNode;
+  disabled?: boolean;
   error?: boolean;
+  inputRef?: React.LegacyRef<HTMLInputElement>;
+  maxLength?: number;
   name?: string;
   placeholder?: string;
+  showCount?: boolean;
   style?: React.CSSProperties;
   type: 'text' | 'search' | 'password' | 'email' | 'number';
   value?: string;
@@ -13,32 +17,56 @@ export interface Props {
 
 export const Input = ({
   addonBefore,
+  disabled,
   error,
+  inputRef,
+  maxLength,
   name,
   placeholder,
+  showCount,
   style,
   type,
   value,
   onChange,
 }: Props) => {
   return (
-    <div className="ui-input" style={style}>
+    <div className="ui-input">
       {addonBefore && (
-        <span className="ui-input-addon-before" style={{ width: '20%' }}>
-          {addonBefore}
-        </span>
+        <span className="ui-input_addon-before">{addonBefore}</span>
       )}
       <input
-        className={`ui-input-input ${error ? 'error' : ''}`}
-        name={name}
+        className={`ui-input_input ${error ? 'error' : ''} ${
+          disabled ? 'disabled' : ''
+        }`}
+        data-testid="ui-input_input-element"
+        disabled={disabled}
         id={name}
+        maxLength={maxLength}
+        name={name}
         placeholder={placeholder}
-        style={{ paddingLeft: addonBefore !== undefined ? '20%' : undefined }}
+        ref={inputRef}
+        style={{
+          ...style,
+          paddingLeft: addonBefore !== undefined ? '44px' : undefined,
+        }}
         type={type}
-        value={value}
-        onChange={onChange}
-        data-testid="ui-input-input-element"
+        value={
+          maxLength && value && value.length > maxLength
+            ? value.slice(0, maxLength)
+            : value
+        }
+        onChange={disabled ? undefined : onChange}
       />
+      {showCount && (
+        <div className="ui-input_counter-container">
+          <span className="ui-input_counter">
+            {value && maxLength && value.length > maxLength
+              ? maxLength
+              : value?.length || 0}
+            {maxLength ? ` / ${maxLength}` : ''}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

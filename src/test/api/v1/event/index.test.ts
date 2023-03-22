@@ -1,8 +1,9 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/event/index';
+import handler from 'pages/api/v1/event';
 // fixtures
 import {
   createEvent,
+  createEventDetail,
   createEventTag,
   createEventTicketInfo,
   createLocation,
@@ -22,22 +23,25 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('GET route -- /api/event -- success request', () => {
+describe('GET route -- /api/v1/event -- success request', () => {
   test('returns the data', async () => {
     const eventData = {
       event: createEvent(),
+      event_detail: createEventDetail(),
       event_location: createLocation(),
       event_ticket_info: createEventTicketInfo(),
     };
 
     const eventData2 = {
       event: createEvent({ id: 2 }),
+      event_detail: createEventDetail({ id: 2, event_id: 2 }),
       event_location: createLocation({ id: 2, event_id: 2 }),
       event_ticket_info: createEventTicketInfo({ id: 2, event_id: 2 }),
     };
 
     const eventData3 = {
       event: createEvent({ id: 3 }),
+      event_detail: createEventDetail({ id: 3, event_id: 3 }),
       event_location: createLocation({ id: 3, event_id: 3 }),
       event_ticket_info: createEventTicketInfo({ id: 3, event_id: 3 }),
     };
@@ -86,18 +90,21 @@ describe('GET route -- /api/event -- success request', () => {
       events: [
         {
           ...eventData.event,
+          event_detail: eventData.event_detail,
           event_location: eventData.event_location,
           event_ticket_info: eventData.event_ticket_info,
           event_tag: [RowData[0].event_tag, RowData[1].event_tag],
         },
         {
           ...eventData2.event,
+          event_detail: eventData2.event_detail,
           event_location: eventData2.event_location,
           event_ticket_info: eventData2.event_ticket_info,
           event_tag: [RowData[2].event_tag],
         },
         {
           ...eventData3.event,
+          event_detail: eventData3.event_detail,
           event_location: eventData3.event_location,
           event_ticket_info: eventData3.event_ticket_info,
           event_tag: [],
@@ -116,7 +123,7 @@ describe('GET route -- /api/event -- success request', () => {
   });
 });
 
-describe('GET route -- /api/event -- bad request', () => {
+describe('GET route -- /api/v1/event -- bad request', () => {
   test('internal server error', async () => {
     // @ts-ignore
     dbSelect.mockImplementation(() => {

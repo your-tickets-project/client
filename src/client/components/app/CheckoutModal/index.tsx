@@ -16,9 +16,8 @@ import {
   shimmer,
   toBase64,
 } from 'client/helpers';
-// redux
-import { useSelector } from 'react-redux';
-import { RootState } from 'client/store';
+// store
+import { AuthSelector } from 'client/store/selectors';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
@@ -50,7 +49,7 @@ export default function CheckoutModal({
 }: Props) {
   const router = useRouter();
   const vw = useVW();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = AuthSelector();
 
   const [ticketsNumber, setTicketsNumber] = useState(1);
   const [checkout, setCheckout] = useState<CheckoutType>(
@@ -189,7 +188,7 @@ export default function CheckoutModal({
                             rules={{
                               required: true,
                               type: 'string',
-                              message: 'First name is a required field',
+                              requiredMessage: 'First name is a required field',
                             }}
                           >
                             <Input type="text" />
@@ -202,7 +201,7 @@ export default function CheckoutModal({
                             rules={{
                               required: true,
                               type: 'string',
-                              message: 'Last name is a required field',
+                              requiredMessage: 'Last name is a required field',
                             }}
                           >
                             <Input type="text" />
@@ -227,7 +226,8 @@ export default function CheckoutModal({
                             rules={{
                               required: true,
                               type: 'string',
-                              message: 'Phone number is a required field',
+                              requiredMessage:
+                                'Phone number is a required field',
                             }}
                           >
                             <Input type="text" />
@@ -323,12 +323,12 @@ export default function CheckoutModal({
             )}
           </div>
 
-          {vw !== null && vw >= 768 && (
+          {vw >= 768 && (
             <div className="col-md-5">
               <div className="order-summary">
                 <div>
                   <Image
-                    src={event.cover_image_url}
+                    src={event.event_detail.cover_image_url}
                     alt="0"
                     width={1800}
                     height={700}

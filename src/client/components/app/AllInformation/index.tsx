@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 // components
+import Cards from 'client/components/app/Cards';
+import { Button } from 'client/components/ui';
 import {
   ControlIcon,
   GlassIcon,
@@ -10,15 +13,12 @@ import {
   PhotoIcon,
   ShoesIcon,
 } from 'client/components/icons';
-import { Button } from 'client/components/ui';
-import Cards from 'client/components/app/Cards';
 // interfaces
 import { EventType } from 'interfaces';
 // services
-import { getEvents } from 'client/services/event';
+import { getEvents } from 'client/services/event.service';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
-import toast from 'react-hot-toast';
 
 const categoryCards = [
   {
@@ -79,7 +79,7 @@ export default function AllInformation() {
         const res = await getEvents();
         setEvents(res.data.events);
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || 'Internal server error');
+        toast.error(error?.response?.data?.message || 'Internal server error.');
       }
     };
     queryAPI();

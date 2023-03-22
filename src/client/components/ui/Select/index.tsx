@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Props {
   value?: string | number;
@@ -30,34 +30,43 @@ export const Select = ({
   placeholder,
   onChange,
 }: Props) => {
-  const [loading, setIsLoaded] = useState(false);
-  const [isShowOptions, setIsShowOptions] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isActive, setIsActive] = useState(false);
   const [selectedOption, setSelectedOption] = useState(
     options.find((option) => option.value === value)
   );
 
   useEffect(() => {
-    setIsLoaded(true);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    if (!loading) return;
+    if (isLoading) return;
     if (value === undefined || selectedOption === undefined) return;
     onChange?.({ target: { name, value: selectedOption.value } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    window.addEventListener('click', (e) => {
+      if (!e.target) return;
+      // @ts-ignore
+      if (!ref.current?.contains(e.target)) setIsActive(false);
+    });
+  }, [isLoading]);
 
   return (
-    <div className="ui-select">
+    <div className="ui-select" ref={ref}>
       <div
-        className="ui-select-container"
-        onClick={() => setIsShowOptions(!isShowOptions)}
+        className="ui-select_container"
+        onClick={() => setIsActive(!isActive)}
       >
         <input
           type="text"
-          className={`ui-select-input ${
-            isShowOptions ? 'is-active' : 'is-not-active'
-          }`}
+          className={`ui-select_input ${isActive ? 'active' : 'not-active'}`}
           placeholder={placeholder}
           value={selectedOption?.label}
           id={name}
@@ -68,28 +77,24 @@ export const Select = ({
           readOnly
           disabled
         />
-        <div className="ui-select-icon">
+        <div className="ui-select_icon">
           <SelectArrowIcon />
         </div>
       </div>
 
       {!!options.length && (
         <ul
-          className={`ui-select-options ${
-            isShowOptions ? 'is-active' : 'is-not-active'
-          }`}
+          className={`ui-select_options ${isActive ? 'active' : 'not-active'}`}
         >
           {options.map((option) => (
             <li
               key={option.key}
-              className={`ui-select-option ${
-                option.label === selectedOption?.label
-                  ? 'is-active'
-                  : 'is-not-active'
+              className={`ui-select_option ${
+                option.label === selectedOption?.label ? 'active' : 'not-active'
               }`}
               onClick={() => {
                 setSelectedOption(option);
-                setIsShowOptions(false);
+                setIsActive(false);
                 onChange?.({ target: { name, value: option.value } });
               }}
             >

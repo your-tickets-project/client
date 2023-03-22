@@ -1,5 +1,5 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/auth/login';
+import handler from 'pages/api/v1/auth/login';
 // fixtures
 import { createUser } from 'fixtures/user.fixture';
 // http status codes
@@ -16,7 +16,7 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('POST route -- /api/auth/signin -- success request', () => {
+describe('POST route -- /api/v1/auth/signin -- success request', () => {
   test('log in successfully', async () => {
     const user = createUser();
     const securePassword = await hashPassword({ password: user.password });
@@ -38,7 +38,7 @@ describe('POST route -- /api/auth/signin -- success request', () => {
     expect(res.statusCode).toBe(OK_STATUS);
     expect(res.body).toEqual({
       accessToken: expect.any(String),
-      message: 'Log in successfully',
+      message: 'Log in successfully.',
       user: {
         id: user.id,
         email: user.email,
@@ -49,14 +49,14 @@ describe('POST route -- /api/auth/signin -- success request', () => {
   });
 });
 
-describe('POST route -- /api/auth/signin -- bad request', () => {
+describe('POST route -- /api/v1/auth/signin -- bad request', () => {
   test('empty body sent', async () => {
     const res = await request({ handler, method: 'POST', body: {} });
 
     expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
-      message: 'Invalid body',
+      message: 'Invalid body.',
       error: 'Bad Request',
       errors: ['email is a required field', 'password is a required field'],
     });
@@ -77,7 +77,7 @@ describe('POST route -- /api/auth/signin -- bad request', () => {
     expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
-      message: 'Invalid body',
+      message: 'Invalid body.',
       error: 'Bad Request',
       errors: ['email must be a valid email'],
     });
@@ -102,7 +102,7 @@ describe('POST route -- /api/auth/signin -- bad request', () => {
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
       error: 'Bad Request',
-      message: 'Invalid email or password',
+      message: 'Invalid email or password.',
     });
   });
 
@@ -130,7 +130,7 @@ describe('POST route -- /api/auth/signin -- bad request', () => {
     expect(res.body).toEqual({
       statusCode: BAD_REQUEST_STATUS,
       error: 'Bad Request',
-      message: 'Invalid email or password',
+      message: 'Invalid email or password.',
     });
   });
 });

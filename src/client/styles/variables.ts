@@ -6,18 +6,19 @@ export const breakPoints = {
 };
 
 export const colors = {
+  black: '#000000',
   color1: '#D1410C',
   color2: '#3D64FF',
   color3: '#1E0A3C',
   color4: '#004182',
-  black: '#000000',
-  white: '#ffffff',
   gray: '#c3c3c3',
-  lightGray: '#F8F7FA',
   grayFont: '#6F7287',
   lightBlack: '#3F4E4F',
+  lightGray: '#F8F7FA',
   success: '#57CC99',
+  transparentBlack: 'rgba(0, 0, 0, 0.6)',
   warning: '#ff4d4f',
+  white: '#ffffff',
 };
 
 export const fonts = {
