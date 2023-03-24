@@ -2,7 +2,7 @@ import Image from 'next/image';
 // components
 import { SelectArrowIcon } from 'client/components/icons';
 import { Button, Tabs } from 'client/components/ui';
-import Layout from 'client/components/Layout';
+import PublicLayout from 'client/components/Layouts/PublicLayout';
 import AllInformation from 'client/components/app/AllInformation';
 // helpers
 import { shimmer, toBase64 } from 'client/helpers';
@@ -11,13 +11,13 @@ import { breakPoints, colors } from 'client/styles/variables';
 
 export default function Home() {
   return (
-    <Layout>
+    <PublicLayout>
       <section className="banner">
         <Image
           src="/assets/home-banner.jpg"
           alt="banner"
           width={1200}
-          height={700}
+          height={200}
           style={{
             width: '100%',
             height: 'auto',
@@ -35,7 +35,7 @@ export default function Home() {
               src="/assets/letters.svg"
               alt="letters"
               width={700}
-              height={700}
+              height={200}
               style={{ width: '100%', height: 'auto' }}
               placeholder="blur"
               blurDataURL={`data:image/svg+xml;base64,${toBase64(
@@ -172,6 +172,6 @@ export default function Home() {
           }
         }
       `}</style>
-    </Layout>
+    </PublicLayout>
   );
 }

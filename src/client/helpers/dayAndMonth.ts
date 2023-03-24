@@ -1,4 +1,4 @@
-export const dayAndMonth = ({ date }: { date: Date }) => {
+export const dayAndMonth = ({ date }: { date: string }) => {
   const d = new Date(date);
   if (d.toString() === 'Invalid Date') {
     return date.toString();

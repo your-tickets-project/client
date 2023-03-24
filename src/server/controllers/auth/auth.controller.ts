@@ -13,6 +13,18 @@ import { generateJWT } from 'server/utils';
 import { validationsOptions } from 'server/validations/validationOptions';
 import { loginDto, signinDto } from 'server/validations/auth';
 
+/* GET
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+export const checkUser = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  delete req.user?.password;
+  res.status(OK_STATUS).json({ user: req.user });
+};
+
+/* POST
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const validateSignIn = async (
   req: NextApiRequestExtended,
   res: NextApiResponse,
@@ -21,7 +33,7 @@ export const validateSignIn = async (
   try {
     req.body = await signinDto.validate(req.body, validationsOptions);
   } catch (err: any) {
-    throw new BadRequestException('Invalid body', err.errors);
+    throw new BadRequestException('Invalid body.', err.errors);
   }
 
   await next();
@@ -32,7 +44,7 @@ export const signIn = async (
   res: NextApiResponse
 ) => {
   await createUser({ data: req.body });
-  res.status(CREATED_STATUS).json({ message: 'User created successfully' });
+  res.status(CREATED_STATUS).json({ message: 'User created successfully.' });
 };
 
 export const validateLogIn = async (
@@ -43,7 +55,7 @@ export const validateLogIn = async (
   try {
     req.body = await loginDto.validate(req.body, validationsOptions);
   } catch (err: any) {
-    throw new BadRequestException('Invalid body', err.errors);
+    throw new BadRequestException('Invalid body.', err.errors);
   }
 
   await next();
@@ -59,13 +71,5 @@ export const logIn = async (
   delete user.password;
   res
     .status(OK_STATUS)
-    .json({ accessToken, message: 'Log in successfully', user });
-};
-
-export const checkUser = async (
-  req: NextApiRequestExtended,
-  res: NextApiResponse
-) => {
-  delete req.user?.password;
-  res.status(OK_STATUS).json({ user: req.user });
+    .json({ accessToken, message: 'Log in successfully.', user });
 };

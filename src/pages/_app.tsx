@@ -3,13 +3,14 @@ import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
 // components
 import AuthGuard from 'client/components/app/AuthGuard';
-// redux
+// store
 import { Provider } from 'react-redux';
 import { store } from 'client/store';
 // styles
 import globalStyles from 'client/styles/globals';
 import 'client/styles/grid.css';
 import 'client/styles/ui-components.css';
+import 'client/styles/trix.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

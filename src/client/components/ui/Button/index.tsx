@@ -3,31 +3,36 @@ import React from 'react';
 interface Props {
   block?: boolean;
   children?: React.ReactNode;
+  disabled?: boolean;
   htmlType?: 'button' | 'reset' | 'submit';
   icon?: React.ReactNode;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   style?: React.CSSProperties;
   type?: 'primary' | 'link';
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const Button = ({
-  children,
-  type,
-  htmlType,
   block,
-  style,
-  onClick,
+  children,
+  disabled,
+  htmlType,
   icon,
+  style,
+  type,
+  onClick,
 }: Props) => {
   return (
     <button
-      type={htmlType ?? 'button'}
-      className={`ui-button ${type || ''} ${block ? 'block' : ''}`}
+      className={`ui-button ${type || ''} ${block ? 'block' : ''} ${
+        disabled ? 'disabled' : ''
+      }`}
+      disabled={disabled}
       style={style}
-      onClick={onClick}
+      type={htmlType ?? 'button'}
+      onClick={disabled ? undefined : onClick}
     >
       {icon && (
-        <div data-testid="ui-button-icon-element" className="ui-button-icon">
+        <div data-testid="ui-button_icon-element" className="ui-button_icon">
           {icon}
         </div>
       )}{' '}

@@ -26,19 +26,19 @@ export const Card = ({ cover, title, children, hoverable, style }: Props) => {
       className={`ui-card ${hoverable ? 'hoverable' : ''}`}
       style={style}
     >
-      <div className="ui-card-header">
+      <div className="ui-card_header">
         {cover && (
-          <div className="ui-card-cover">
+          <div className="ui-card_cover">
             {' '}
-            <div className="ui-card-like-button">
+            <div className="ui-card_like-button">
               <HeartIcon />
             </div>
             {cover}
           </div>
         )}
-        {title && <div className="ui-card-title">{title}</div>}
+        {title && <div className="ui-card_title">{title}</div>}
       </div>
-      <aside className="ui-card-body">{children}</aside>
+      <aside className="ui-card_body">{children}</aside>
     </article>
   );
 };

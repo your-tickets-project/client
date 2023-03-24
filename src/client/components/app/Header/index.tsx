@@ -1,8 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
+import toaster from 'react-hot-toast';
 // components
 import {
   MenuIcon,
+  OptionsIcon,
   SearchIcon,
   SelectArrowIcon,
   UserIcon,
@@ -10,23 +12,29 @@ import {
 import { DropDown, Input } from 'client/components/ui';
 // hooks
 import useVW from 'client/hooks/useVW';
-// redux
-import { useSelector } from 'react-redux';
-import { RootState } from 'client/store';
+// store
+import { AuthSelector, AppSelector } from 'client/store/selectors';
 import { authLogOut } from 'client/store/actions/auth';
+import { appShowDashboardOptions } from 'client/store/actions/app';
 // styles
-import { breakPoints, colors } from 'client/styles/variables';
+import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
+
+interface Props {
+  showDashboardIcon?: boolean;
+}
 
 interface ItemsType {
   href: string;
   content: string;
   style?: React.CSSProperties;
-  handleClick?: () => void;
+  handleClick?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }
 
 const itemStyle = {
   color: colors.grayFont,
+  display: 'block',
   fontWeight: 'bold',
+  padding: '1rem',
 };
 
 const links: ItemsType[] = [
@@ -41,7 +49,7 @@ const links: ItemsType[] = [
     style: itemStyle,
   },
   {
-    href: '/create',
+    href: '/create-event',
     content: 'Create an event',
     style: { ...itemStyle, color: colors.color2 },
   },
@@ -59,12 +67,12 @@ const links: ItemsType[] = [
 
 const authLinks: ItemsType[] = [
   {
-    href: '/browse',
+    href: '/',
     content: 'Browse events',
     style: itemStyle,
   },
   {
-    href: '/home',
+    href: '/dashboard/events',
     content: 'Manage my events',
     style: itemStyle,
   },
@@ -77,78 +85,88 @@ const authLinks: ItemsType[] = [
     href: '/login',
     content: 'Log out',
     style: itemStyle,
-    handleClick() {
+    handleClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+      e.preventDefault();
       authLogOut();
+      toaster.success('Logged out successfully.');
     },
   },
 ];
 
-export default function Header() {
+export default function Header({ showDashboardIcon }: Props) {
+  const { isAuthenticated, user } = AuthSelector();
+  const { isShowingDashboardOptions } = AppSelector();
+
   const vw = useVW();
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
 
   return (
     <>
       <header>
         <nav className="row vg-8">
-          <div className="col-8 col-sm-7 col-md-6 row vg-8">
-            <Link href="/" className="logo col-7 col-sm-6 col-md-6 col-lg-5">
+          <div className="col-8 col-sm-6 row">
+            <Link href="/" className="logo col-7 col-sm-8 col-md-6 col-lg-5">
               Yourtickets
             </Link>
-            <div className="search col-5 col-sm-3 col-md-6 col-lg-7">
-              {vw !== null && vw >= 768 && (
-                <Input
-                  type="search"
-                  placeholder="Search events"
-                  addonBefore={<SearchIcon />}
-                  style={{ backgroundColor: colors.lightGray }}
-                />
-              )}
-
-              {(vw === null || vw < 768) && (
-                <div className="search-button">
-                  <SearchIcon />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="col-4 col-sm-5 col-md-6">
-            {!isAuthenticated && (
-              <>
-                {(vw === null || vw < 768) && (
-                  <DropDown
-                    items={links.map(
-                      ({ href, content, style, handleClick }) => ({
-                        key: href,
-                        item: (
-                          <Link
-                            href={href}
-                            style={{ ...style, marginBottom: '.8rem' }}
-                            onClick={handleClick}
-                          >
-                            {content}
-                          </Link>
-                        ),
-                      })
-                    )}
-                    style={{ justifyContent: 'flex-end' }}
-                  >
-                    <div className="mobile-icon">
-                      <span className="icon">
-                        <MenuIcon />
-                      </span>{' '}
-                      Menu
-                    </div>
-                  </DropDown>
+            {!showDashboardIcon && (
+              <div className="search col-5 col-sm-4 col-md-6 col-lg-7">
+                {vw < breakPointsPX.md && (
+                  <div className="search-button">
+                    <SearchIcon />
+                  </div>
                 )}
 
-                {vw !== null && vw >= 768 && (
+                {vw >= breakPointsPX.md && (
+                  <Input
+                    placeholder="Search events"
+                    addonBefore={<SearchIcon />}
+                    style={{ backgroundColor: colors.lightGray }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+          <div className="col-4 col-sm-6">
+            {!isAuthenticated && (
+              <>
+                {vw < breakPointsPX.md && (
+                  <div className="row" style={{ justifyContent: 'flex-end' }}>
+                    <div className="col-6 col-sm-3">
+                      <DropDown
+                        items={links.map(
+                          ({ href, content, style, handleClick }) => ({
+                            key: href,
+                            item: (
+                              <Link
+                                href={href}
+                                style={{ ...style }}
+                                onClick={handleClick}
+                              >
+                                {content}
+                              </Link>
+                            ),
+                          })
+                        )}
+                        style={{ justifyContent: 'flex-end' }}
+                      >
+                        <div className="icon-container">
+                          <span className="icon">
+                            <MenuIcon />
+                          </span>{' '}
+                          Menu
+                        </div>
+                      </DropDown>
+                    </div>
+                  </div>
+                )}
+
+                {vw >= breakPointsPX.md && (
                   <div className="links">
                     {links.map(({ href, style, content, handleClick }) => (
                       <Link key={href} href={href} legacyBehavior>
-                        <a style={{ ...style }} onClick={handleClick}>
+                        <a
+                          style={{ ...style, display: 'flex', padding: '0' }}
+                          onClick={handleClick}
+                        >
                           {content}
                         </a>
                       </Link>
@@ -159,48 +177,33 @@ export default function Header() {
             )}
 
             {isAuthenticated && (
-              <>
-                {(vw === null || vw < 576) && (
-                  <DropDown
-                    items={authLinks.map(
-                      ({ href, content, style, handleClick }) => ({
-                        key: href,
-                        item: (
-                          <Link
-                            href={href}
-                            style={{ ...style, marginBottom: '.8rem' }}
-                            onClick={handleClick}
-                          >
-                            {content}
-                          </Link>
-                        ),
+              <div
+                className="row vg-sm-8"
+                style={{ height: '100%', justifyContent: 'flex-end' }}
+              >
+                {showDashboardIcon && vw < breakPointsPX.md && (
+                  <div
+                    className="dashboard-icon-container col-6 col-sm-2"
+                    onClick={() =>
+                      appShowDashboardOptions({
+                        isShowOptions: !isShowingDashboardOptions,
                       })
-                    )}
-                    style={{ justifyContent: 'flex-end' }}
+                    }
                   >
-                    <div className="mobile-icon">
-                      <span className="icon">
-                        <UserIcon />
-                      </span>{' '}
+                    <div className="icon-container">
+                      <div className="icon">
+                        <OptionsIcon />
+                      </div>
                     </div>
-                  </DropDown>
+                  </div>
                 )}
 
-                {vw !== null && vw >= 576 && (
-                  <div className="links">
-                    {vw >= 768 && (
-                      <Link href="/create" legacyBehavior>
-                        <a
-                          style={{
-                            color: colors.color2,
-                            fontWeight: 'bold',
-                            marginRight: '0.5rem',
-                          }}
-                        >
-                          Create an event
-                        </a>
-                      </Link>
-                    )}
+                {vw < breakPointsPX.sm && (
+                  <div
+                    className={`icon-container ${
+                      showDashboardIcon ? 'col-6' : 'col-8'
+                    }`}
+                  >
                     <DropDown
                       items={authLinks.map(
                         ({ href, content, style, handleClick }) => ({
@@ -208,7 +211,7 @@ export default function Header() {
                           item: (
                             <Link
                               href={href}
-                              style={{ ...style, marginBottom: '.8rem' }}
+                              style={{ ...style }}
                               onClick={handleClick}
                             >
                               {content}
@@ -216,42 +219,88 @@ export default function Header() {
                           ),
                         })
                       )}
-                      style={{
-                        justifyContent: 'flex-end',
-                        width: vw >= 768 ? 'auto' : '100%',
-                      }}
                     >
-                      <div
-                        style={{
-                          fontWeight: 'bold',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
-                      >
-                        {user?.email}
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '28px',
-                          }}
-                        >
-                          <SelectArrowIcon />
-                        </div>{' '}
-                      </div>
+                      <div className="icon">
+                        <UserIcon />
+                      </div>{' '}
                     </DropDown>
                   </div>
                 )}
-              </>
+
+                {vw >= breakPointsPX.sm && (
+                  <div
+                    className={`${
+                      showDashboardIcon ? 'col-6 col-sm-10' : 'col-12'
+                    } col-md-12`}
+                  >
+                    <div className="links">
+                      {vw >= breakPointsPX.md && (
+                        <Link href="/create-event" legacyBehavior>
+                          <a
+                            style={{
+                              color: colors.color2,
+                              fontWeight: 'bold',
+                              marginRight: '0.5rem',
+                            }}
+                          >
+                            Create an event
+                          </a>
+                        </Link>
+                      )}
+                      <DropDown
+                        items={authLinks.map(
+                          ({ href, content, style, handleClick }) => ({
+                            key: href,
+                            item: (
+                              <Link
+                                href={href}
+                                style={{ ...style }}
+                                onClick={handleClick}
+                              >
+                                {content}
+                              </Link>
+                            ),
+                          })
+                        )}
+                        style={{
+                          justifyContent: 'flex-end',
+                          width: vw >= breakPointsPX.md ? 'auto' : '100%',
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {user?.email}
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              width: '28px',
+                            }}
+                          >
+                            <SelectArrowIcon />
+                          </div>{' '}
+                        </div>
+                      </DropDown>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </nav>
       </header>
       <style jsx>{`
         header {
+          border-bottom: 1px solid ${colors.gray};
           font-size: 12px;
+          height: 70px;
           padding: 1rem 0.5rem;
         }
 
@@ -262,7 +311,6 @@ export default function Header() {
         .search {
           align-items: center;
           display: flex;
-          justify-content: center;
         }
 
         .search-button {
@@ -273,11 +321,13 @@ export default function Header() {
           width: 40px;
         }
 
-        .mobile-icon {
+        .icon-container {
           align-items: center;
+          cursor: pointer;
           display: flex;
-          font-weight: bold;
           justify-content: center;
+          height: 100%;
+          transition: background-color 0.5s ease;
         }
 
         .icon {
@@ -302,7 +352,14 @@ export default function Header() {
         }
 
         @media (hover: hover) {
+          .icon-container:hover {
+            background-color: ${colors.lightGray};
+          }
+
           .links a:hover {
+            background-color: ${colors.lightGray};
+          }
+          .dashboard-icon-container:hover {
             background-color: ${colors.lightGray};
           }
         }

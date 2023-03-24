@@ -23,7 +23,7 @@ export const authMiddleware = async (
     );
   }
 
-  const authToken = authorization as string;
+  const authToken = authorization;
   const [init, token] = authToken.split(' ');
 
   if (init !== 'Bearer') {

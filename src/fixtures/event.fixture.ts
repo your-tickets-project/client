@@ -3,13 +3,10 @@ export const createEvent = ({
   id = 1,
   title = 'test title',
   slug = 'test-slug',
-  date_start = '1996-02-09T04:00:00.000Z',
-  date_end = '1996-02-09T04:00:00.000Z',
+  date_start = '1996-02-09',
+  date_end = '1996-02-09',
   time_start = '13:00:00',
   time_end = '18:00:00',
-  cover_image_url = '/example/0.webp',
-  summary = 'test summary',
-  description = '<p>test description.</p>',
 } = {}) => ({
   id,
   title,
@@ -18,10 +15,15 @@ export const createEvent = ({
   date_end,
   time_start,
   time_end,
-  cover_image_url,
-  summary,
-  description,
 });
+
+export const createEventDetail = ({
+  id = 1,
+  event_id = 1,
+  cover_image_url = '/example/0.webp',
+  summary = 'test summary',
+  description = '<p>test description.</p>',
+} = {}) => ({ id, event_id, cover_image_url, summary, description });
 
 export const createLocation = ({
   id = 1,
@@ -33,8 +35,8 @@ export const createLocation = ({
   state = 'test state',
   postal_code = '0000',
   country = 'test country',
-  latitude = '10.6423814',
-  longitude = '-71.6103239',
+  latitude = 10.6423814,
+  longitude = -71.6103239,
 } = {}) => ({
   id,
   event_id,
@@ -53,7 +55,7 @@ export const createEventTicketInfo = ({
   id = 1,
   event_id = 1,
   type = 'free',
-  name = 'Admisión Presencial - test',
+  name = 'General admission - test',
   quantity = 100,
   price = 0,
   sales_start = '1996-02-01T04:00:00.000Z',
@@ -82,7 +84,7 @@ export const createEventTicketInfo = ({
 export const createEventTag = ({
   id = 1,
   event_id = 1,
-  name = 'test events',
+  name = 'tag',
 }: {
   id?: number | null;
   event_id?: number | null;

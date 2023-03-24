@@ -10,7 +10,7 @@ describe('when <Button/> is mounted', () => {
   test('should not show the icon', () => {
     render(<Button>Follow</Button>);
     expect(
-      screen.queryByTestId('ui-button-icon-element')
+      screen.queryByTestId('ui-button_icon-element')
     ).not.toBeInTheDocument();
   });
 });

@@ -18,11 +18,28 @@ ADD PRIMARY KEY (`id`);
 ALTER TABLE `event`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
+-- Create table event_detail
+CREATE TABLE `event_detail` (
+  `id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `cover_image_url` varchar(255) NULL,
+  `summary` varchar(140) NULL,
+  `description` text NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+ALTER TABLE `event_detail`
+ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `event_detail`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `event_detail` ADD CONSTRAINT `event_detail_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
 -- Create table event_location
 CREATE TABLE `event_location` (
   `id` int(11) NOT NULL,
   `event_id` int(11) NOT NULL,
-  `venue_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `venue_name` text NOT NULL,
   `address_1` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
   `address_2` varchar(150) COLLATE utf8_unicode_ci NULL,
   `city` varchar(100) COLLATE utf8_unicode_ci NOT NULL,

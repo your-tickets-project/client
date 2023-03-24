@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Props {
   children: React.ReactNode;
@@ -7,23 +7,38 @@ interface Props {
 }
 
 export const DropDown = ({ children, items, style }: Props) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    window.addEventListener('click', (e) => {
+      if (!e.target) return;
+      // @ts-ignore
+      if (!ref.current?.contains(e.target)) setIsActive(false);
+    });
+  }, [isLoading]);
 
   return (
     <div
       className="ui-dropdown"
+      ref={ref}
       style={style}
       onClick={() => setIsActive(!isActive)}
     >
       <div>{children}</div>
       {!!items.length && (
         <ul
-          className={`ui-dropdown-items ${
-            isActive ? 'is-active' : 'is-not-active'
-          }`}
+          className={`ui-dropdown_items ${isActive ? 'active' : 'not-active'}`}
         >
           {items.map(({ key, item }) => (
-            <li key={key} className="ui-dropdown-item">
+            <li key={key} className="ui-dropdown_item">
               {item}
             </li>
           ))}

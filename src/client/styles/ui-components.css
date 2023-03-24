@@ -1,36 +1,45 @@
 /* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
--- Base Styles
+-- Variables & base styles
 - Button
 - Card
+- DatePicker
 - Divider
+- Dragger
 - Dropdown
 - Form
 - Input
+- InputTag
 - Modal
 - Select
+- Table
 - Tabs
 - Tag
+- TextArea
+- TimePicker
 */
 
-/* Base Styles
+/* Variables & base styles
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-
 :root {
+  /* colors */
   --black: #000;
   --color1: #d1410c;
   --color2: #3d64ff;
+  --danger-color: #ff4d4f;
   --dark-gray: #555;
-  --font-size-normal: clamp(0.88rem, calc(0.83rem + 0.22vw), 1rem);
-  --font-size-small: clamp(0.75rem, calc(0.71rem + 0.22vw), 0.88rem);
-  --font-size-big: clamp(1rem, calc(0.96rem + 0.22vw), 1.13rem);
   --gray-font: #6f7287;
-  --light-gray-font: #d5d5d5;
   --light-black: #3f4e4f;
+  --light-blue: #e4fbff;
+  --light-gray-font: #d5d5d5;
   --light-gray: #f8f7fa;
   --medium-gray: #c3c3c3;
-  --warning-color: #ff4d4f;
   --white: #fff;
+  /* fonts */
+  --font-size-big: clamp(1rem, calc(0.96rem + 0.22vw), 1.13rem);
+  --font-size-normal: clamp(0.88rem, calc(0.83rem + 0.22vw), 1rem);
+  --font-size-small: clamp(0.75rem, calc(0.71rem + 0.22vw), 0.88rem);
+  /* utilities */
   --box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
     0 5px 12px 4px rgb(0 0 0 / 9%);
 }
@@ -109,7 +118,18 @@ p {
   background-color: var(--light-gray);
 }
 
-.ui-button .ui-button-icon {
+.ui-button.disabled {
+  background-color: var(--medium-gray);
+  border: none;
+  color: var(--white);
+  cursor: not-allowed;
+}
+
+.ui-button.disabled:hover {
+  opacity: 1;
+}
+
+.ui-button_icon {
   width: 28px;
   height: 28px;
   margin-right: 10px;
@@ -129,11 +149,11 @@ p {
   box-shadow: var(--box-shadow);
 }
 
-.ui-card-cover {
+.ui-card_cover {
   position: relative;
 }
 
-.ui-card-like-button {
+.ui-card_like-button {
   background-color: var(--white);
   border-radius: 50%;
   border: 1px solid var(--medium-gray);
@@ -147,27 +167,270 @@ p {
   width: 40px;
 }
 
-.ui-card-like-button:hover {
+.ui-card_like-button:hover {
   background-color: var(--light-gray);
 }
 
-.ui-card-title {
+.ui-card_title {
   font-size: var(--font-size-big);
   font-weight: bold;
   padding: 0.8rem 0.8rem 0 0.8rem;
 }
 
-.ui-card-body {
+.ui-card_body {
   padding: 0.8rem;
 }
 
 @media (min-width: 48rem) {
-  .ui-card .cover .like-button {
+  .ui-card_like-button {
     height: 50px;
     padding: 0.8rem;
     right: 25px;
     width: 50px;
   }
+}
+
+/* DatePicker
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.react-calendar {
+  width: 350px;
+  max-width: 100%;
+  background: white;
+  border: 1px solid #a0a096;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.125em;
+}
+.react-calendar--doubleView {
+  width: 700px;
+}
+.react-calendar--doubleView .react-calendar__viewContainer {
+  display: flex;
+  margin: -0.5em;
+}
+.react-calendar--doubleView .react-calendar__viewContainer > * {
+  width: 50%;
+  margin: 0.5em;
+}
+.react-calendar,
+.react-calendar *,
+.react-calendar *:before,
+.react-calendar *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.react-calendar button {
+  margin: 0;
+  border: 0;
+  outline: none;
+}
+.react-calendar button:enabled:hover {
+  cursor: pointer;
+}
+.react-calendar__navigation {
+  display: flex;
+  height: 44px;
+  margin-bottom: 1em;
+}
+.react-calendar__navigation button {
+  min-width: 44px;
+  background: none;
+}
+.react-calendar__navigation button:disabled {
+  background-color: #f0f0f0;
+}
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #e6e6e6;
+}
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.75em;
+}
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5em;
+}
+.react-calendar__month-view__weekNumbers .react-calendar__tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+.react-calendar__month-view__days__day--weekend {
+  color: #d10000;
+}
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #757575;
+}
+.react-calendar__year-view .react-calendar__tile,
+.react-calendar__decade-view .react-calendar__tile,
+.react-calendar__century-view .react-calendar__tile {
+  padding: 2em 0.5em;
+}
+.react-calendar__tile {
+  max-width: 100%;
+  padding: 10px 6.6667px;
+  background: none;
+  text-align: center;
+  line-height: 16px;
+}
+.react-calendar__tile:disabled {
+  background-color: #f0f0f0;
+}
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #e6e6e6;
+}
+.react-calendar__tile--now {
+  background: #ffff76;
+}
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+  background: #ffffa9;
+}
+.react-calendar__tile--hasActive {
+  background: #76baff;
+}
+.react-calendar__tile--hasActive:enabled:hover,
+.react-calendar__tile--hasActive:enabled:focus {
+  background: #a9d4ff;
+}
+.react-calendar__tile--active {
+  background: #006edc;
+  color: white;
+}
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: #1087ff;
+}
+.react-calendar--selectRange .react-calendar__tile--hover {
+  background-color: #e6e6e6;
+}
+
+.ui-date-picker {
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.react-date-picker {
+  display: inline-flex;
+  position: relative;
+}
+
+.react-date-picker,
+.react-date-picker *,
+.react-date-picker *:before,
+.react-date-picker *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.react-date-picker--disabled {
+  background-color: #f0f0f0;
+  color: #6d6d6d;
+}
+
+.react-date-picker__wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  border: 1px solid var(--medium-gray);
+  border-radius: 5px;
+  padding: 1.5px 12.8px;
+}
+
+.react-date-picker.error .react-date-picker__wrapper {
+  border-color: var(--danger-color);
+}
+
+.react-date-picker__inputGroup {
+  min-width: calc((4px * 3) + 0.54em * 8 + 0.217em * 2);
+  flex-grow: 1;
+  padding: 0 2px;
+  box-sizing: content-box;
+}
+
+.react-date-picker__inputGroup__divider {
+  padding: 1px 0;
+  white-space: pre;
+}
+
+.react-date-picker__inputGroup__divider,
+.react-date-picker__inputGroup__leadingZero {
+  display: inline-block;
+}
+
+.react-date-picker__inputGroup__input {
+  min-width: 0.54em;
+  height: 100%;
+  position: relative;
+  padding: 0 1px;
+  border: 0;
+  background: none;
+  font: inherit;
+  box-sizing: content-box;
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.react-date-picker__inputGroup__input::-webkit-outer-spin-button,
+.react-date-picker__inputGroup__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.react-date-picker__inputGroup__input:invalid {
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.react-date-picker__inputGroup__input--hasLeadingZero {
+  margin-left: -0.54em;
+  padding-left: calc(1px + 0.54em);
+}
+
+.react-date-picker__button {
+  border: 0;
+  background: transparent;
+  padding: 4px 6px;
+}
+
+.react-date-picker__button:enabled {
+  cursor: pointer;
+}
+
+.react-date-picker__button:enabled:hover .react-date-picker__button__icon,
+.react-date-picker__button:enabled:focus .react-date-picker__button__icon {
+  stroke: #0078d7;
+}
+
+.react-date-picker__button:disabled .react-date-picker__button__icon {
+  stroke: #6d6d6d;
+}
+
+.react-date-picker__button svg {
+  display: inherit;
+}
+
+.react-date-picker__calendar {
+  width: 350px;
+  max-width: 100vw;
+  z-index: 1;
+}
+
+.react-date-picker__calendar--closed {
+  display: none;
+}
+
+.react-date-picker__calendar .react-calendar {
+  border-width: thin;
 }
 
 /* Divider
@@ -182,6 +445,125 @@ p {
   width: 80%;
 }
 
+/* Dragger
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-dragger_dragger {
+  background-color: var(--light-gray);
+  border-radius: 2px;
+  border: 1px dashed var(--medium-gray);
+  cursor: pointer;
+  padding: 1rem 0;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.ui-dragger_dragger:not(.disabled, .error):hover,
+.ui-dragger_dragger.active {
+  border-color: var(--color2);
+}
+
+.ui-dragger_dragger.disabled {
+  color: var(--gray-font);
+  cursor: no-drop;
+}
+
+.ui-dragger_dragger.error:not(.disabled) {
+  border-color: var(--danger-color);
+}
+
+.ui-dragger_dragger-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.ui-dragger_icon {
+  margin: 0 auto;
+  width: 60px;
+}
+
+.ui-dragger_dragger.disabled .ui-dragger_icon svg {
+  fill: var(--gray-font);
+}
+
+.ui-dragger_info {
+  font-size: var(--font-size-normal);
+  font-weight: bold;
+}
+
+.ui-dragger_upload-info {
+  display: grid;
+  grid-template-columns: 1fr;
+  list-style: none;
+  margin: 10px 0;
+  padding: 0;
+  row-gap: 0.4rem;
+}
+
+.ui-dragger_upload-info-item {
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.ui-dragger_upload-info-item::before {
+  content: '•';
+  font-size: 0.75rem;
+  margin-right: 8px;
+}
+
+.ui-dragger_file-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  row-gap: 1rem;
+}
+
+.ui-dragger_item {
+  align-items: center;
+  border-radius: 5px;
+  border: 1px solid var(--medium-gray);
+  column-gap: 0.8rem;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.ui-dragger_item.error {
+  border-color: var(--danger-color);
+}
+
+.ui-dragger_item-image {
+  flex: 0 0 70px;
+}
+
+.ui-dragger_item-name {
+  flex: 1;
+}
+
+.ui-dragger_item-icon {
+  cursor: pointer;
+  padding: 0.3rem;
+  transition: background-color 0.3s ease;
+  width: 35px;
+}
+
+.ui-dragger_item-icon:hover {
+  background-color: var(--light-gray);
+}
+
+@media (min-width: 75rem) {
+  .ui-dragger_upload-info {
+    column-gap: 0.4rem;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ui-dragger_upload-info-item {
+    text-align: center;
+  }
+}
+
 /* Dropdown
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .ui-dropdown {
@@ -190,14 +572,13 @@ p {
   display: flex;
   height: 100%;
   justify-content: center;
-  padding: 0 0.5rem;
   position: relative;
   transition: background-color 0.2s ease;
   width: 100%;
   z-index: 1000;
 }
 
-.ui-dropdown-items {
+.ui-dropdown_items {
   background-color: var(--white);
   box-shadow: var(--box-shadow);
   display: flex;
@@ -214,24 +595,23 @@ p {
   width: 200px;
 }
 
-.ui-dropdown-items.is-active {
+.ui-dropdown_items.active {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(1%);
 }
 
-.ui-dropdown-items.is-not-active {
+.ui-dropdown_items.not-active {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10%);
 }
 
-.ui-dropdown-item {
-  padding: 1rem;
+.ui-dropdown_item {
   transition: background-color 0.5s ease;
 }
 
-.ui-dropdown-item:hover {
+.ui-dropdown_item:hover {
   background-color: var(--light-gray);
 }
 
@@ -247,18 +627,19 @@ p {
   margin-bottom: 2rem;
 }
 
-.ui-form-group {
-  margin-bottom: 1rem;
+.ui-form_group {
+  margin-bottom: 2rem;
+  position: relative;
 }
 
-.ui-form-label {
+.ui-form_label {
   display: inline-block;
   font-size: var(--font-size-normal);
   margin-bottom: 0.5rem;
 }
 
-.ui-form-label.is-required::before {
-  color: var(--warning-color);
+.ui-form_label.required::before {
+  color: var(--danger-color);
   content: '*';
   display: inline-block;
   font-family: SimSun, sans-serif;
@@ -267,9 +648,12 @@ p {
   margin-right: 4px;
 }
 
-.ui-form-error {
-  color: var(--warning-color);
+.ui-form_error {
+  top: 105%;
+  color: var(--danger-color);
   font-size: var(--font-size-small);
+  left: 0;
+  position: absolute;
 }
 
 /* Input
@@ -279,7 +663,7 @@ p {
   width: 100%;
 }
 
-.ui-input-addon-before {
+.ui-input_addon-before {
   align-items: center;
   bottom: 0;
   color: var(--light-gray);
@@ -287,27 +671,84 @@ p {
   height: 100%;
   justify-content: center;
   left: 0;
-  padding: 0.6rem;
+  padding: 0.6rem 1rem;
   position: absolute;
+  width: 44px;
 }
 
-.ui-input-input {
+.ui-input_input {
   border-radius: 5px;
   border: 1px solid var(--medium-gray);
+  height: 32px;
   outline: none;
   padding: 0.4rem 0.8rem;
   transition: border 0.2s ease;
   font-family: 'Raleway', sans-serif;
+  font-size: var(--font-size-small);
+  width: 100%;
+}
+.ui-input_input:not(.error, .disabled):focus {
+  border: 1px solid var(--color2);
+}
+
+.ui-input_input.error {
+  border-color: var(--danger-color);
+}
+
+.ui-input_input.disabled {
+  background-color: var(--light-gray);
+  cursor: not-allowed;
+}
+
+.ui-input_counter-container {
+  align-items: center;
+  color: var(--gray-font);
+  display: flex;
+  font-size: var(--font-size-normal);
+  justify-content: flex-end;
+  position: absolute;
+  right: 0;
+  top: 100%;
   width: 100%;
 }
 
-.ui-input-input.error {
-  border-color: var(--warning-color);
-  margin-bottom: 0.3rem;
+/* InputTag
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-input-tag_container {
+  align-items: center;
+  column-gap: 10px;
+  display: flex;
 }
 
-.ui-input-input:focus {
-  border: 1px solid var(--color2);
+.ui-input-tag_input {
+  flex: 0 0 70%;
+}
+
+.ui-input-tag_button {
+  flex: 0 0 calc(30% - 10px);
+  height: 31px;
+}
+
+.ui-input-tag_error-container,
+.ui-input-tag_counter-container {
+  align-items: center;
+  color: var(--gray-font);
+  display: flex;
+  font-size: var(--font-size-normal);
+  justify-content: flex-start;
+  margin-top: 0.2rem;
+  width: 100%;
+}
+
+.ui-input-tag_error-container {
+  color: var(--danger-color);
+}
+
+.ui-input-tag-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  row-gap: 8px;
 }
 
 /* Modal
@@ -321,7 +762,7 @@ p {
   z-index: 2000;
 }
 
-.ui-modal-overlay {
+.ui-modal_overlay {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
@@ -330,7 +771,7 @@ p {
   width: 100%;
 }
 
-.ui-modal-content {
+.ui-modal_content {
   background-color: var(--white);
   max-width: 1200px;
   opacity: 0;
@@ -341,19 +782,19 @@ p {
   width: 85vw;
 }
 
-.ui-modal-content.is-active {
+.ui-modal_content.active {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.ui-modal-content.is-not-active {
+.ui-modal_content.not-active {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10%);
 }
 
-.ui-modal-icon {
+.ui-modal_icon {
   background-color: var(--light-gray);
   border: 1px solid var(--black);
   border-radius: 50%;
@@ -367,7 +808,7 @@ p {
   z-index: 1000;
 }
 
-.ui-modal-title {
+.ui-modal_title {
   border-bottom: 1px solid var(--medium-gray);
   font-size: var(--font-size-big);
   font-weight: bold;
@@ -376,14 +817,14 @@ p {
   padding: 1rem 2.5rem 1rem 1rem;
 }
 
-.ui-modal-body {
+.ui-modal_body {
   font-size: var(--font-size-normal);
   line-height: 1.5;
   overflow-y: auto;
   padding: 1rem;
 }
 
-.ui-modal-default-footer {
+.ui-modal_default-footer {
   align-items: center;
   border-top: 1px solid var(--medium-gray);
   display: flex;
@@ -391,7 +832,7 @@ p {
   padding: 1rem;
 }
 
-.ui-modal-cancel-button {
+.ui-modal_cancel-button {
   margin-right: 1rem;
 }
 
@@ -401,11 +842,11 @@ p {
   position: relative;
 }
 
-.ui-select-container {
+.ui-select_container {
   position: relative;
 }
 
-.ui-select-input {
+.ui-select_input {
   background-color: var(--white);
   border-radius: 5px;
   border: 1px solid var(--medium-gray);
@@ -417,26 +858,26 @@ p {
   width: 100%;
 }
 
-.ui-select-input.is-active {
+.ui-select_input.active {
   color: var(--light-gray-font);
 }
 
-.ui-select-input:hover,
-.ui-select-input:focus {
+.ui-select_input:hover,
+.ui-select_input:focus {
   border-color: var(--color2);
 }
 
-.ui-select-icon {
+.ui-select_icon {
   align-items: center;
   display: flex;
   justify-content: center;
   position: absolute;
   right: 0;
-  top: 5%;
+  top: 10%;
   width: 28px;
 }
 
-.ui-select-options {
+.ui-select_options {
   background-color: var(--white);
   box-shadow: var(--box-shadow);
   left: 0;
@@ -449,39 +890,77 @@ p {
   transform: translateY(-10%);
   transition: all 0.3s ease;
   width: 100%;
+  z-index: 1000;
 }
 
-.ui-select-options.is-active {
+.ui-select_options.active {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.ui-select-options.is-not-active {
+.ui-select_options.not-active {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10%);
 }
 
-.ui-select-option {
+.ui-select_option {
   cursor: pointer;
+  font-size: var(--font-size-small);
+  margin-bottom: 0.3rem;
   overflow: hidden;
   padding: 0.3rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ui-select-option:not(.is-active):hover {
+.ui-select_option:last-of-type {
+  margin-bottom: 0;
+}
+
+.ui-select_option:not(.active):hover {
   background-color: var(--light-gray);
 }
 
-.ui-select-option.is-active {
-  background-color: #e4fbff;
+.ui-select_option.active {
+  background-color: var(--light-blue);
+}
+
+/* Table
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-table {
+  border: 1px solid var(--light-gray);
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.ui-table_cell {
+  border-bottom: 1px solid var(--medium-gray);
+  color: var(--black);
+  padding: 1rem;
+  text-align: start;
+}
+
+th.ui-table_cell {
+  background-color: var(--light-gray);
+  position: relative;
+}
+
+th.ui-table_cell:not(:last-of-type):before {
+  background-color: var(--medium-gray);
+  content: '';
+  height: 1.6rem;
+  position: absolute;
+  right: 0;
+  top: 30%;
+  width: 1px;
 }
 
 /* Tabs
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-.ui-tabs-container {
+.ui-tabs_container {
   align-items: center;
   display: flex;
   list-style: none;
@@ -489,18 +968,18 @@ p {
   padding: 0;
 }
 
-.ui-tabs-container::-webkit-scrollbar {
+.ui-tabs_container::-webkit-scrollbar {
   -webkit-appearance: none;
   height: 1px;
   width: 1px;
 }
 
-.ui-tabs-container::-webkit-scrollbar-thumb {
+.ui-tabs_container::-webkit-scrollbar-thumb {
   background-color: var(--medium-gray);
   border-radius: 5px;
 }
 
-.ui-tabs-tab {
+.ui-tabs_tab {
   border-bottom: 2px solid transparent;
   color: #3f4e4f;
   cursor: pointer;
@@ -511,36 +990,288 @@ p {
   white-space: nowrap;
 }
 
-.ui-tabs-tab:last-of-type {
+.ui-tabs_tab:last-of-type {
   margin-right: 0;
 }
 
-.ui-tabs-tab:hover {
+.ui-tabs_tab:hover {
   color: var(--black);
   border-color: var(--black);
 }
 
-.ui-tabs-tab.is-active {
+.ui-tabs_tab.active {
   border-bottom: 2px solid var(--color2);
   color: var(--color2);
 }
 
-.ui-tabs-active {
+.ui-tabs_active {
   margin-top: 2rem;
 }
 
 /* Tag
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-
 .ui-tag {
+  align-items: center;
   background-color: var(--light-gray);
   border-radius: 20px;
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
   padding: 0.6rem;
   transition: background-color 0.3s ease;
   width: max-content;
 }
 
-.ui-tag:hover {
+.ui-tag.hoverable:hover {
   background-color: var(--medium-gray);
+  cursor: pointer;
+}
+
+.ui-tag_content {
+  flex: 1;
+}
+
+.ui-tag_close-icon {
+  cursor: pointer;
+  margin-left: 0.5rem;
+  padding: 0.2rem;
+  width: 20px;
+}
+
+/* TextArea
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.ui-textarea {
+  position: relative;
+  width: 100%;
+}
+
+.ui-textarea_textarea {
+  border-radius: 5px;
+  border: 1px solid var(--medium-gray);
+  height: 32px;
+  outline: none;
+  padding: 0.4rem 0.8rem;
+  transition: border 0.2s ease;
+  font-family: 'Raleway', sans-serif;
+  font-size: var(--font-size-small);
+  width: 100%;
+}
+
+.ui-textarea_textarea:not(.error, .disabled):focus {
+  border: 1px solid var(--color2);
+}
+
+.ui-textarea_textarea.error {
+  border-color: var(--danger-color);
+}
+
+.ui-textarea_textarea.disabled {
+  background-color: var(--light-gray);
+  cursor: not-allowed;
+}
+
+.ui-textarea_counter-container {
+  align-items: center;
+  color: var(--gray-font);
+  display: flex;
+  font-size: var(--font-size-normal);
+  justify-content: flex-end;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 100%;
+}
+
+/* TimePicker
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.react-clock {
+  display: block;
+  position: relative;
+}
+
+.react-clock,
+.react-clock *,
+.react-clock *:before,
+.react-clock *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.react-clock__face {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border: 1px solid black;
+  border-radius: 50%;
+}
+
+.react-clock__hand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 50%;
+}
+
+.react-clock__hand__body {
+  position: absolute;
+  background-color: black;
+  transform: translateX(-50%);
+}
+
+.react-clock__mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 50%;
+}
+
+.react-clock__mark__body {
+  position: absolute;
+  background-color: black;
+  transform: translateX(-50%);
+}
+
+.react-clock__mark__number {
+  position: absolute;
+  left: -40px;
+  width: 80px;
+  text-align: center;
+}
+
+.react-clock__second-hand__body {
+  background-color: red;
+}
+
+.ui-time-picker {
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.react-time-picker {
+  display: inline-flex;
+  position: relative;
+}
+
+.react-time-picker,
+.react-time-picker *,
+.react-time-picker *:before,
+.react-time-picker *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.react-time-picker--disabled {
+  background-color: #f0f0f0;
+  color: #6d6d6d;
+}
+
+.react-time-picker__wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  border: 1px solid var(--medium-gray);
+  border-radius: 5px;
+  padding: 1.5px 12.8px;
+}
+
+.react-time-picker.error .react-time-picker__wrapper {
+  border-color: var(--danger-color);
+}
+
+.react-time-picker__inputGroup {
+  min-width: calc((4px * 3) + 0.54em * 6 + 0.217em * 2);
+  flex-grow: 1;
+  padding: 0 2px;
+  box-sizing: content-box;
+}
+
+.react-time-picker__inputGroup__divider {
+  padding: 1px 0;
+  white-space: pre;
+}
+
+.react-time-picker__inputGroup__divider,
+.react-time-picker__inputGroup__leadingZero {
+  display: inline-block;
+}
+
+.react-time-picker__inputGroup__input {
+  min-width: 0.54em;
+  height: 100%;
+  position: relative;
+  padding: 0 1px;
+  border: 0;
+  background: none;
+  font: inherit;
+  box-sizing: content-box;
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.react-time-picker__inputGroup__input::-webkit-outer-spin-button,
+.react-time-picker__inputGroup__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.react-time-picker__inputGroup__input:invalid {
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.react-time-picker__inputGroup__input--hasLeadingZero {
+  margin-left: -0.54em;
+  padding-left: calc(1px + 0.54em);
+}
+
+.react-time-picker__inputGroup__amPm {
+  font: inherit;
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+  appearance: menulist;
+}
+
+.react-time-picker__button {
+  border: 0;
+  background: transparent;
+  padding: 4px 6px;
+}
+
+.react-time-picker__button:enabled {
+  cursor: pointer;
+}
+
+.react-time-picker__button:enabled:hover .react-time-picker__button__icon,
+.react-time-picker__button:enabled:focus .react-time-picker__button__icon {
+  stroke: #0078d7;
+}
+
+.react-time-picker__button:disabled .react-time-picker__button__icon {
+  stroke: #6d6d6d;
+}
+
+.react-time-picker__button svg {
+  display: inherit;
+}
+
+.react-time-picker__clock {
+  width: 200px;
+  height: 200px;
+  max-width: 100vw;
+  padding: 25px;
+  background-color: white;
+  border: thin solid #a0a096;
+  z-index: 1;
+}
+
+.react-time-picker__clock--closed {
+  display: none;
 }

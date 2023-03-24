@@ -1,9 +1,10 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { rest } from 'msw';
-import Event from 'pages/event/[slug]';
+import EventPage from 'pages/event/[slug]';
 // fixtures
 import {
   createEvent,
+  createEventDetail,
   createEventTag,
   createEventTicketInfo,
   createLocation,
@@ -12,14 +13,15 @@ import { createUser } from 'fixtures/user.fixture';
 // http status codes
 import { OK_STATUS } from 'server/constants/http.status';
 // mocks
-import PrivateWrapper from 'client/mocks/PrivateWrapper';
 import { server } from 'client/mocks/server';
+import { PrivateWrapper } from 'client/mocks/Wrappers';
 
 jest.mock('next/router', () => ({
   useRouter() {
     return {
       query: { slug: 'valid-slug' },
       push: jest.fn(),
+      replace: jest.fn(),
     };
   },
 }));
@@ -32,12 +34,13 @@ afterEach(() => server.resetHandlers());
 
 afterAll(() => server.close());
 
-describe('<Event/> integration', () => {
+describe('<EventPage/> integration', () => {
   it(`should show event information`, async () => {
-    render(<Event />, { wrapper: PrivateWrapper });
+    render(<EventPage />, { wrapper: PrivateWrapper });
 
     const event = {
       ...createEvent(),
+      event_detail: createEventDetail(),
       event_location: createLocation(),
       event_ticket_info: createEventTicketInfo(),
       event_tag: [createEventTag()],
@@ -55,10 +58,11 @@ describe('<Event/> integration', () => {
   });
 
   it(`should show the modal only when the user is authenticated`, async () => {
-    render(<Event />, { wrapper: PrivateWrapper });
+    render(<EventPage />, { wrapper: PrivateWrapper });
 
     const event = {
       ...createEvent(),
+      event_detail: createEventDetail(),
       event_location: createLocation(),
       event_ticket_info: createEventTicketInfo(),
       event_tag: [createEventTag()],
@@ -74,16 +78,17 @@ describe('<Event/> integration', () => {
       await screen.findByRole('button', { name: /Get tickets/i })
     );
 
-    expect(screen.getByTestId('ui-modal-overlay-element')).toBeInTheDocument();
+    expect(screen.getByTestId('ui-modal_overlay-element')).toBeInTheDocument();
   });
 
   it(`should register the user correctly when the event is free`, async () => {
-    render(<Event />, { wrapper: PrivateWrapper });
+    render(<EventPage />, { wrapper: PrivateWrapper });
 
     const authUser = createUser();
 
     const event = {
       ...createEvent(),
+      event_detail: createEventDetail(),
       event_location: createLocation(),
       event_ticket_info: createEventTicketInfo(),
       event_tag: [createEventTag()],

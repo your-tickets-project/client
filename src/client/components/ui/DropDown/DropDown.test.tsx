@@ -26,10 +26,10 @@ describe('when the user click to select an option', () => {
   test('should display the items', () => {
     const $optonsContainer = screen.getByRole('list');
 
-    expect($optonsContainer.classList.contains('is-not-active')).toBeTruthy();
+    expect($optonsContainer.classList.contains('not-active')).toBeTruthy();
 
     fireEvent.click(screen.getByText(/test/i));
 
-    expect($optonsContainer.classList.contains('is-active')).toBeTruthy();
+    expect($optonsContainer.classList.contains('active')).toBeTruthy();
   });
 });

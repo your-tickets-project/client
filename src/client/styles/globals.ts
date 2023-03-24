@@ -4,7 +4,8 @@ import { breakPoints, colors, fluidFont, fonts } from './variables';
 export default css.global`
   @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;700&display=swap');
 
-  /* ! ****** Reset ****** */
+  /* Reset
+  –––––––––––––––––––––––––––––––––––––––––––––––––– */
   html {
     box-sizing: border-box;
     font-family: ${fonts.font1};
@@ -25,6 +26,7 @@ export default css.global`
   }
 
   a {
+    color: ${colors.black};
     text-decoration: none;
   }
 
@@ -84,7 +86,8 @@ export default css.global`
     font-family: ${fonts.font1};
   }
 
-  /* ****** Utilities ****** */
+  /* Utilities
+  –––––––––––––––––––––––––––––––––––––––––––––––––– */
   .box-shadow {
     box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
       0 5px 12px 4px rgb(0 0 0 / 9%);
@@ -112,6 +115,46 @@ export default css.global`
     .logo {
       font-size: 1.8rem;
       justify-content: flex-start;
+    }
+  }
+
+  @media (min-width: ${breakPoints.md}) {
+    .box-md-shadow {
+      box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
+        0 5px 12px 4px rgb(0 0 0 / 9%);
+    }
+  }
+
+  /* Editor
+  –––––––––––––––––––––––––––––––––––––––––––––––––– */
+  .editor_upload-info {
+    display: grid;
+    grid-template-columns: 1fr;
+    list-style: none;
+    margin: 10px 0;
+    padding: 0;
+    row-gap: 0.4rem;
+  }
+
+  .editor_upload-info_item {
+    font-size: 0.75rem;
+    text-align: left;
+  }
+
+  .editor_upload-info_item::before {
+    content: '•';
+    font-size: 0.75rem;
+    margin-right: 8px;
+  }
+
+  @media (min-width: 75rem) {
+    .editor_upload-info {
+      column-gap: 0.4rem;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .editor_upload-info_item {
+      text-align: center;
     }
   }
 `;

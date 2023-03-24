@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Form } from '.';
 import { Button, Input } from 'client/components/ui';
 
 describe('when the user sends the form without data', () => {
-  test('should throw an error when form field is required but empty', async () => {
+  it('should throw an error when form field is required but empty', async () => {
     render(
       <Form>
         <Form.Item
@@ -13,7 +14,7 @@ describe('when the user sends the form without data', () => {
             required: true,
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -28,8 +29,8 @@ describe('when the user sends the form without data', () => {
     ).toBeInTheDocument();
   });
 
-  test('should throw when form field is required with a custom error message', async () => {
-    const message = 'custom error message';
+  it('should throw when form field is required with a custom error message', async () => {
+    const requiredMessage = 'custom error message';
 
     render(
       <Form>
@@ -38,10 +39,10 @@ describe('when the user sends the form without data', () => {
           name="name"
           rules={{
             required: true,
-            message,
+            requiredMessage,
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -51,16 +52,16 @@ describe('when the user sends the form without data', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(await screen.findByText(requiredMessage)).toBeInTheDocument();
   });
 });
 
 describe('when the developer wants to validate the fields', () => {
-  test('should valitate an email field', async () => {
+  it('should valitate an email field', async () => {
     render(
       <Form>
         <Form.Item label="Email" name="email" rules={{ type: 'email' }}>
-          <Input type="email" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -68,16 +69,18 @@ describe('when the developer wants to validate the fields', () => {
     const $emailField = screen.getByLabelText<HTMLInputElement>(/email/i);
     fireEvent.change($emailField, { target: { value: 'wrong email' } });
 
-    expect(
-      await screen.findByText(/email must be a valid email/i)
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(/email must be a valid email/i)
+      ).toBeInTheDocument();
+    });
   });
 
-  test('should valitate a number field', async () => {
+  it('should valitate a number field', async () => {
     render(
       <Form>
         <Form.Item label="Age" name="age" rules={{ type: 'number' }}>
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -92,7 +95,7 @@ describe('when the developer wants to validate the fields', () => {
     ).toBeInTheDocument();
   });
 
-  test('should validate fields with custom error messages', async () => {
+  it('should validate fields with custom error messages', async () => {
     const emailMessage = 'Email field must be a valid email';
     const ageMessage = 'Age field must be a number';
 
@@ -101,16 +104,16 @@ describe('when the developer wants to validate the fields', () => {
         <Form.Item
           label="Email"
           name="email"
-          rules={{ type: 'email', message: emailMessage }}
+          rules={{ type: 'email', validationMessage: emailMessage }}
         >
-          <Input type="email" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Age"
           name="age"
-          rules={{ type: 'number', message: ageMessage }}
+          rules={{ type: 'number', validationMessage: ageMessage }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -126,15 +129,15 @@ describe('when the developer wants to validate the fields', () => {
   });
 });
 
-describe('when the developer writes the same field twice', () => {
-  test('should both fields with the same name attribute have the same data', () => {
+describe('when the developer writes the same data twice in two differents fields', () => {
+  it('should both fields with the same name attribute have the same data', () => {
     render(
       <Form>
         <Form.Item label="Name" name="name">
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item label="Name 2" name="name">
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -149,7 +152,7 @@ describe('when the developer writes the same field twice', () => {
 });
 
 describe('when the user send the form with data', () => {
-  test('should send the form with the correct data passing the validations', async () => {
+  it('should send the form with the correct data passing the validations', async () => {
     const handleFinish = jest.fn();
     const values = {
       email: 'test@test.com',
@@ -168,28 +171,28 @@ describe('when the user send the form with data', () => {
             type: 'email',
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="First name"
           name="first_name"
-          rules={{ required: true, message: 'First name is required' }}
+          rules={{ required: true, requiredMessage: 'First name is required' }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Last name"
           name="last_name"
-          rules={{ required: true, message: 'Last name is required' }}
+          rules={{ required: true, requiredMessage: 'Last name is required' }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
-          rules={{ required: true, message: 'Password is required' }}
+          rules={{ required: true, requiredMessage: 'Password is required' }}
         >
-          <Input type="password" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -215,6 +218,53 @@ describe('when the user send the form with data', () => {
 
     await waitFor(() => {
       expect(handleFinish).toHaveBeenCalledWith(values);
+    });
+  });
+});
+
+describe('when the developer wants to validate a field with another field value', () => {
+  it(`should render a custom error message in the field when tries to validate`, async () => {
+    const message = 'passwords do not match';
+    render(
+      <Form>
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={{
+            required: true,
+          }}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Repeat password"
+          name="repeat_password"
+          rules={{
+            required: true,
+            validator(formValues, value) {
+              if (value !== formValues.password) {
+                return {
+                  isValid: false,
+                  message,
+                };
+              }
+
+              return {
+                isValid: true,
+              };
+            },
+          }}
+        >
+          <Input />
+        </Form.Item>
+      </Form>
+    );
+
+    await userEvent.type(screen.getByLabelText('Password'), '1234');
+    await userEvent.type(screen.getByLabelText('Repeat password'), '123');
+
+    await waitFor(() => {
+      expect(screen.queryByText(message)).toBeInTheDocument();
     });
   });
 });

@@ -33,11 +33,11 @@ describe('when <Select/> is mounted', () => {
   test('should display the options', () => {
     const $optionsElement = screen.getByRole('list');
 
-    expect($optionsElement.classList.contains('is-not-active')).toBeTruthy();
+    expect($optionsElement.classList.contains('not-active')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('combobox'));
 
-    expect($optionsElement.classList.contains('is-active')).toBeTruthy();
+    expect($optionsElement.classList.contains('active')).toBeTruthy();
   });
 });
 

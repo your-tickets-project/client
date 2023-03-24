@@ -5,10 +5,11 @@ import { InternalServerErrorException } from 'server/exceptions';
 // http status codes
 import { METHOD_NOT_ALLOWED } from 'server/constants/http.status';
 // interfaces
-import { UserType } from 'interfaces';
+import { MulterFileType, UserType } from 'interfaces';
 
 export interface NextApiRequestExtended extends NextApiRequest {
   user: UserType | null;
+  files?: MulterFileType[];
 }
 
 export const errorHandler = () => ({

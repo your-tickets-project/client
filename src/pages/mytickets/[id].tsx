@@ -3,18 +3,15 @@ import Link from 'next/link';
 // components
 import { Button, Divider } from 'client/components/ui';
 import { LeftBackArrowIcon } from 'client/components/icons';
-import Layout from 'client/components/Layout';
-// redux
-import { useSelector } from 'react-redux';
-import { RootState } from 'client/store';
+import PublicLayout from 'client/components/Layouts/PublicLayout';
+// store
+import { AuthSelector } from 'client/store/selectors';
 // styles
 import { colors } from 'client/styles/variables';
 import Redirect from 'client/components/app/Redirect';
 
-export default function Ticket() {
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
+export default function TicketPage() {
+  const { user, isAuthenticated } = AuthSelector();
 
   const BackButton = () => {
     return (
@@ -29,7 +26,7 @@ export default function Ticket() {
   if (!isAuthenticated) return <Redirect to="/" />;
 
   return (
-    <Layout>
+    <PublicLayout>
       <section className="container">
         <BackButton />
         <h1>
@@ -124,6 +121,6 @@ export default function Ticket() {
           color: ${colors.grayFont};
         }
       `}</style>
-    </Layout>
+    </PublicLayout>
   );
 }
