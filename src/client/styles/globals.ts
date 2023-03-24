@@ -127,7 +127,7 @@ export default css.global`
 
   /* Editor
   –––––––––––––––––––––––––––––––––––––––––––––––––– */
-  .editor-upload-info {
+  .editor_upload-info {
     display: grid;
     grid-template-columns: 1fr;
     list-style: none;
@@ -136,24 +136,24 @@ export default css.global`
     row-gap: 0.4rem;
   }
 
-  .editor-upload-info-item {
+  .editor_upload-info_item {
     font-size: 0.75rem;
     text-align: left;
   }
 
-  .editor-upload-info-item::before {
+  .editor_upload-info_item::before {
     content: '•';
     font-size: 0.75rem;
     margin-right: 8px;
   }
 
   @media (min-width: 75rem) {
-    .editor-upload-info {
+    .editor_upload-info {
       column-gap: 0.4rem;
       grid-template-columns: repeat(3, 1fr);
     }
 
-    .editor-upload-info-item {
+    .editor_upload-info_item {
       text-align: center;
     }
   }

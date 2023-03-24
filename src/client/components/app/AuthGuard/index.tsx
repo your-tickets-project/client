@@ -18,8 +18,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
-  useEffect(() => {}, [isLoading]);
-
   useEffect(() => {
     if (loading) return;
     if (!accessToken) {

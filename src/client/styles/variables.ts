@@ -5,6 +5,13 @@ export const breakPoints = {
   xl: '75rem',
 };
 
+export const breakPointsPX = {
+  sm: 576,
+  md: 768,
+  lg: 992,
+  xl: 1200,
+};
+
 export const colors = {
   black: '#000000',
   color1: '#D1410C',

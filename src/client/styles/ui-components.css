@@ -1056,12 +1056,17 @@ th.ui-table_cell:not(:last-of-type):before {
   width: 100%;
 }
 
+.ui-textarea_textarea:not(.error, .disabled):focus {
+  border: 1px solid var(--color2);
+}
+
 .ui-textarea_textarea.error {
   border-color: var(--danger-color);
 }
 
-.ui-textarea_textarea:focus {
-  border: 1px solid var(--color2);
+.ui-textarea_textarea.disabled {
+  background-color: var(--light-gray);
+  cursor: not-allowed;
 }
 
 .ui-textarea_counter-container {

@@ -10,7 +10,6 @@ import {
 import { OK_STATUS } from 'server/constants/http.status';
 import { BadRequestException } from 'server/exceptions';
 
-// TODO: test
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const getMedia = async (

@@ -17,7 +17,6 @@ export default function EventsPage() {
           <h1 className="col-12">Events</h1>
           <div className="col-12 col-md-4">
             <Input
-              type="search"
               placeholder="Search events"
               addonBefore={<SearchIcon />}
               style={{ backgroundColor: colors.lightGray, height: '32px' }}

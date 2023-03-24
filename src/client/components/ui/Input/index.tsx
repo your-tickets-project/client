@@ -10,7 +10,6 @@ interface Props {
   placeholder?: string;
   showCount?: boolean;
   style?: React.CSSProperties;
-  type: 'text' | 'search' | 'password' | 'email' | 'number';
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
@@ -25,7 +24,6 @@ export const Input = ({
   placeholder,
   showCount,
   style,
-  type,
   value,
   onChange,
 }: Props) => {
@@ -49,7 +47,6 @@ export const Input = ({
           ...style,
           paddingLeft: addonBefore !== undefined ? '44px' : undefined,
         }}
-        type={type}
         value={
           maxLength && value && value.length > maxLength
             ? value.slice(0, maxLength)

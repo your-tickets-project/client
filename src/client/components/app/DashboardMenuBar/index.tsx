@@ -13,7 +13,7 @@ import useVW from 'client/hooks/useVW';
 // store
 import { AppSelector } from 'client/store/selectors';
 // styles
-import { breakPoints, colors } from 'client/styles/variables';
+import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
 
 const dashboardLinks = [
   {
@@ -49,7 +49,7 @@ export default function DashboardMenuBar() {
 
   return (
     <>
-      {(isShowingDashboardOptions || vw >= 768) && (
+      {(isShowingDashboardOptions || vw >= breakPointsPX.md) && (
         <aside>
           <div className="container row vg-8 hg-48 vg-sm-32 vg-md-0 hg-md-32">
             {dashboardLinks.map(({ href, Icon, title, tag }) => (

@@ -2,10 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Input } from '.';
 
 describe('when <Input/> is mounted', () => {
-  const handleChange = jest.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
-
     render(
       <Input
         addonBefore="addon-before"
@@ -13,9 +10,8 @@ describe('when <Input/> is mounted', () => {
         maxLength={10}
         placeholder="test"
         showCount
-        type="text"
         value="test value test"
-        onChange={handleChange}
+        onChange={jest.fn()}
       />
     );
   });
@@ -48,7 +44,7 @@ describe('when <Input/> is mounted', () => {
 describe('when the user types', () => {
   it('should call the onChange function', () => {
     const handleChange = jest.fn();
-    render(<Input type="text" onChange={handleChange} />);
+    render(<Input onChange={handleChange} />);
 
     fireEvent.change(screen.getByTestId('ui-input_input-element'), {
       target: { value: 'test' },
@@ -59,7 +55,7 @@ describe('when the user types', () => {
 
   it(`should not call the onChange function when is disabled`, () => {
     const handleChange = jest.fn();
-    render(<Input disabled type="text" onChange={handleChange} />);
+    render(<Input disabled onChange={handleChange} />);
 
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'test' },

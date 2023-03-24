@@ -61,8 +61,6 @@ interface Props {
 }
 
 let fileAmount = 0;
-
-// TODO: test
 export default function TrixEditor({
   accept,
   filesAmount,
@@ -198,9 +196,9 @@ export default function TrixEditor({
         onEditorReady={debounce(handleEditorReady, 800)}
       />
       {!!uploadInfo?.length && (
-        <ul className="editor-upload-info">
+        <ul className="editor_upload-info">
           {uploadInfo.map(({ id, message }) => (
-            <li key={id} className="editor-upload-info-item">
+            <li key={id} className="editor_upload-info_item">
               {message}
             </li>
           ))}

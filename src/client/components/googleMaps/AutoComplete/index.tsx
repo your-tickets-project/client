@@ -107,7 +107,6 @@ const AutoCompleteInput = ({
         inputRef={ref}
         name="auto-complete"
         placeholder="Search for a venue or address."
-        type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />

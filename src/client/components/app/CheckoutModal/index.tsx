@@ -19,7 +19,12 @@ import {
 // store
 import { AuthSelector } from 'client/store/selectors';
 // styles
-import { breakPoints, colors, fluidFont } from 'client/styles/variables';
+import {
+  breakPoints,
+  breakPointsPX,
+  colors,
+  fluidFont,
+} from 'client/styles/variables';
 
 interface Props {
   event: EventType;
@@ -191,7 +196,7 @@ export default function CheckoutModal({
                               requiredMessage: 'First name is a required field',
                             }}
                           >
-                            <Input type="text" />
+                            <Input />
                           </Form.Item>
                         </div>
                         <div className="col-12 col-md-6">
@@ -204,7 +209,7 @@ export default function CheckoutModal({
                               requiredMessage: 'Last name is a required field',
                             }}
                           >
-                            <Input type="text" />
+                            <Input />
                           </Form.Item>
                         </div>
                         <div className="col-12">
@@ -216,7 +221,7 @@ export default function CheckoutModal({
                               type: 'email',
                             }}
                           >
-                            <Input type="email" />
+                            <Input />
                           </Form.Item>
                         </div>
                         <div className="col-12">
@@ -230,7 +235,7 @@ export default function CheckoutModal({
                                 'Phone number is a required field',
                             }}
                           >
-                            <Input type="text" />
+                            <Input />
                           </Form.Item>
                         </div>
                       </div>
@@ -323,7 +328,7 @@ export default function CheckoutModal({
             )}
           </div>
 
-          {vw >= 768 && (
+          {vw >= breakPointsPX.md && (
             <div className="col-md-5">
               <div className="order-summary">
                 <div>

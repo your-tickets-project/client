@@ -62,7 +62,7 @@ export default function SignInPage() {
                 type: 'email',
               }}
             >
-              <Input type="text" />
+              <Input />
             </Form.Item>
             <Form.Item
               label="First name"
@@ -72,7 +72,7 @@ export default function SignInPage() {
                 requiredMessage: 'First name is a required field',
               }}
             >
-              <Input type="text" />
+              <Input />
             </Form.Item>
             <Form.Item
               label="Last name"
@@ -82,7 +82,7 @@ export default function SignInPage() {
                 requiredMessage: 'Last name is a required field',
               }}
             >
-              <Input type="text" />
+              <Input />
             </Form.Item>
             <Form.Item
               label="Password"
@@ -92,7 +92,7 @@ export default function SignInPage() {
                 requiredMessage: 'Password is a required field',
               }}
             >
-              <Input type="password" />
+              <Input />
             </Form.Item>
             <Button htmlType="submit" type="primary" block disabled={isSending}>
               Send

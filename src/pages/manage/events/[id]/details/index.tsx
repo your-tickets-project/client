@@ -28,7 +28,6 @@ interface FileType {
   error?: boolean;
 }
 
-// TODO: test
 export default function EditDetailsPage() {
   return (
     <PrivateRoute>

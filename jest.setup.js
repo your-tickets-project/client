@@ -20,7 +20,6 @@ HTMLCanvasElement.prototype.getContext = jest.fn();
 jest.mock('next/router', () => ({
   useRouter() {
     return {
-      query: { slug: 'valid-slug' },
       push: jest.fn(),
       replace: jest.fn(),
     };

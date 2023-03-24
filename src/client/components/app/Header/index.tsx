@@ -17,7 +17,7 @@ import { AuthSelector, AppSelector } from 'client/store/selectors';
 import { authLogOut } from 'client/store/actions/auth';
 import { appShowDashboardOptions } from 'client/store/actions/app';
 // styles
-import { breakPoints, colors } from 'client/styles/variables';
+import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
 
 interface Props {
   showDashboardIcon?: boolean;
@@ -109,15 +109,14 @@ export default function Header({ showDashboardIcon }: Props) {
             </Link>
             {!showDashboardIcon && (
               <div className="search col-5 col-sm-4 col-md-6 col-lg-7">
-                {vw < 768 && (
+                {vw < breakPointsPX.md && (
                   <div className="search-button">
                     <SearchIcon />
                   </div>
                 )}
 
-                {vw >= 768 && (
+                {vw >= breakPointsPX.md && (
                   <Input
-                    type="search"
                     placeholder="Search events"
                     addonBefore={<SearchIcon />}
                     style={{ backgroundColor: colors.lightGray }}
@@ -129,7 +128,7 @@ export default function Header({ showDashboardIcon }: Props) {
           <div className="col-4 col-sm-6">
             {!isAuthenticated && (
               <>
-                {vw < 768 && (
+                {vw < breakPointsPX.md && (
                   <div className="row" style={{ justifyContent: 'flex-end' }}>
                     <div className="col-6 col-sm-3">
                       <DropDown
@@ -160,7 +159,7 @@ export default function Header({ showDashboardIcon }: Props) {
                   </div>
                 )}
 
-                {vw >= 768 && (
+                {vw >= breakPointsPX.md && (
                   <div className="links">
                     {links.map(({ href, style, content, handleClick }) => (
                       <Link key={href} href={href} legacyBehavior>
@@ -182,7 +181,7 @@ export default function Header({ showDashboardIcon }: Props) {
                 className="row vg-sm-8"
                 style={{ height: '100%', justifyContent: 'flex-end' }}
               >
-                {showDashboardIcon && vw < 768 && (
+                {showDashboardIcon && vw < breakPointsPX.md && (
                   <div
                     className="dashboard-icon-container col-6 col-sm-2"
                     onClick={() =>
@@ -199,7 +198,7 @@ export default function Header({ showDashboardIcon }: Props) {
                   </div>
                 )}
 
-                {vw < 576 && (
+                {vw < breakPointsPX.sm && (
                   <div
                     className={`icon-container ${
                       showDashboardIcon ? 'col-6' : 'col-8'
@@ -228,14 +227,14 @@ export default function Header({ showDashboardIcon }: Props) {
                   </div>
                 )}
 
-                {vw >= 576 && (
+                {vw >= breakPointsPX.sm && (
                   <div
                     className={`${
                       showDashboardIcon ? 'col-6 col-sm-10' : 'col-12'
                     } col-md-12`}
                   >
                     <div className="links">
-                      {vw >= 768 && (
+                      {vw >= breakPointsPX.md && (
                         <Link href="/create-event" legacyBehavior>
                           <a
                             style={{
@@ -265,7 +264,7 @@ export default function Header({ showDashboardIcon }: Props) {
                         )}
                         style={{
                           justifyContent: 'flex-end',
-                          width: vw >= 768 ? 'auto' : '100%',
+                          width: vw >= breakPointsPX.md ? 'auto' : '100%',
                         }}
                       >
                         <div

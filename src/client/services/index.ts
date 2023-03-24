@@ -2,7 +2,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { store } from 'client/store';
 
-const HOST = process.env.NEXT_PUBLIC_BASE_URL;
+const HOST = process.env.NEXT_PUBLIC_HOST;
 const PATH = process.env.NEXT_PUBLIC_API_PATH;
 
 export const baseURL = `${HOST}${PATH}`;

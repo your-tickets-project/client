@@ -22,7 +22,7 @@ interface Props {
   style?: React.CSSProperties;
   uploadInfo?: { id: string | number; message: string }[];
   uploadRef?: React.LegacyRef<HTMLDivElement>;
-  onDelete: (id: { id: string | number }) => void;
+  onDelete?: (id: { id: string | number }) => void;
   onError?: ({
     file,
     message,
@@ -31,10 +31,9 @@ interface Props {
     file?: File;
     message: string;
   }) => void;
-  onUpload: (files: File[]) => void;
+  onUpload?: (files: File[]) => void;
 }
 
-// TODO: test
 export const Dragger = ({
   accept,
   disabled,
@@ -88,13 +87,12 @@ export const Dragger = ({
   const manageFiles = (files: File[]) => {
     if (!validations(files)) return;
     setFileAmount((state) => state + files.length);
-    onUpload(files);
+    onUpload?.(files);
   };
 
   const handleInputFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (disabled) return;
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
@@ -104,8 +102,6 @@ export const Dragger = ({
   };
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
-
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('active');
@@ -117,7 +113,7 @@ export const Dragger = ({
 
   const handleDeleteFile = ({ id }: { id: string | number }) => {
     setFileAmount((state) => state - 1);
-    onDelete({ id });
+    onDelete?.({ id });
   };
 
   return (
@@ -125,10 +121,11 @@ export const Dragger = ({
       <input
         accept={accept?.join(',')}
         className="ui-dragger_input-file"
+        disabled={disabled}
         hidden
         name="file"
         type="file"
-        onChange={handleInputFileChange}
+        onChange={disabled ? undefined : handleInputFileChange}
         multiple={multiple}
       />
       <div
@@ -136,25 +133,34 @@ export const Dragger = ({
           error ? 'error' : ''
         }`}
         style={style}
-        onClick={() => {
-          if (disabled) return;
-          document
-            .querySelector<HTMLInputElement>('.ui-dragger_input-file')
-            ?.click();
-        }}
-        onDragOver={(e) => {
-          if (disabled) return;
-          e.preventDefault();
-          e.stopPropagation();
-          e.currentTarget.classList.add('active');
-        }}
-        onDragLeave={(e) => {
-          if (disabled) return;
-          e.preventDefault();
-          e.stopPropagation();
-          e.currentTarget.classList.remove('active');
-        }}
-        onDrop={handleDrop}
+        onClick={
+          disabled
+            ? undefined
+            : () => {
+                document
+                  .querySelector<HTMLInputElement>('.ui-dragger_input-file')
+                  ?.click();
+              }
+        }
+        onDragOver={
+          disabled
+            ? undefined
+            : (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.add('active');
+              }
+        }
+        onDragLeave={
+          disabled
+            ? undefined
+            : (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('active');
+              }
+        }
+        onDrop={disabled ? undefined : handleDrop}
       >
         <div className="ui-dragger_dragger-container">
           <div className="ui-dragger_icon">
@@ -182,7 +188,7 @@ export const Dragger = ({
               className={`ui-dragger_item ${file.error ? 'error' : ''}`}
             >
               <div className="ui-dragger_item-image">
-                <img src={file.imageSrc} alt="image" />
+                <img src={file.imageSrc} alt={file.name} />
               </div>
               <p className="ui-dragger_item-name">{file.name}</p>
               <div

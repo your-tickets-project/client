@@ -30,9 +30,7 @@ jest.mock('next/router', () => ({
   },
 }));
 
-beforeAll(() => {
-  server.listen();
-});
+beforeAll(() => server.listen());
 
 afterEach(() => server.resetHandlers());
 
@@ -76,7 +74,7 @@ describe('<BasicInfoPage/> success integration', () => {
     fireEvent.click(screen.getByRole('button', { name: /save/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/event updated./i)).toBeInTheDocument();
+      expect(screen.getByText(message)).toBeInTheDocument();
     });
   }, 10_000);
 });

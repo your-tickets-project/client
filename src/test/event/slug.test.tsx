@@ -21,6 +21,7 @@ jest.mock('next/router', () => ({
     return {
       query: { slug: 'valid-slug' },
       push: jest.fn(),
+      replace: jest.fn(),
     };
   },
 }));

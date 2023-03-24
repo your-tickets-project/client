@@ -60,7 +60,6 @@ export const InputTag = ({
             maxLength={maxLength}
             placeholder={placeholder}
             showCount={showCount}
-            type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />

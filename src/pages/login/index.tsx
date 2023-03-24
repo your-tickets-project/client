@@ -60,7 +60,7 @@ export default function LogInPage() {
                 type: 'email',
               }}
             >
-              <Input type="text" />
+              <Input />
             </Form.Item>
             <Form.Item
               label="Password"
@@ -70,7 +70,7 @@ export default function LogInPage() {
                 requiredMessage: 'Password is a required field',
               }}
             >
-              <Input type="password" />
+              <Input />
             </Form.Item>
             <Button htmlType="submit" type="primary" block disabled={isSending}>
               Send

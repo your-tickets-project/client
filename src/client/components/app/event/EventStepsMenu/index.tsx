@@ -11,7 +11,7 @@ import {
 // hooks
 import useVW from 'client/hooks/useVW';
 // styles
-import { breakPoints, colors } from 'client/styles/variables';
+import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
 
 interface Props {
   activeStep: 'basic-info' | 'details' | 'tickets' | 'preview-publish';
@@ -48,7 +48,7 @@ export default function EventStepsMenu({ activeStep, eventId }: Props) {
   return (
     <>
       <nav className="container">
-        {vw < 768 && (
+        {vw < breakPointsPX.md && (
           <div className="mobile-menu row">
             <div className="col-2">
               <div className="icon-container">
@@ -67,7 +67,7 @@ export default function EventStepsMenu({ activeStep, eventId }: Props) {
             </div>
           </div>
         )}
-        {(showMenu || vw >= 768) && (
+        {(showMenu || vw >= breakPointsPX.md) && (
           <aside onClick={() => setShowMenu(false)}>
             <div className="menu">
               {steps.map(({ href, Icon, title }) => (

@@ -206,7 +206,7 @@ export default function BasicInfoForm({
                 requiredMessage: 'Event title is a required field',
               }}
             >
-              <Input type="text" showCount maxLength={75} />
+              <Input showCount maxLength={75} />
             </Form.Item>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function BasicInfoForm({
                     requiredMessage: 'Venue name is a required field',
                   }}
                 >
-                  <Input type="text" showCount maxLength={500} />
+                  <Input showCount maxLength={500} />
                 </Form.Item>
               </div>
               <div className="col-12">
@@ -281,7 +281,7 @@ export default function BasicInfoForm({
                     requiredMessage: 'Address 1 is a required field',
                   }}
                 >
-                  <Input type="text" showCount maxLength={100} />
+                  <Input showCount maxLength={100} />
                 </Form.Item>
               </div>
               <div className="col-12 col-md-6">
@@ -292,7 +292,7 @@ export default function BasicInfoForm({
                     type: 'string',
                   }}
                 >
-                  <Input type="text" showCount maxLength={120} />
+                  <Input showCount maxLength={120} />
                 </Form.Item>
               </div>
               <div className="col-12 col-md-6">
@@ -305,12 +305,12 @@ export default function BasicInfoForm({
                     requiredMessage: 'City is a required field',
                   }}
                 >
-                  <Input type="text" showCount maxLength={50} />
+                  <Input showCount maxLength={50} />
                 </Form.Item>
               </div>
               <div className="col-6 col-md-3">
                 <Form.Item label="State" name="state">
-                  <Input type="text" showCount maxLength={30} />
+                  <Input showCount maxLength={30} />
                 </Form.Item>
               </div>
               <div className="col-6 col-md-3">
@@ -323,7 +323,7 @@ export default function BasicInfoForm({
                     requiredMessage: 'Postal code is a required field',
                   }}
                 >
-                  <Input type="text" showCount maxLength={30} />
+                  <Input showCount maxLength={30} />
                 </Form.Item>
               </div>
               <div className="col-12">
@@ -336,7 +336,7 @@ export default function BasicInfoForm({
                     requiredMessage: 'Country is a required field',
                   }}
                 >
-                  <Input type="text" showCount maxLength={30} />
+                  <Input showCount maxLength={30} />
                 </Form.Item>
               </div>
             </div>

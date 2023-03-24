@@ -3,7 +3,12 @@ import { useRouter } from 'next/router';
 // hooks
 import useVW from 'client/hooks/useVW';
 // styles
-import { breakPoints, colors, fluidFont } from 'client/styles/variables';
+import {
+  breakPoints,
+  breakPointsPX,
+  colors,
+  fluidFont,
+} from 'client/styles/variables';
 
 const options = [
   {
@@ -82,7 +87,7 @@ export default function Footer() {
   return (
     <>
       <footer>
-        {vw >= 768 && (
+        {vw >= breakPointsPX.md && (
           <div className="options row">
             {options.map(({ title, options }, i) => (
               <div key={`${title}-${i}`} className="option col-3">

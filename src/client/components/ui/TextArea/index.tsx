@@ -1,19 +1,20 @@
 import React from 'react';
 
 interface Props {
+  disabled?: boolean;
   error?: boolean;
-  textAreaRef?: React.LegacyRef<HTMLTextAreaElement>;
   maxLength?: number;
   name?: string;
   placeholder?: string;
   showCount?: boolean;
   style?: React.CSSProperties;
+  textAreaRef?: React.LegacyRef<HTMLTextAreaElement>;
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 }
 
-// TODO: test
 export const TextArea = ({
+  disabled,
   error,
   textAreaRef,
   maxLength,
@@ -27,8 +28,11 @@ export const TextArea = ({
   return (
     <div className="ui-textarea">
       <textarea
-        className={`ui-textarea_textarea ${error ? 'error' : ''}`}
+        className={`ui-textarea_textarea ${disabled ? 'disabled' : ''} ${
+          error ? 'error' : ''
+        }`}
         data-testid="ui-textarea_textarea-element"
+        disabled={disabled}
         id={name}
         maxLength={maxLength}
         name={name}
@@ -40,13 +44,15 @@ export const TextArea = ({
             ? value.slice(0, maxLength)
             : value
         }
-        onChange={onChange}
+        onChange={disabled ? undefined : onChange}
       />
-      {showCount && maxLength && (
+      {showCount && (
         <div className="ui-textarea_counter-container">
           <span className="ui-textarea_counter">
-            {value && value.length > maxLength ? maxLength : value?.length || 0}
-            /{maxLength}
+            {value && maxLength && value.length > maxLength
+              ? maxLength
+              : value?.length || 0}
+            {maxLength ? ` / ${maxLength}` : ''}
           </span>
         </div>
       )}

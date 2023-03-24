@@ -14,7 +14,7 @@ describe('when the user sends the form without data', () => {
             required: true,
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -42,7 +42,7 @@ describe('when the user sends the form without data', () => {
             requiredMessage,
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -61,7 +61,7 @@ describe('when the developer wants to validate the fields', () => {
     render(
       <Form>
         <Form.Item label="Email" name="email" rules={{ type: 'email' }}>
-          <Input type="email" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -80,7 +80,7 @@ describe('when the developer wants to validate the fields', () => {
     render(
       <Form>
         <Form.Item label="Age" name="age" rules={{ type: 'number' }}>
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -106,14 +106,14 @@ describe('when the developer wants to validate the fields', () => {
           name="email"
           rules={{ type: 'email', validationMessage: emailMessage }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Age"
           name="age"
           rules={{ type: 'number', validationMessage: ageMessage }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -134,10 +134,10 @@ describe('when the developer writes the same data twice in two differents fields
     render(
       <Form>
         <Form.Item label="Name" name="name">
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item label="Name 2" name="name">
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
@@ -171,28 +171,28 @@ describe('when the user send the form with data', () => {
             type: 'email',
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="First name"
           name="first_name"
           rules={{ required: true, requiredMessage: 'First name is required' }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Last name"
           name="last_name"
           rules={{ required: true, requiredMessage: 'Last name is required' }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
           rules={{ required: true, requiredMessage: 'Password is required' }}
         >
-          <Input type="password" />
+          <Input />
         </Form.Item>
         <Button htmlType="submit" type="primary" block>
           Submit
@@ -234,7 +234,7 @@ describe('when the developer wants to validate a field with another field value'
             required: true,
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
         <Form.Item
           label="Repeat password"
@@ -255,7 +255,7 @@ describe('when the developer wants to validate a field with another field value'
             },
           }}
         >
-          <Input type="text" />
+          <Input />
         </Form.Item>
       </Form>
     );
