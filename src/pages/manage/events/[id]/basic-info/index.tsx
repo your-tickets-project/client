@@ -6,6 +6,7 @@ import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
 import EventFormLayout from 'client/components/app/event/EventFormLayout';
 import BasicInfoForm from 'client/components/app/event/BasicInfoForm';
+import Loader from 'client/components/app/Loader';
 // interfaces
 import {
   EventBasicInfoType,
@@ -32,11 +33,10 @@ const BasicInfoFormWrapper = () => {
   const [isLoading, setIsLoading] = useState(true);
   // data
   const [eventBasicInfo, setEventBasicInfo] = useState<
-    | (EventBasicInfoType & {
-        event_location: EventLocationType;
-        event_tag: EventTagType[];
-      })
-    | undefined
+    EventBasicInfoType & {
+      event_location: EventLocationType;
+      event_tag: EventTagType[];
+    }
   >();
 
   useEffect(() => {
@@ -66,14 +66,29 @@ const BasicInfoFormWrapper = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, router.isReady]);
 
-  if (!eventBasicInfo) return null;
+  if (!eventBasicInfo) {
+    return (
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          height: '100%',
+          justifyContent: 'center',
+        }}
+      >
+        <Loader />
+      </div>
+    );
+  }
 
   return (
-    <EventFormLayout activeStep="basic-info" eventId={eventBasicInfo.id}>
-      <BasicInfoForm
-        eventData={eventBasicInfo}
-        parentScrollToSelector="#event-form-layout"
-      />
+    <EventFormLayout>
+      <div className="container">
+        <BasicInfoForm
+          eventData={eventBasicInfo}
+          parentScrollToSelector="#event-form-layout"
+        />
+      </div>
     </EventFormLayout>
   );
 };

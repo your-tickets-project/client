@@ -1,5 +1,8 @@
-export const validationsOptions = {
+export const stripUnknownOptions = {
   stripUnknown: true,
-  strict: true,
+};
+
+export const strictOptions = {
   abortEarly: false,
+  strict: true,
 };

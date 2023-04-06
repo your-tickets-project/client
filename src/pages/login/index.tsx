@@ -67,7 +67,6 @@ export default function LogInPage() {
               name="password"
               rules={{
                 required: true,
-                requiredMessage: 'Password is a required field',
               }}
             >
               <Input />

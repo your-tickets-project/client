@@ -119,7 +119,6 @@ export default function Header({ showDashboardIcon }: Props) {
                   <Input
                     placeholder="Search events"
                     addonBefore={<SearchIcon />}
-                    style={{ backgroundColor: colors.lightGray }}
                   />
                 )}
               </div>

@@ -4,7 +4,7 @@ export const dayAndMonth = ({ date }: { date: string }) => {
     return date.toString();
   }
 
-  const day = d.getDate();
+  const day = `0${d.getDate()}`.slice(-2);
   const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(d);
 
   return `${month} ${day}`;

@@ -13,16 +13,6 @@ interface Props {
   onChange?: (e: { target: { name?: string; value: string | number } }) => void;
 }
 
-const SelectArrowIcon = (props: { fill?: string }) => (
-  <svg viewBox="0 0 24 24" xmlSpace="preserve" {...props}>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="m7 10.2 5 5 5-5-1.4-1.4-3.6 3.6-3.6-3.6z"
-    />
-  </svg>
-);
-
 export const Select = ({
   value,
   name,
@@ -43,7 +33,7 @@ export const Select = ({
 
   useEffect(() => {
     if (isLoading) return;
-    if (value === undefined || selectedOption === undefined) return;
+    if (selectedOption === undefined) return;
     onChange?.({ target: { name, value: selectedOption.value } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
@@ -106,3 +96,13 @@ export const Select = ({
     </div>
   );
 };
+
+const SelectArrowIcon = (props: { fill?: string }) => (
+  <svg viewBox="0 0 24 24" xmlSpace="preserve" {...props}>
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="m7 10.2 5 5 5-5-1.4-1.4-3.6 3.6-3.6-3.6z"
+    />
+  </svg>
+);

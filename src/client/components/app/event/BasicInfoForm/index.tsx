@@ -159,8 +159,11 @@ export default function BasicInfoForm({
         }, 3000);
       }
     } catch (error: any) {
-      setIsSending(false);
       toaster.error(error?.response?.data?.message || 'Internal server error.');
+
+      setTimeout(() => {
+        router.replace('/dashboard/events');
+      }, 3000);
     }
   };
 
@@ -202,11 +205,10 @@ export default function BasicInfoForm({
               name="title"
               rules={{
                 required: true,
-                type: 'string',
-                requiredMessage: 'Event title is a required field',
+                max: 75,
               }}
             >
-              <Input showCount maxLength={75} />
+              <Input />
             </Form.Item>
           </div>
         </div>
@@ -261,11 +263,10 @@ export default function BasicInfoForm({
                   name="venue_name"
                   rules={{
                     required: true,
-                    type: 'string',
-                    requiredMessage: 'Venue name is a required field',
+                    max: 500,
                   }}
                 >
-                  <Input showCount maxLength={500} />
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-12">
@@ -277,11 +278,10 @@ export default function BasicInfoForm({
                   name="address_1"
                   rules={{
                     required: true,
-                    type: 'string',
-                    requiredMessage: 'Address 1 is a required field',
+                    max: 100,
                   }}
                 >
-                  <Input showCount maxLength={100} />
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-12 col-md-6">
@@ -289,10 +289,10 @@ export default function BasicInfoForm({
                   label="Address 2"
                   name="address_2"
                   rules={{
-                    type: 'string',
+                    max: 120,
                   }}
                 >
-                  <Input showCount maxLength={120} />
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-12 col-md-6">
@@ -301,16 +301,15 @@ export default function BasicInfoForm({
                   name="city"
                   rules={{
                     required: true,
-                    type: 'string',
-                    requiredMessage: 'City is a required field',
+                    max: 50,
                   }}
                 >
-                  <Input showCount maxLength={50} />
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-6 col-md-3">
-                <Form.Item label="State" name="state">
-                  <Input showCount maxLength={30} />
+                <Form.Item label="State" name="state" rules={{ max: 30 }}>
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-6 col-md-3">
@@ -319,11 +318,10 @@ export default function BasicInfoForm({
                   name="postal_code"
                   rules={{
                     required: true,
-                    type: 'string',
-                    requiredMessage: 'Postal code is a required field',
+                    max: 30,
                   }}
                 >
-                  <Input showCount maxLength={30} />
+                  <Input />
                 </Form.Item>
               </div>
               <div className="col-12">
@@ -332,11 +330,10 @@ export default function BasicInfoForm({
                   name="country"
                   rules={{
                     required: true,
-                    type: 'string',
-                    requiredMessage: 'Country is a required field',
+                    max: 30,
                   }}
                 >
-                  <Input showCount maxLength={30} />
+                  <Input />
                 </Form.Item>
               </div>
             </div>
@@ -358,23 +355,6 @@ export default function BasicInfoForm({
                 name="date_start"
                 rules={{
                   required: true,
-                  requiredMessage: 'Event starts is a required field',
-                  validator(formValues: FormValues, value) {
-                    const dateStart = new Date(`${value}T00:00:00`);
-                    const dateEnd = new Date(`${formValues.date_end}T00:00:00`);
-
-                    if (dateStart > dateEnd) {
-                      return {
-                        isValid: false,
-                        message:
-                          'Event start date can not be greater than Event end date',
-                      };
-                    }
-
-                    return {
-                      isValid: true,
-                    };
-                  },
                 }}
               >
                 <DatePicker />
@@ -386,7 +366,6 @@ export default function BasicInfoForm({
                 name="time_start"
                 rules={{
                   required: true,
-                  requiredMessage: 'Start time is a required field',
                 }}
               >
                 <TimePicker />
@@ -400,21 +379,35 @@ export default function BasicInfoForm({
                 name="date_end"
                 rules={{
                   required: true,
-                  requiredMessage: 'Event ends is a required field',
-                  validator(formValues: FormValues, value) {
-                    const dateStart = new Date(
-                      `${formValues.date_start}T00:00:00`
-                    );
-                    const dateEnd = new Date(`${value}T00:00:00`);
+                  validator(value, formValues: FormValues) {
+                    if (
+                      formValues.date_start &&
+                      formValues.time_start &&
+                      formValues.time_end
+                    ) {
+                      const startDate = new Date(
+                        `${formValues.date_start}T${formValues.time_start}`
+                      );
+                      const endDate = new Date(
+                        `${value}T${formValues.time_end}`
+                      );
 
-                    if (dateStart > dateEnd) {
-                      return {
-                        isValid: false,
-                        message:
-                          'Event start date can not be greater than Event end date',
-                      };
+                      if (startDate >= endDate) {
+                        return {
+                          isValid: false,
+                          message:
+                            'Start date can not be greater than or equal to End date',
+                        };
+                      }
+
+                      const nowDate = new Date();
+                      if (nowDate >= endDate) {
+                        return {
+                          isValid: false,
+                          message: 'End date cannot be in the past',
+                        };
+                      }
                     }
-
                     return {
                       isValid: true,
                     };
@@ -430,7 +423,6 @@ export default function BasicInfoForm({
                 name="time_end"
                 rules={{
                   required: true,
-                  requiredMessage: 'End time is a required field',
                 }}
               >
                 <TimePicker />

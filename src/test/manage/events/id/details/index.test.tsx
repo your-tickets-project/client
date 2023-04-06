@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react';
 import EditDetailsPage from 'pages/manage/events/[id]/details';
 // fixtures
-import { createEvent, createEventDetail } from 'fixtures/event.fixture';
+import { createEventDetail } from 'fixtures/event.fixture';
 // http status codes
 import { OK_STATUS } from 'server/constants/http.status';
 // mocks
@@ -16,7 +16,7 @@ import { server } from 'client/mocks/server';
 import { PrivateWrapper } from 'client/mocks/Wrappers';
 
 const eventData = {
-  ...createEvent(),
+  id: 1,
   event_detail: createEventDetail(),
 };
 
@@ -24,7 +24,7 @@ jest.mock('next/router', () => ({
   useRouter() {
     return {
       isReady: true,
-      asPath: '/event',
+      asPath: `/manage/events/${eventData.id}/details`,
       push: jest.fn(),
       query: { id: eventData.id },
     };
@@ -59,9 +59,12 @@ const handlePostEventDetail = () =>
   });
 
 const handlePutEventDetail = () =>
-  rest.put(`/event/details/${eventData.id}`, async (req, res, ctx) => {
-    return res(ctx.status(OK_STATUS), ctx.json({ message }));
-  });
+  rest.put(
+    `/event/details/${eventData.id}/${eventData.event_detail.id}`,
+    async (req, res, ctx) => {
+      return res(ctx.status(OK_STATUS), ctx.json({ message }));
+    }
+  );
 
 beforeAll(() => server.listen());
 

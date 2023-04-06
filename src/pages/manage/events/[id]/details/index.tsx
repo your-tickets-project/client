@@ -7,6 +7,7 @@ import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
 import EventFormLayout from 'client/components/app/event/EventFormLayout';
 import TrixEditor from 'client/components/app/TrixEditor';
+import Loader from 'client/components/app/Loader';
 import { Button, Form, TextArea, Dragger } from 'client/components/ui';
 // helpers
 import { debounce, stringToHTML } from 'client/helpers';
@@ -28,20 +29,20 @@ interface FileType {
   error?: boolean;
 }
 
+const parentScrollToSelector = '#event-form-layout';
+let eventDetailId: number | null = null;
+
 export default function EditDetailsPage() {
   return (
     <PrivateRoute>
       <DashboardLayout>
-        <EventDetailFormWrapper />
+        <DetailFormWrapper />
       </DashboardLayout>
     </PrivateRoute>
   );
 }
 
-const parentScrollToSelector = '#event-form-layout';
-let eventDetailId: number | null = null;
-
-const EventDetailFormWrapper = () => {
+const DetailFormWrapper = () => {
   const router = useRouter();
 
   // booleans
@@ -49,10 +50,11 @@ const EventDetailFormWrapper = () => {
   const [uploadError, setUploadError] = useState(false);
   const [isSending, setIsSending] = useState(false);
   // data
-  const [eventId, setEventId] = useState<string | number | undefined>();
-  const [eventDetail, setEventDetail] = useState<
-    { id: string | number; summary: string } | undefined
-  >();
+  const [eventId, setEventId] = useState<string | number>();
+  const [eventDetail, setEventDetail] = useState<{
+    id: string | number;
+    summary: string;
+  }>();
   const [fileList, setFileList] = useState<FileType[]>([]);
   const [descriptionInfo, setDescriptionInfo] = useState<string>('');
   const [editorFilesAmount, setEditorFilesAmount] = useState<number>(0);
@@ -295,10 +297,23 @@ const EventDetailFormWrapper = () => {
     setIsSending(false);
   };
 
-  if (!eventId) return null;
+  if (!eventId) {
+    return (
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          height: '100%',
+          justifyContent: 'center',
+        }}
+      >
+        <Loader />
+      </div>
+    );
+  }
 
   return (
-    <EventFormLayout activeStep="details" eventId={eventId}>
+    <EventFormLayout>
       <div className="container">
         <Form
           extraOffsetTop={80}
@@ -311,7 +326,7 @@ const EventDetailFormWrapper = () => {
           <div className="row hg-24">
             <div className="col-12 row hg-8">
               <div className="col-12">
-                <h3>Main event image</h3>
+                <h1>Main event image</h1>
                 <p>
                   Add the photo to show what your event will be about. You can
                   upload just 1 image.
@@ -360,13 +375,11 @@ const EventDetailFormWrapper = () => {
                   label="Summary"
                   name="summary"
                   rules={{
-                    requiredMessage: 'Summary is a required field',
                     required: true,
+                    max: 140,
                   }}
                 >
                   <TextArea
-                    maxLength={140}
-                    showCount
                     style={{
                       height: '68px',
                       resize: 'none',

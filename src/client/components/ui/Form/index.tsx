@@ -94,16 +94,18 @@ interface FormProps {
 
 interface ItemProps {
   children: React.ReactElement;
-  label: React.ReactNode;
+  label: string;
   name: string;
   rules?: {
+    disabled?: boolean;
+    max?: number;
+    message?: string;
+    min?: number;
     required?: boolean;
-    requiredMessage?: string;
-    type?: 'string' | 'number' | 'email';
-    validationMessage?: string;
+    type?: 'text' | 'number' | 'email';
     validator?: (
-      fomrValues: any,
-      value: string
+      value: any,
+      formValues: any
     ) => { isValid: boolean; message?: string };
   };
 }
@@ -211,10 +213,12 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
   useEffect(() => {
     if (isLoading) return;
 
-    const validation = yupTypeValidation[rules?.type ?? 'string']?.({
+    const validation = yupTypeValidation[rules?.type ?? 'text']?.({
+      label,
+      max: rules?.max,
+      message: rules?.message,
+      min: rules?.min,
       required: !!rules?.required,
-      requiredMessage: rules?.requiredMessage,
-      validationMessage: rules?.validationMessage,
     });
 
     setValidations((state: any) => ({
@@ -225,7 +229,7 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
             test(value: string | undefined, ctx: Yup.TestContext<any>) {
               if (!value || !rules?.validator) return true;
 
-              const result = rules.validator(formik.values, value);
+              const result = rules.validator(value, formik.values);
               if (!result.isValid) {
                 return ctx.createError({ message: result.message });
               }
@@ -235,7 +239,7 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
         : validation,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, formik.values]);
+  }, [isLoading, formik.values, rules]);
 
   return (
     <div className="ui-form_group" id={`${name}-item`}>
@@ -248,15 +252,22 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
         {label}
       </label>
       {React.cloneElement(child, {
-        name,
+        disabled: !!rules?.disabled,
         error: !!formik.errors[name]?.length || child.props.error,
-        onChange: formik.handleChange,
+        max: rules?.max && rules?.type === 'number' ? rules.max : undefined,
+        maxLength:
+          rules?.max && rules?.type !== 'number' ? rules.max : undefined,
+        min: rules?.max && rules?.type === 'number' ? rules.min : undefined,
+        name,
+        type: rules?.type ?? 'text',
+        showCount: !!(rules?.max && rules?.type !== 'number'),
         value: formik.values[name] || '',
+        onChange: formik.handleChange,
       })}
       {!!formik.errors[name]?.length && (
         <span className="ui-form_error">
           {(formik.errors[name] as string).includes('must be a `number` type')
-            ? rules?.validationMessage || (formik.errors[name] as string)
+            ? rules?.message || (formik.errors[name] as string)
             : (formik.errors[name] as string)}
         </span>
       )}
@@ -267,44 +278,104 @@ const Item = ({ children, label, name, rules }: ItemProps) => {
 Form.Item = Item;
 
 const yupTypeValidation = {
-  string({
+  text({
+    label,
+    max,
+    message,
+    min,
     required,
-    requiredMessage,
   }: {
+    label: string;
+    max?: number;
+    message?: string;
+    min?: number;
     required: boolean;
-    requiredMessage?: string;
   }) {
-    const validation = Yup.string().trim();
+    let validation = Yup.string().trim();
+    if (max !== undefined) {
+      validation = validation.max(
+        max,
+        `${label} must be at most ${max} characters`
+      );
+    }
+    if (min !== undefined) {
+      validation = validation.min(
+        min,
+        `${label} must be at least ${min} characters`
+      );
+    }
     if (required) {
-      return validation.required(requiredMessage);
+      validation = validation.required(
+        message || `${label} is a required field`
+      );
     }
     return validation;
   },
   email({
+    label,
+    max,
+    message,
+    min,
     required,
-    requiredMessage,
-    validationMessage,
   }: {
+    label: string;
+    max?: number;
+    message?: string;
+    min?: number;
     required: boolean;
-    requiredMessage?: string;
-    validationMessage?: string;
   }) {
-    const validation = Yup.string().email(validationMessage).trim();
+    let validation = Yup.string()
+      .email(`${label} must be a valid email`)
+      .trim();
+    if (max !== undefined) {
+      validation = validation.max(
+        max,
+        `${label} must be at most ${max} characters`
+      );
+    }
+    if (min !== undefined) {
+      validation = validation.min(
+        min,
+        `${label} must be at least ${min} characters`
+      );
+    }
     if (required) {
-      return validation.required(requiredMessage);
+      validation = validation.required(
+        message || `${label} is a required field`
+      );
     }
     return validation;
   },
   number({
+    label,
+    max,
+    message,
+    min,
     required,
-    requiredMessage,
   }: {
+    label: string;
+    max?: number;
+    message?: string;
+    min?: number;
     required: boolean;
-    requiredMessage?: string;
   }) {
-    const validation = Yup.number();
+    let validation = Yup.number();
+    if (max !== undefined) {
+      validation = validation.max(
+        max,
+        `${label} must be less than or equal to ${max}`
+      );
+    }
+    if (min !== undefined) {
+      validation = validation.min(
+        min,
+        `${label} must be greater than or equal to ${min}`
+      );
+    }
     if (required) {
-      return validation.required(requiredMessage);
+      validation = validation.required(
+        message || `${label} is a required field`
+      );
     }
     return validation;
   },

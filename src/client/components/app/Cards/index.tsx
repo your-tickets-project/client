@@ -3,8 +3,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 // components
 import { Card } from 'client/components/ui';
+import Loader from 'client/components/app/Loader';
 // helpers
 import {
+  currencyFormat,
   formatDate,
   formatShortLocation,
   formatTime,
@@ -13,6 +15,8 @@ import {
 } from 'client/helpers';
 // interfaces
 import { EventType } from 'interfaces';
+// services
+import { baseURL } from 'client/services';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
@@ -25,50 +29,57 @@ export default function Cards({ events }: Props) {
     <>
       <div className="cards">
         <div className="row hg-32 vg-md-8">
-          {events.map(
-            ({
-              event_detail: { cover_image_url: coverImageUrl },
-              date_start: dateStart,
-              event_location: location,
-              event_ticket_info: eventTicketInfo,
-              id,
-              slug,
-              title,
-              time_start: timeStart,
-            }) => (
-              <div key={id} className="card col-12 col-md-6 col-xl-3">
-                <Link href={`/event/${slug}`}>
-                  <Card
-                    cover={
-                      coverImageUrl ? (
-                        <Image
-                          src={coverImageUrl}
-                          alt="0"
-                          width={700}
-                          height={700}
-                          style={{ width: '100%', height: 'auto' }}
-                          placeholder="blur"
-                          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                            shimmer('100%', '100%')
-                          )}`}
-                        />
-                      ) : undefined
-                    }
-                    hoverable
-                    style={{ height: '100%' }}
-                  >
-                    <p className="title">{title}</p>
-                    <p className="date">{`${formatDate({
-                      date: dateStart,
-                    })}, ${formatTime({ time: timeStart })}`}</p>
-                    <p className="location">
-                      {formatShortLocation({ location })}
-                    </p>
-                    <p className="price">{eventTicketInfo.price || 'Free'}</p>
-                  </Card>
-                </Link>
-              </div>
+          {events.length ? (
+            events.map(
+              ({
+                event_detail: { cover_image_url: coverImageUrl },
+                date_start: dateStart,
+                event_location: location,
+                event_ticket_info: eventTicketInfo,
+                id,
+                slug,
+                title,
+                time_start: timeStart,
+              }) => (
+                <div key={id} className="card col-12 col-md-6 col-xl-3">
+                  <Link href={`/event/${slug}`}>
+                    <Card
+                      cover={
+                        coverImageUrl ? (
+                          <Image
+                            alt="0"
+                            blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                              shimmer('100%', '100%')
+                            )}`}
+                            fill={true}
+                            placeholder="blur"
+                            src={`${baseURL}/media/${coverImageUrl}`}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        ) : undefined
+                      }
+                      hoverable
+                      style={{ height: '100%' }}
+                    >
+                      <p className="title">{title}</p>
+                      <p className="date">{`${formatDate({
+                        date: dateStart,
+                      })}, ${formatTime({ time: timeStart })}`}</p>
+                      <p className="location">
+                        {formatShortLocation({ location })}
+                      </p>
+                      <p className="price">
+                        {eventTicketInfo.type === 'free'
+                          ? 'Free'
+                          : currencyFormat(eventTicketInfo.price, 'USD')}
+                      </p>
+                    </Card>
+                  </Link>
+                </div>
+              )
             )
+          ) : (
+            <Loader />
           )}
         </div>
       </div>

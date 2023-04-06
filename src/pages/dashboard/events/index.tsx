@@ -5,8 +5,6 @@ import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
 import { Button, Input, Select, Table } from 'client/components/ui';
 import { SearchIcon } from 'client/components/icons';
-// styles
-import { colors } from 'client/styles/variables';
 
 // TODO: test
 export default function EventsPage() {
@@ -19,7 +17,7 @@ export default function EventsPage() {
             <Input
               placeholder="Search events"
               addonBefore={<SearchIcon />}
-              style={{ backgroundColor: colors.lightGray, height: '32px' }}
+              style={{ height: '32px' }}
             />
           </div>
           <div className="col-12 col-md-4">

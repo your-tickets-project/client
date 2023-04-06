@@ -64,15 +64,15 @@ const categoryCards = [
 ];
 
 export default function AllInformation() {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState<EventType[]>([]);
 
   useEffect(() => {
-    setLoading(false);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (isLoading) return;
 
     const queryAPI = async () => {
       try {
@@ -83,7 +83,7 @@ export default function AllInformation() {
       }
     };
     queryAPI();
-  }, [loading]);
+  }, [isLoading]);
 
   return (
     <>

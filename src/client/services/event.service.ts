@@ -7,6 +7,8 @@ import {
   NullablePartial,
   EventTagType,
   EventLocationType,
+  ShowEventTicketInfoType,
+  EventTicketInfoType,
 } from 'interfaces';
 
 /* GET
@@ -20,6 +22,18 @@ export const getEventBySlug = async ({
 }: {
   slug: string;
 }): Promise<AxiosResponse<{ event: EventType }>> => API.get(`/event/${slug}`);
+
+export const getCheckSteps = async ({
+  eventId,
+}: {
+  eventId: string | number;
+}): Promise<
+  AxiosResponse<{
+    id: number;
+    include_event_detail: boolean;
+    include_event_ticket_info: boolean;
+  }>
+> => API.get(`/event/check-steps/${eventId}`);
 
 export const getEventBasicInfo = async ({
   eventId,
@@ -45,6 +59,30 @@ export const getEventDetail = async ({
   }>
 > => API.get(`/event/details/${eventId}`);
 
+export const getEventTickets = async ({
+  eventId,
+}: {
+  eventId: string | number;
+}): Promise<
+  AxiosResponse<{
+    id: number;
+    event_tickets_info: ShowEventTicketInfoType[];
+  }>
+> => API.get(`/event/tickets/${eventId}`);
+
+export const getEventTicket = async ({
+  eventId,
+  ticketId,
+}: {
+  eventId: string | number;
+  ticketId: string | number;
+}): Promise<
+  AxiosResponse<{
+    id: number;
+    event_ticket_info: EventTicketInfoType;
+  }>
+> => API.get(`/event/tickets/${eventId}/${ticketId}`);
+
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const postEventBasicInfo = async (
@@ -60,6 +98,15 @@ export const postEventDetail = async ({
   eventId: string | number;
 }): Promise<AxiosResponse<{ message: string; insertId: number }>> =>
   API.post(`/event/details/${eventId}`, data);
+
+export const postEventTicket = async ({
+  data,
+  eventId,
+}: {
+  data: unknown;
+  eventId: string | number;
+}): Promise<AxiosResponse<{ message: string }>> =>
+  API.post(`/event/tickets/${eventId}`, data);
 
 /* PUT
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -81,4 +128,26 @@ export const putEventDetail = async ({
   eventId: string | number;
   eventDetailId: string | number;
 }): Promise<AxiosResponse<{ message: string }>> =>
-  API.put(`/event/details/${eventId}?event_detail_id=${eventDetailId}`, data);
+  API.put(`/event/details/${eventId}/${eventDetailId}`, data);
+
+export const putEventTicket = async ({
+  data,
+  eventId,
+  ticketId,
+}: {
+  data: unknown;
+  eventId: string | number;
+  ticketId: string | number;
+}): Promise<AxiosResponse<{ message: string }>> =>
+  API.put(`/event/tickets/${eventId}/${ticketId}`, data);
+
+/* DELETE
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+export const deleteEventTicket = async ({
+  eventId,
+  ticketId,
+}: {
+  eventId: string | number;
+  ticketId: string | number;
+}): Promise<AxiosResponse<{ message: string }>> =>
+  API.delete(`/event/tickets/${eventId}/${ticketId}`);

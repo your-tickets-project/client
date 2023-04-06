@@ -17,5 +17,15 @@ export const server = setupServer(
         filesData: [{ Key: 'test', name: 'test' }],
       })
     );
+  }),
+  rest.get(`/event/check-steps/1`, async (req, res, ctx) => {
+    return res(
+      ctx.status(OK_STATUS),
+      ctx.json({
+        id: 1,
+        include_event_detail: true,
+        include_event_ticket_info: true,
+      })
+    );
   })
 );

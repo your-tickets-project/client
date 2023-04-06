@@ -10,7 +10,10 @@ import { CREATED_STATUS, OK_STATUS } from 'server/constants/http.status';
 // utils
 import { generateJWT } from 'server/utils';
 // validations
-import { validationsOptions } from 'server/validations/validationOptions';
+import {
+  strictOptions,
+  stripUnknownOptions,
+} from 'server/validations/validationOptions';
 import { loginDto, signinDto } from 'server/validations/auth';
 
 /* GET
@@ -31,7 +34,8 @@ export const validateSignIn = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await signinDto.validate(req.body, validationsOptions);
+    const validation = await signinDto.validate(req.body, strictOptions);
+    req.body = await signinDto.validate(validation, stripUnknownOptions);
   } catch (err: any) {
     throw new BadRequestException('Invalid body.', err.errors);
   }
@@ -53,7 +57,8 @@ export const validateLogIn = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await loginDto.validate(req.body, validationsOptions);
+    const validation = await loginDto.validate(req.body, strictOptions);
+    req.body = await loginDto.validate(validation, stripUnknownOptions);
   } catch (err: any) {
     throw new BadRequestException('Invalid body.', err.errors);
   }

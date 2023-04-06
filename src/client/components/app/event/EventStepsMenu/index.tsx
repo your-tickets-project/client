@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
+import toaster from 'react-hot-toast';
 // components
 import {
   CheckCircleIcon,
@@ -10,40 +12,87 @@ import {
 } from 'client/components/icons';
 // hooks
 import useVW from 'client/hooks/useVW';
+// services
+import { getCheckSteps } from 'client/services/event.service';
 // styles
 import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
 
-interface Props {
-  activeStep: 'basic-info' | 'details' | 'tickets' | 'preview-publish';
-  eventId: number | string;
-}
-
-const steps = [
-  {
-    href: 'basic-info',
-    Icon: () => <CheckCircleIcon fill="#000" />,
-    title: 'Basic info',
-  },
-  {
-    href: 'details',
-    Icon: TwoCircleIcon,
-    title: 'Details',
-  },
-  {
-    href: 'tickets',
-    Icon: ThreeCircleIcon,
-    title: 'Tickets',
-  },
-  {
-    href: 'preview-publish',
-    Icon: FourCircleIcon,
-    title: 'Publish',
-  },
-];
-
-export default function EventStepsMenu({ activeStep, eventId }: Props) {
+export default function EventStepsMenu() {
+  const router = useRouter();
   const vw = useVW();
+  // booleans
+  const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  // data
+  const [eventId, setEventId] = useState<string | number | undefined>();
+  const [steps, setSteps] = useState<
+    {
+      href: string;
+      Icon: (props: { fill?: string | undefined }) => any;
+      title: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!router.isReady) return;
+
+    const queryAPI = async () => {
+      const { id } = router.query;
+      try {
+        const res = await getCheckSteps({ eventId: id as string });
+        setEventId(res.data.id);
+        setSteps([
+          {
+            href: `/manage/events/${res.data.id}/basic-info`,
+            Icon: () => <CheckCircleIcon fill="#000" />,
+            title: 'Basic info',
+          },
+          {
+            href: `/manage/events/${res.data.id}/details`,
+            Icon: () =>
+              res.data.include_event_detail ? (
+                <CheckCircleIcon fill="#000" />
+              ) : (
+                <TwoCircleIcon />
+              ),
+            title: 'Details',
+          },
+          {
+            href: `/manage/events/${res.data.id}/tickets`,
+            Icon: () =>
+              res.data.include_event_ticket_info ? (
+                <CheckCircleIcon fill="#000" />
+              ) : (
+                <ThreeCircleIcon />
+              ),
+            title: 'Tickets',
+          },
+          {
+            href: `/manage/events/${res.data.id}/preview-publish`,
+            Icon: FourCircleIcon,
+            title: 'Publish',
+          },
+        ]);
+      } catch (error: any) {
+        toaster.error(
+          error?.response?.data?.message || 'Internal server error.'
+        );
+
+        setTimeout(() => {
+          router.replace('/dashboard/events');
+        }, 3000);
+      }
+    };
+    queryAPI();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, router.isReady]);
+
+  if (!eventId) return null;
 
   return (
     <>
@@ -62,7 +111,9 @@ export default function EventStepsMenu({ activeStep, eventId }: Props) {
             </div>
             <div className="col-10">
               <div className="title-container">
-                <h3>{steps.find(({ href }) => href === activeStep)?.title}</h3>
+                <h3>
+                  {steps.find(({ href }) => href === router.asPath)?.title}
+                </h3>
               </div>
             </div>
           </div>
@@ -71,16 +122,12 @@ export default function EventStepsMenu({ activeStep, eventId }: Props) {
           <aside onClick={() => setShowMenu(false)}>
             <div className="menu">
               {steps.map(({ href, Icon, title }) => (
-                <Link
-                  href={`/manage/events/${eventId}/${href}`}
-                  key={title}
-                  legacyBehavior
-                >
+                <Link href={href} key={title} legacyBehavior>
                   <a>
                     <div
                       key={title}
                       className={`step row ${
-                        activeStep === href ? 'is-active' : 'is-not-active'
+                        router.asPath === href ? 'active' : 'not-active'
                       }`}
                     >
                       <div className="col-2">
@@ -159,7 +206,7 @@ export default function EventStepsMenu({ activeStep, eventId }: Props) {
           padding: 0.5rem 0;
         }
 
-        .step.is-active {
+        .step.active {
           background-color: ${colors.white};
         }
 
