@@ -16,8 +16,8 @@ export const EventBasicInfoDto = Yup.object({
   }).required(),
   date_start: Yup.string().required(),
   date_end: Yup.string().required(),
-  time_start: Yup.string().max(20).required(),
-  time_end: Yup.string().max(20).required(),
+  time_start: Yup.string().required(),
+  time_end: Yup.string().required(),
 });
 
 export type EventBasicInfoDtoType = Yup.TypeOf<typeof EventBasicInfoDto>;

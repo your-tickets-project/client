@@ -12,7 +12,7 @@ import {
   OK_STATUS,
 } from 'server/constants/http.status';
 // mocks
-import { dbInsert, dbSelect, dbUpdate } from 'server/database';
+import { dbInsert, dbSelect } from 'server/database';
 // utils
 import { generateJWT } from 'server/utils';
 
@@ -23,8 +23,6 @@ afterEach(() => {
   dbSelect.mockClear();
   // @ts-ignore
   dbInsert.mockClear();
-  // @ts-ignore
-  dbUpdate.mockClear();
 });
 
 const user = createUser();
@@ -53,7 +51,7 @@ describe('GET -- api/v1/event/details/[id] -- success request', () => {
 });
 
 describe('GET -- api/v1/event/details/[id] -- bad request', () => {
-  it(`should throw Id is required.`, async () => {
+  it(`should throw "Id is required."`, async () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
     const res = await request({
@@ -69,7 +67,7 @@ describe('GET -- api/v1/event/details/[id] -- bad request', () => {
     });
   });
 
-  it(`should throw Event not found.`, async () => {
+  it(`should throw "Event not found."`, async () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
     // @ts-ignore
@@ -143,7 +141,7 @@ describe('POST -- api/v1/event/details/[id] -- bad request', () => {
     });
   });
 
-  it(`should throw Id is required.`, async () => {
+  it(`should throw "Id is required."`, async () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
 
@@ -162,7 +160,7 @@ describe('POST -- api/v1/event/details/[id] -- bad request', () => {
     });
   });
 
-  it(`should throw Event not found.`, async () => {
+  it(`should throw "Event not found."`, async () => {
     const id = 1;
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
@@ -175,96 +173,6 @@ describe('POST -- api/v1/event/details/[id] -- bad request', () => {
       query: { id },
       headers: { authorization: `Bearer ${token}` },
       body,
-    });
-
-    expect(res.statusCode).toBe(NOT_FOUND_STATUS);
-    expect(res.body).toEqual({
-      error: 'Not Found',
-      message: 'Event not found.',
-      statusCode: NOT_FOUND_STATUS,
-    });
-  });
-});
-
-describe('PUT -- api/v1/event/details/[id] -- success request', () => {
-  it(`should update the data`, async () => {
-    const id = 1;
-    // @ts-ignore
-    dbSelect.mockReturnValueOnce(Promise.resolve([user]));
-    // @ts-ignore
-    dbUpdate.mockReturnValueOnce(Promise.resolve({ affectedRows: 1 }));
-
-    const res = await request({
-      handler,
-      method: 'PUT',
-      query: { id },
-      headers: { authorization: `Bearer ${token}` },
-      body,
-      url: `/api/v1/event/details/${id}?event_detail_id=${event_detail.id}`,
-    });
-
-    expect(res.statusCode).toBe(OK_STATUS);
-    expect(res.body).toEqual({ message: 'Event updated.' });
-  });
-});
-
-describe('PUT -- api/v1/event/details/[id] -- bad request', () => {
-  it(`should throw Id is required.`, async () => {
-    const id = 1;
-    // @ts-ignore
-    dbSelect.mockReturnValueOnce(Promise.resolve([user]));
-
-    const res = await request({
-      handler,
-      method: 'PUT',
-      headers: { authorization: `Bearer ${token}` },
-      body,
-      url: `/api/v1/event/details/${id}?event_detail_id=${event_detail.id}`,
-    });
-
-    expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
-    expect(res.body).toEqual({
-      error: 'Bad Request',
-      message: 'Id is required.',
-      statusCode: BAD_REQUEST_STATUS,
-    });
-  });
-
-  it(`should throw event_detail_id param is required.`, async () => {
-    const id = 1;
-    // @ts-ignore
-    dbSelect.mockReturnValueOnce(Promise.resolve([user]));
-
-    const res = await request({
-      handler,
-      method: 'PUT',
-      query: { id },
-      headers: { authorization: `Bearer ${token}` },
-      body,
-    });
-
-    expect(res.statusCode).toBe(BAD_REQUEST_STATUS);
-    expect(res.body).toEqual({
-      error: 'Bad Request',
-      message: 'event_detail_id param is required.',
-      statusCode: BAD_REQUEST_STATUS,
-    });
-  });
-
-  it(`should throw Event not found.`, async () => {
-    const id = 1;
-    // @ts-ignore
-    dbSelect.mockReturnValueOnce(Promise.resolve([user]));
-    // @ts-ignore
-    dbUpdate.mockReturnValueOnce(Promise.resolve({ affectedRows: 0 }));
-
-    const res = await request({
-      handler,
-      method: 'PUT',
-      query: { id },
-      headers: { authorization: `Bearer ${token}` },
-      body,
-      url: `/api/v1/event/details/${id}?event_detail_id=${event_detail.id}`,
     });
 
     expect(res.statusCode).toBe(NOT_FOUND_STATUS);

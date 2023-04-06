@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 // components
@@ -15,54 +15,86 @@ import { AppSelector } from 'client/store/selectors';
 // styles
 import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
 
-const dashboardLinks = [
-  {
-    Icon: CalendarIcon,
-    title: 'Event',
-    href: '/dashboard/events',
-    tag: 'event',
-  },
-  {
-    Icon: InvoiceIcon,
-    title: 'Orders',
-    href: '/dashboard/orders',
-    tag: 'order',
-  },
-  {
-    Icon: TicketIcon,
-    title: 'Your Tickets',
-    href: '/dashboard/tickets',
-    tag: 'ticket',
-  },
-  {
-    Icon: DollarIcon,
-    title: 'Finance',
-    href: '/dashboard/finance',
-    tag: 'finance',
-  },
-];
-
 export default function DashboardMenuBar() {
-  const { asPath } = useRouter();
+  const router = useRouter();
   const { isShowingDashboardOptions } = AppSelector();
+
   const vw = useVW();
+  const [isLoading, setIsLoading] = useState(true);
+  const [links, setLinks] = useState<
+    {
+      Icon: (props: { fill?: string | undefined }) => any;
+      title: string;
+      href: string;
+      urlList: string[];
+    }[]
+  >([]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!router.isReady) return;
+
+    const { query } = router;
+
+    setLinks([
+      {
+        Icon: CalendarIcon,
+        title: 'Event',
+        href: '/dashboard/events',
+        urlList: [
+          '/create-event',
+          '/dashboard/events',
+          `/manage/events/${query.id}/basic-info`,
+          `/manage/events/${query.id}/details`,
+          `/manage/events/${query.id}/tickets`,
+        ],
+      },
+      {
+        Icon: InvoiceIcon,
+        title: 'Orders',
+        href: '/dashboard/orders',
+        urlList: [],
+      },
+      {
+        Icon: TicketIcon,
+        title: 'Your Tickets',
+        href: '/dashboard/tickets',
+        urlList: [],
+      },
+      {
+        Icon: DollarIcon,
+        title: 'Finance',
+        href: '/dashboard/finance',
+        urlList: [],
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, router.isReady]);
 
   return (
     <>
       {(isShowingDashboardOptions || vw >= breakPointsPX.md) && (
         <aside>
           <div className="container row vg-8 hg-48 vg-sm-32 vg-md-0 hg-md-32">
-            {dashboardLinks.map(({ href, Icon, title, tag }) => (
+            {links.map(({ href, Icon, title, urlList }) => (
               <div key={href} className="col-6 col-sm-4 col-md-12">
                 <Link href={href} legacyBehavior>
                   <a
                     className={`dashboard-option ${
-                      asPath.includes(tag) ? 'active' : 'not-active'
+                      urlList.includes(router.asPath) ? 'active' : 'not-active'
                     }`}
                   >
                     <div className={`dashboard-option-icon`}>
                       <Icon
-                        fill={asPath.includes(tag) ? colors.white : undefined}
+                        fill={
+                          urlList.includes(router.asPath)
+                            ? colors.white
+                            : undefined
+                        }
                       />
                     </div>
                     <p className="dashboard-option-title box-md-shadow">

@@ -23,7 +23,7 @@ jest.mock('next/router', () => ({
   useRouter() {
     return {
       isReady: true,
-      asPath: '/event',
+      asPath: `/manage/events/${eventData.id}/basic-info`,
       push: jest.fn(),
       query: { id: eventData.id },
     };

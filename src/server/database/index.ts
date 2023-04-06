@@ -4,7 +4,7 @@ import { db } from './config';
 interface SelectParams {
   query: string;
   queryIdentifiers?: string[];
-  queryValues?: (number | string)[];
+  queryValues?: (string | number | null)[];
   nestTables?: boolean;
 }
 
@@ -15,13 +15,13 @@ interface InsertParams {
 
 interface UpdateParams {
   query: string;
-  data: any;
-  queryValues?: (string | number)[];
+  data?: any;
+  queryValues?: (string | number | null)[];
 }
 
 interface DeleteParams {
   query: string;
-  queryValues?: (string | number)[];
+  queryValues?: (string | number | null)[];
 }
 
 export const dbSelect = async <T = any>({
@@ -62,7 +62,9 @@ export const dbUpdate = async ({
   queryValues = [],
 }: UpdateParams) => {
   const values: any = [];
-  values.push(data);
+  if (data) {
+    values.push(data);
+  }
   if (queryValues.length) {
     values.push(...queryValues);
   }

@@ -37,9 +37,9 @@ export const DatePicker = ({ error, name, value, onChange }: Props) => {
                   return;
                 }
 
-                const year = date.getFullYear();
-                const month = `0${date.getMonth() + 1}`.slice(-2);
                 const day = `0${date.getDate()}`.slice(-2);
+                const month = `0${date.getMonth() + 1}`.slice(-2);
+                const year = date.getFullYear();
                 onChange({
                   target: { name, value: `${year}-${month}-${day}` },
                 });

@@ -5,11 +5,15 @@ interface Props {
   disabled?: boolean;
   error?: boolean;
   inputRef?: React.LegacyRef<HTMLInputElement>;
+  max?: number | string;
   maxLength?: number;
+  min?: number | string;
   name?: string;
   placeholder?: string;
   showCount?: boolean;
+  step?: number | string;
   style?: React.CSSProperties;
+  type?: 'text' | 'number';
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
@@ -19,11 +23,15 @@ export const Input = ({
   disabled,
   error,
   inputRef,
+  max,
   maxLength,
+  min,
   name,
   placeholder,
   showCount,
+  step,
   style,
+  type,
   value,
   onChange,
 }: Props) => {
@@ -39,14 +47,18 @@ export const Input = ({
         data-testid="ui-input_input-element"
         disabled={disabled}
         id={name}
+        max={max}
         maxLength={maxLength}
+        min={min}
         name={name}
         placeholder={placeholder}
         ref={inputRef}
+        step={step}
         style={{
           ...style,
           paddingLeft: addonBefore !== undefined ? '44px' : undefined,
         }}
+        type={type || 'text'}
         value={
           maxLength && value && value.length > maxLength
             ? value.slice(0, maxLength)

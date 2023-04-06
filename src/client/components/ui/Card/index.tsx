@@ -29,7 +29,6 @@ export const Card = ({ cover, title, children, hoverable, style }: Props) => {
       <div className="ui-card_header">
         {cover && (
           <div className="ui-card_cover">
-            {' '}
             <div className="ui-card_like-button">
               <HeartIcon />
             </div>

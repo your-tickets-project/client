@@ -5,6 +5,7 @@ export * from './CarIcon';
 export * from './CheckCircleIcon';
 export * from './ControlIcon';
 export * from './DollarIcon';
+export * from './EditIcon';
 export * from './EmailIcon';
 export * from './FacebookIcon';
 export * from './FourCircleIcon';

@@ -11,16 +11,27 @@ import {
   findEventDetail,
   findEvents,
   editEventBasicInfo,
+  findEventTickets,
+  findCheckSteps,
+  removeEventTicket,
+  createEventTicket,
+  findEventTicket,
+  editEventTicket,
 } from 'server/data/event/event.data';
 // exceptions
 import { BadRequestException } from 'server/exceptions';
 // http status codes
 import { CREATED_STATUS, OK_STATUS } from 'server/constants/http.status';
-// utils
-import { queryStringParams } from 'server/utils';
 // validations
-import { validationsOptions } from 'server/validations/validationOptions';
-import { EventBasicInfoDto, EventDetailDto } from 'server/validations/event';
+import {
+  strictOptions,
+  stripUnknownOptions,
+} from 'server/validations/validationOptions';
+import {
+  EventBasicInfoDto,
+  EventDetailDto,
+  EventTicketDto,
+} from 'server/validations/event';
 
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -44,6 +55,21 @@ export const getEventBySlug = async (
   res.status(OK_STATUS).json({ event });
 };
 
+export const getCheckSteps = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  const data = await findCheckSteps({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
 export const getEventBasicInfo = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
@@ -52,7 +78,10 @@ export const getEventBasicInfo = async (
     throw new BadRequestException('Id is required.');
   }
 
-  const data = await findEventBasicInfo({ eventId: req.query.id as string });
+  const data = await findEventBasicInfo({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
   res.status(OK_STATUS).json(data);
 };
 
@@ -64,7 +93,45 @@ export const getEventDetail = async (
     throw new BadRequestException('Id is required.');
   }
 
-  const data = await findEventDetail({ eventId: req.query.id as string });
+  const data = await findEventDetail({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
+export const getEventTickets = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  const data = await findEventTickets({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
+export const getEventTicket = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  if (!req.query.ticketId) {
+    throw new BadRequestException('Ticket id is required.');
+  }
+
+  const data = await findEventTicket({
+    eventId: req.query.id as string,
+    ticketId: req.query.ticketId as string,
+    userId: req.user!.id,
+  });
   res.status(OK_STATUS).json(data);
 };
 
@@ -76,7 +143,14 @@ export const validateEventBasicInfo = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await EventBasicInfoDto.validate(req.body, validationsOptions);
+    const validation = await EventBasicInfoDto.validate(
+      req.body,
+      strictOptions
+    );
+    req.body = await EventBasicInfoDto.validate(
+      validation,
+      stripUnknownOptions
+    );
   } catch (err: any) {
     throw new BadRequestException('Invalid body.', err.errors);
   }
@@ -88,7 +162,10 @@ export const postEventBasicInfo = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
 ) => {
-  const data = await createEventBasicInfo({ data: req.body });
+  const data = await createEventBasicInfo({
+    data: req.body,
+    userId: req.user!.id,
+  });
   res
     .status(CREATED_STATUS)
     .json({ message: 'Created successfully.', insertId: data.insertId });
@@ -100,7 +177,8 @@ export const validateEventDetail = async (
   next: NextHandler
 ) => {
   try {
-    req.body = await EventDetailDto.validate(req.body, validationsOptions);
+    const validation = await EventDetailDto.validate(req.body, strictOptions);
+    req.body = await EventDetailDto.validate(validation, stripUnknownOptions);
   } catch (err: any) {
     throw new BadRequestException('Invalid body.', err.errors);
   }
@@ -119,10 +197,42 @@ export const postEventDetail = async (
   const data = await createEventDetail({
     data: req.body,
     eventId: req.query.id as string,
+    userId: req.user!.id,
   });
   res
     .status(CREATED_STATUS)
     .json({ message: 'Event updated.', insertId: data.insertId });
+};
+
+export const validateEventTicket = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse,
+  next: NextHandler
+) => {
+  try {
+    const validation = await EventTicketDto.validate(req.body, strictOptions);
+    req.body = await EventTicketDto.validate(validation, stripUnknownOptions);
+  } catch (err: any) {
+    throw new BadRequestException('Invalid body.', err.errors);
+  }
+
+  await next();
+};
+
+export const postEventTicket = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  await createEventTicket({
+    data: req.body,
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(CREATED_STATUS).json({ message: 'Event updated.' });
 };
 
 /* PUT
@@ -138,6 +248,7 @@ export const putEventBasicInfo = async (
   await editEventBasicInfo({
     data: req.body,
     eventId: req.query.id as string,
+    userId: req.user!.id,
   });
 
   res.status(OK_STATUS).json({ message: 'Event updated.' });
@@ -151,15 +262,59 @@ export const putEventDetail = async (
     throw new BadRequestException('Id is required.');
   }
 
-  const paramsObject = queryStringParams({ str: req.url?.split('?')[1] });
-  if (!paramsObject?.event_detail_id) {
-    throw new BadRequestException('event_detail_id param is required.');
+  if (!req.query.detailId) {
+    throw new BadRequestException('Detail id is required.');
   }
 
   await editEventDetail({
     data: req.body,
-    eventDetailId: paramsObject.event_detail_id,
+    eventDetailId: req.query.detailId as string,
     eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+
+  res.status(OK_STATUS).json({ message: 'Event updated.' });
+};
+
+export const putEventTicket = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  if (!req.query.ticketId) {
+    throw new BadRequestException('Ticket id is required.');
+  }
+
+  await editEventTicket({
+    data: req.body,
+    eventId: req.query.id as string,
+    ticketId: req.query.ticketId as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json({ message: 'Event updated.' });
+};
+
+/* DELETE
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+export const deleteEventTicket = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  if (!req.query.ticketId) {
+    throw new BadRequestException('Ticket id is required.');
+  }
+
+  await removeEventTicket({
+    eventId: req.query.id as string,
+    ticketId: req.query.ticketId as string,
+    userId: req.user!.id,
   });
 
   res.status(OK_STATUS).json({ message: 'Event updated.' });

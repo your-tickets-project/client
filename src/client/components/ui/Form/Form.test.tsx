@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Form } from '.';
 import { Button, Input } from 'client/components/ui';
@@ -30,7 +36,7 @@ describe('when the user sends the form without data', () => {
   });
 
   it('should throw when form field is required with a custom error message', async () => {
-    const requiredMessage = 'custom error message';
+    const message = 'custom error message';
 
     render(
       <Form>
@@ -39,7 +45,7 @@ describe('when the user sends the form without data', () => {
           name="name"
           rules={{
             required: true,
-            requiredMessage,
+            message,
           }}
         >
           <Input />
@@ -52,7 +58,7 @@ describe('when the user sends the form without data', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(await screen.findByText(requiredMessage)).toBeInTheDocument();
+    expect(await screen.findByText(message)).toBeInTheDocument();
   });
 });
 
@@ -79,53 +85,26 @@ describe('when the developer wants to validate the fields', () => {
   it('should valitate a number field', async () => {
     render(
       <Form>
-        <Form.Item label="Age" name="age" rules={{ type: 'number' }}>
-          <Input />
-        </Form.Item>
-      </Form>
-    );
-
-    const $numberField = screen.getByLabelText<HTMLInputElement>(/age/i);
-    fireEvent.change($numberField, { target: { value: 'not a number' } });
-
-    expect(
-      await screen.findByText(
-        'age must be a `number` type, but the final value was: `NaN` (cast from the value `"not a number"`).'
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('should validate fields with custom error messages', async () => {
-    const emailMessage = 'Email field must be a valid email';
-    const ageMessage = 'Age field must be a number';
-
-    render(
-      <Form>
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={{ type: 'email', validationMessage: emailMessage }}
-        >
-          <Input />
-        </Form.Item>
         <Form.Item
           label="Age"
           name="age"
-          rules={{ type: 'number', validationMessage: ageMessage }}
+          rules={{
+            type: 'number',
+            required: true,
+            message: 'Age must be a number',
+          }}
         >
           <Input />
         </Form.Item>
+        <Button htmlType="submit" type="primary" block>
+          Submit
+        </Button>
       </Form>
     );
 
-    const $emailField = screen.getByLabelText<HTMLInputElement>(/email/i);
-    fireEvent.change($emailField, { target: { value: 'wrong email' } });
+    fireEvent.click(screen.getByRole('button'));
 
-    const $numberField = screen.getByLabelText<HTMLInputElement>(/age/i);
-    fireEvent.change($numberField, { target: { value: 'not a number' } });
-
-    expect(await screen.findByText(emailMessage)).toBeInTheDocument();
-    expect(await screen.findByText(ageMessage)).toBeInTheDocument();
+    expect(await screen.findByText('Age must be a number')).toBeInTheDocument();
   });
 });
 
@@ -161,6 +140,13 @@ describe('when the user send the form with data', () => {
       password: '123456',
     };
 
+    const errors = {
+      email: 'Email is a required field',
+      first_name: 'First name is a required field',
+      last_name: 'Last name is a required field',
+      password: 'Password is a required field',
+    };
+
     render(
       <Form onFinish={handleFinish}>
         <Form.Item
@@ -169,6 +155,7 @@ describe('when the user send the form with data', () => {
           rules={{
             required: true,
             type: 'email',
+            message: errors.email,
           }}
         >
           <Input />
@@ -176,21 +163,21 @@ describe('when the user send the form with data', () => {
         <Form.Item
           label="First name"
           name="first_name"
-          rules={{ required: true, requiredMessage: 'First name is required' }}
+          rules={{ required: true, message: errors.first_name }}
         >
           <Input />
         </Form.Item>
         <Form.Item
           label="Last name"
           name="last_name"
-          rules={{ required: true, requiredMessage: 'Last name is required' }}
+          rules={{ required: true, message: errors.last_name }}
         >
           <Input />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
-          rules={{ required: true, requiredMessage: 'Password is required' }}
+          rules={{ required: true, message: errors.password }}
         >
           <Input />
         </Form.Item>
@@ -199,6 +186,15 @@ describe('when the user send the form with data', () => {
         </Button>
       </Form>
     );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
+    });
+
+    expect(screen.getByText(errors.email)).toBeInTheDocument();
+    expect(screen.getByText(errors.first_name)).toBeInTheDocument();
+    expect(screen.getByText(errors.last_name)).toBeInTheDocument();
+    expect(screen.getByText(errors.password)).toBeInTheDocument();
 
     const $emailField = screen.getByLabelText<HTMLInputElement>(/email/i);
     fireEvent.change($emailField, { target: { value: values.email } });
@@ -217,6 +213,10 @@ describe('when the user send the form with data', () => {
     fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
     await waitFor(() => {
+      expect(screen.queryByText(errors.email)).not.toBeInTheDocument();
+      expect(screen.queryByText(errors.first_name)).not.toBeInTheDocument();
+      expect(screen.queryByText(errors.last_name)).not.toBeInTheDocument();
+      expect(screen.queryByText(errors.password)).not.toBeInTheDocument();
       expect(handleFinish).toHaveBeenCalledWith(values);
     });
   });
@@ -241,7 +241,7 @@ describe('when the developer wants to validate a field with another field value'
           name="repeat_password"
           rules={{
             required: true,
-            validator(formValues, value) {
+            validator(value, formValues) {
               if (value !== formValues.password) {
                 return {
                   isValid: false,

@@ -32,6 +32,7 @@ import {
 // interfaces
 import { EventType } from 'interfaces';
 // services
+import { baseURL } from 'client/services';
 import { getEventBySlug } from 'client/services/event.service';
 // store
 import { AuthSelector } from 'client/store/selectors';
@@ -72,17 +73,18 @@ export default function EventPage() {
   return (
     <PublicLayout>
       <div className="banner">
-        <Image
-          src={event.event_detail.cover_image_url}
-          alt="0"
-          width={1800}
-          height={700}
-          style={{ width: '100%', height: 'auto' }}
-          placeholder="blur"
-          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-            shimmer('100%', '100%')
-          )}`}
-        />
+        <div className="img-container">
+          <Image
+            src={`${baseURL}/media/${event.event_detail.cover_image_url}`}
+            alt="0"
+            fill={true}
+            style={{ objectFit: 'cover' }}
+            placeholder="blur"
+            blurDataURL={`data:image/svg+xml;base64,${toBase64(
+              shimmer('100%', '100%')
+            )}`}
+          />
+        </div>
         <div className="actions-buttons container">
           <div className="icon like-button">
             <HeartIcon />
@@ -288,6 +290,13 @@ export default function EventPage() {
         .banner {
           margin-bottom: 1rem;
           margin-top: 2rem;
+          position: relati;
+        }
+
+        .banner .img-container {
+          height: 450px;
+          position: relative;
+          width: 100%;
         }
 
         .banner .actions-buttons {

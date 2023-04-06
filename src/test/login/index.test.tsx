@@ -68,7 +68,7 @@ describe('<LoginPage/> success integration', () => {
 describe('<LoginPage/> check validations', () => {
   it(`should validate required fields`, async () => {
     expect(
-      screen.queryByText('email is a required field')
+      screen.queryByText('Email is a required field')
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText('Password is a required field')
@@ -77,7 +77,7 @@ describe('<LoginPage/> check validations', () => {
     fireEvent.click(screen.getByRole('button', { name: /Send/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('email is a required field')).toBeInTheDocument();
+      expect(screen.getByText('Email is a required field')).toBeInTheDocument();
       expect(
         screen.getByText('Password is a required field')
       ).toBeInTheDocument();

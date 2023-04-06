@@ -4,6 +4,7 @@ import { Button } from '../index';
 interface Props {
   bodyStyle?: React.CSSProperties;
   children: React.ReactNode;
+  contentStyle?: React.CSSProperties;
   footer?: React.ReactNode;
   isShowModal: boolean;
   maskClosable?: boolean;
@@ -16,6 +17,7 @@ interface Props {
 export const Modal = ({
   bodyStyle,
   children,
+  contentStyle,
   footer,
   isShowModal,
   maskClosable = false,
@@ -55,7 +57,10 @@ export const Modal = ({
         }}
         data-testid="ui-modal_overlay-element"
       >
-        <div className={`ui-modal_content ${active ? 'active' : 'not-active'}`}>
+        <div
+          className={`ui-modal_content ${active ? 'active' : 'not-active'}`}
+          style={contentStyle}
+        >
           <div className="ui-modal_icon" onClick={onCancel}>
             <XIcon />
           </div>
@@ -67,10 +72,12 @@ export const Modal = ({
             <div className="ui-modal_footer">
               <div className="ui-modal_default-footer">
                 <div className="ui-modal_cancel-button">
-                  <Button onClick={onCancel}>cancel</Button>
+                  <Button block onClick={onCancel}>
+                    cancel
+                  </Button>
                 </div>
                 <div className="ui-modal_confirm-button">
-                  <Button type="primary" onClick={onConfirm}>
+                  <Button block type="primary" onClick={onConfirm}>
                     confirm
                   </Button>
                 </div>

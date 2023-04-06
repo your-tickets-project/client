@@ -5,24 +5,18 @@ import EventStepsMenu from 'client/components/app/event/EventStepsMenu';
 import { breakPoints } from 'client/styles/variables';
 
 interface Props {
-  activeStep: 'basic-info' | 'details' | 'tickets' | 'preview-publish';
   children: React.ReactNode;
-  eventId: number | string;
 }
 
-export default function EventFormLayout({
-  activeStep,
-  children,
-  eventId,
-}: Props) {
+export default function EventFormLayout({ children }: Props) {
   return (
     <>
       <div className="event-container row">
         <div className="menu-container col-12 col-md-3">
-          <EventStepsMenu activeStep={activeStep} eventId={eventId} />
+          <EventStepsMenu />
         </div>
         <section className="col-12 col-md-9" id="event-form-layout">
-          <div className="container">{children}</div>
+          {children}
         </section>
       </div>
       <style jsx>{`

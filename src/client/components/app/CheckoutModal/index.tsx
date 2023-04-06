@@ -16,6 +16,8 @@ import {
   shimmer,
   toBase64,
 } from 'client/helpers';
+// services
+import { baseURL } from 'client/services';
 // store
 import { AuthSelector } from 'client/store/selectors';
 // styles
@@ -42,11 +44,6 @@ enum CHECKOUT_STATES {
   SUCCESS = 'success',
 }
 
-type CheckoutType =
-  | CHECKOUT_STATES.PRE_SALE
-  | CHECKOUT_STATES.CHECKOUT
-  | CHECKOUT_STATES.SUCCESS;
-
 export default function CheckoutModal({
   event,
   handleShowModal,
@@ -56,12 +53,14 @@ export default function CheckoutModal({
   const vw = useVW();
   const { user } = AuthSelector();
 
-  const [ticketsNumber, setTicketsNumber] = useState(1);
-  const [checkout, setCheckout] = useState<CheckoutType>(
-    CHECKOUT_STATES.PRE_SALE
-  );
+  // booleans
   const [showLeave, setShowLeave] = useState(false);
   const [timeEnd, setTimeEnd] = useState(false);
+  // data
+  const [ticketsNumber, setTicketsNumber] = useState(1);
+  const [checkout, setCheckout] = useState<CHECKOUT_STATES>(
+    CHECKOUT_STATES.PRE_SALE
+  );
 
   const handleFinish = async (values: any) => {
     setCheckout(CHECKOUT_STATES.SUCCESS);
@@ -80,7 +79,7 @@ export default function CheckoutModal({
   return (
     <>
       <Modal
-        bodyStyle={{ padding: '0' }}
+        bodyStyle={{ padding: '0', overflowY: 'auto' }}
         footer={null}
         isShowModal={isShowModal}
         onCancel={() => {
@@ -192,8 +191,6 @@ export default function CheckoutModal({
                             name="first_name"
                             rules={{
                               required: true,
-                              type: 'string',
-                              requiredMessage: 'First name is a required field',
                             }}
                           >
                             <Input />
@@ -205,8 +202,6 @@ export default function CheckoutModal({
                             name="last_name"
                             rules={{
                               required: true,
-                              type: 'string',
-                              requiredMessage: 'Last name is a required field',
                             }}
                           >
                             <Input />
@@ -230,9 +225,6 @@ export default function CheckoutModal({
                             name="phone_number"
                             rules={{
                               required: true,
-                              type: 'string',
-                              requiredMessage:
-                                'Phone number is a required field',
                             }}
                           >
                             <Input />
@@ -333,7 +325,7 @@ export default function CheckoutModal({
               <div className="order-summary">
                 <div>
                   <Image
-                    src={event.event_detail.cover_image_url}
+                    src={`${baseURL}/media/${event.event_detail.cover_image_url}`}
                     alt="0"
                     width={1800}
                     height={700}

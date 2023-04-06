@@ -18,17 +18,22 @@ export interface EventTagType {
   name: string;
 }
 
-export interface EventTicketInfoType {
+export interface ShowEventTicketInfoType {
   id: number;
-  event_id: number;
-  type: string;
   name: string;
-  quantity: number;
   price: number;
-  sales_start: Date;
-  sales_end: Date;
-  time_start: string;
+  quantity: number;
+  sales_end: string;
+  sales_start: string;
+  sold: number;
   time_end: string;
+  time_start: string;
+  type: string;
+  visibility: string;
+}
+
+export interface EventTicketInfoType extends ShowEventTicketInfoType {
+  event_id: number;
   description: null | string;
   minimum_quantity: number;
   maximum_quantity: number;
@@ -44,6 +49,7 @@ export interface EventDetailType {
 
 export interface EventBasicInfoType {
   id: number;
+  user_id: number;
   title: string;
   slug: string;
   date_start: string;

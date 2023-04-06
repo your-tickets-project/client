@@ -58,13 +58,15 @@ export const createEventTicketInfo = ({
   name = 'General admission - test',
   quantity = 100,
   price = 0,
+  sold = 0,
   sales_start = '1996-02-01T04:00:00.000Z',
   sales_end = '1996-02-08T04:00:00.000Z',
   time_start = '00:00:00',
   time_end = '23:59:59',
-  description = null,
+  description = '',
   minimum_quantity = 1,
   maximum_quantity = 10,
+  visibility = 'visible',
 } = {}) => ({
   id,
   event_id,
@@ -72,6 +74,7 @@ export const createEventTicketInfo = ({
   name,
   quantity,
   price,
+  sold,
   sales_start,
   sales_end,
   time_start,
@@ -79,6 +82,7 @@ export const createEventTicketInfo = ({
   description,
   maximum_quantity,
   minimum_quantity,
+  visibility,
 });
 
 export const createEventTag = ({
