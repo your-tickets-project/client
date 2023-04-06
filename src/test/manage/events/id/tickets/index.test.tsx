@@ -119,23 +119,21 @@ describe('<TicketsPage/> success integration', () => {
     server.use(handleGetTickets());
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
-    await waitFor(() => {
-      const $table = screen.getByRole('table');
-      expect($table).toBeInTheDocument();
+    const $table = await screen.findByRole('table');
+    expect($table).toBeInTheDocument();
 
-      const $columnsHeaders = within($table).getAllByRole('columnheader');
-      expect($columnsHeaders).toHaveLength(6);
+    const $columnsHeaders = within($table).getAllByRole('columnheader');
+    expect($columnsHeaders).toHaveLength(6);
 
-      const [$name, $saleDate, $visibility, $sold, $price, $actions] =
-        $columnsHeaders;
+    const [$name, $saleDate, $visibility, $sold, $price, $actions] =
+      $columnsHeaders;
 
-      expect($name).toHaveTextContent(/name/i);
-      expect($saleDate).toHaveTextContent(/sale date/i);
-      expect($visibility).toHaveTextContent(/visibility/i);
-      expect($sold).toHaveTextContent(/sold/i);
-      expect($price).toHaveTextContent(/price/i);
-      expect($actions).toHaveTextContent(/actions/i);
-    });
+    expect($name).toHaveTextContent(/name/i);
+    expect($saleDate).toHaveTextContent(/sale date/i);
+    expect($visibility).toHaveTextContent(/visibility/i);
+    expect($sold).toHaveTextContent(/sold/i);
+    expect($price).toHaveTextContent(/price/i);
+    expect($actions).toHaveTextContent(/actions/i);
   });
 
   it('should delete a ticket', async () => {
