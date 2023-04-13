@@ -119,7 +119,7 @@ export default css.global`
   }
 
   @media (min-width: ${breakPoints.md}) {
-    .box-md-shadow {
+    .box-shadow-md {
       box-shadow: 0 1px 2px -2px rgb(0 0 0 / 16%), 0 3px 6px 0 rgb(0 0 0 / 12%),
         0 5px 12px 4px rgb(0 0 0 / 9%);
     }

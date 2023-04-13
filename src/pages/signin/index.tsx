@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import { Button, Form, Input } from 'client/components/ui';
 import PublicRoute from 'client/components/app/PublicRoute';
@@ -29,14 +29,14 @@ export default function SignInPage() {
 
     try {
       const res = await signin(values);
-      toaster.success(res.data.message);
+      toast.success(res.data.message);
 
       setTimeout(() => {
         router.push('/login');
       }, 3000);
     } catch (error: any) {
       setIsSending(false);
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
   };
 

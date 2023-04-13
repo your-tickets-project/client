@@ -17,6 +17,9 @@ import {
   createEventTicket,
   findEventTicket,
   editEventTicket,
+  findEventPreview,
+  findEventPreviewPublish,
+  editPublishEvent,
 } from 'server/data/event/event.data';
 // exceptions
 import { BadRequestException } from 'server/exceptions';
@@ -32,6 +35,7 @@ import {
   EventDetailDto,
   EventTicketDto,
 } from 'server/validations/event';
+import { PublishDto } from 'server/validations/event/publish.dto';
 
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -51,8 +55,8 @@ export const getEventBySlug = async (
     throw new BadRequestException('Slug is required.');
   }
 
-  const event = await findEventBySlug({ slug: req.query.slug as string });
-  res.status(OK_STATUS).json({ event });
+  const data = await findEventBySlug({ slug: req.query.slug as string });
+  res.status(OK_STATUS).json(data);
 };
 
 export const getCheckSteps = async (
@@ -130,6 +134,36 @@ export const getEventTicket = async (
   const data = await findEventTicket({
     eventId: req.query.id as string,
     ticketId: req.query.ticketId as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
+export const getEventPreviewPublish = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  const data = await findEventPreviewPublish({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
+export const getEventPreview = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  const data = await findEventPreview({
+    eventId: req.query.id as string,
     userId: req.user!.id,
   });
   res.status(OK_STATUS).json(data);
@@ -295,6 +329,44 @@ export const putEventTicket = async (
     userId: req.user!.id,
   });
   res.status(OK_STATUS).json({ message: 'Event updated.' });
+};
+
+export const validatePublishEvent = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse,
+  next: NextHandler
+) => {
+  try {
+    const validation = await PublishDto.validate(req.body, strictOptions);
+    req.body = await PublishDto.validate(validation, stripUnknownOptions);
+  } catch (err: any) {
+    throw new BadRequestException('Invalid body.', err.errors);
+  }
+
+  await next();
+};
+
+export const putPublishEvent = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  await editPublishEvent({
+    data: req.body,
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+
+  res
+    .status(OK_STATUS)
+    .json({
+      message: `Event ${
+        req.body.is_available ? 'published' : 'unpublished'
+      } successfully.`,
+    });
 };
 
 /* DELETE

@@ -11,13 +11,18 @@ import TicketsPage from 'pages/manage/events/[id]/tickets';
 // fixtures
 import { createEventTicketInfo } from 'fixtures/event.fixture';
 // helpers
-import { getDate } from 'client/helpers';
+import { getDateData } from 'client/helpers';
 // http status codes
 import { OK_STATUS } from 'server/constants/http.status';
 // mocks
 import { rest } from 'msw';
 import { server } from 'client/mocks/server';
 import { PrivateWrapper } from 'client/mocks/Wrappers';
+
+const formatDate = () => {
+  const d = getDateData();
+  return `${d.year}-${d.monthNumber}-${d.day}`;
+};
 
 const eventTicket1 = createEventTicketInfo({
   id: 1,
@@ -26,8 +31,8 @@ const eventTicket1 = createEventTicketInfo({
   quantity: 200,
   sold: 0,
   price: 0,
-  sales_start: `${getDate()}T04:00:00.000Z`,
-  sales_end: `${getDate()}T04:00:00.000Z`,
+  sales_start: `${formatDate()}T04:00:00.000Z`,
+  sales_end: `${formatDate()}T04:00:00.000Z`,
   time_start: '09:00:00',
   time_end: '21:00:00',
   visibility: 'visible',
@@ -40,8 +45,8 @@ const eventTicket2 = createEventTicketInfo({
   quantity: 100,
   sold: 0,
   price: 5,
-  sales_start: `${getDate()}T04:00:00.000Z`,
-  sales_end: `${getDate()}T04:00:00.000Z`,
+  sales_start: `${formatDate()}T04:00:00.000Z`,
+  sales_end: `${formatDate()}T04:00:00.000Z`,
   time_start: '09:00:00',
   time_end: '21:00:00',
   visibility: 'visible',
@@ -116,7 +121,12 @@ afterAll(() => server.close());
 
 describe('<TicketsPage/> success integration', () => {
   it('should render correctly', async () => {
-    server.use(handleGetTickets());
+    server.use(
+      handleGetTickets(),
+      handleGetTicket(),
+      handlePutTicket(),
+      handleDeleteTicket()
+    );
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
     const $table = await screen.findByRole('table');
@@ -137,7 +147,12 @@ describe('<TicketsPage/> success integration', () => {
   });
 
   it('should delete a ticket', async () => {
-    server.use(handleGetTickets(), handleDeleteTicket());
+    server.use(
+      handleGetTickets(),
+      handleGetTicket(),
+      handlePutTicket(),
+      handleDeleteTicket()
+    );
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
     const $table = await screen.findByRole('table');
@@ -169,7 +184,12 @@ describe('<TicketsPage/> success integration', () => {
   }, 10_000);
 
   it('should edit a ticket', async () => {
-    server.use(handleGetTickets(), handleGetTicket(), handlePutTicket());
+    server.use(
+      handleGetTickets(),
+      handleGetTicket(),
+      handlePutTicket(),
+      handleDeleteTicket()
+    );
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
     const $table = await screen.findByRole('table');
@@ -214,7 +234,12 @@ describe('<TicketsPage/> success integration', () => {
   }, 10_000);
 
   it('should not disable the price input if is a paid ticket', async () => {
-    server.use(handleGetTickets());
+    server.use(
+      handleGetTickets(),
+      handleGetTicket(),
+      handlePutTicket(),
+      handleDeleteTicket()
+    );
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
     const $addTicketButton = await screen.findByRole('button', {
@@ -233,7 +258,12 @@ describe('<TicketsPage/> success integration', () => {
 
 describe('<TicketsPage/> validations', () => {
   it('should validate add, edit ticket form required fields', async () => {
-    server.use(handleGetTickets());
+    server.use(
+      handleGetTickets(),
+      handleGetTicket(),
+      handlePutTicket(),
+      handleDeleteTicket()
+    );
     render(<TicketsPage />, { wrapper: PrivateWrapper });
 
     const $addTicketButton = await screen.findByRole('button', {

@@ -9,6 +9,7 @@ import {
   EventLocationType,
   ShowEventTicketInfoType,
   EventTicketInfoType,
+  EventPreviewPublishType,
 } from 'interfaces';
 
 /* GET
@@ -21,7 +22,7 @@ export const getEventBySlug = async ({
   slug,
 }: {
   slug: string;
-}): Promise<AxiosResponse<{ event: EventType }>> => API.get(`/event/${slug}`);
+}): Promise<AxiosResponse<EventType>> => API.get(`/event/${slug}`);
 
 export const getCheckSteps = async ({
   eventId,
@@ -30,6 +31,7 @@ export const getCheckSteps = async ({
 }): Promise<
   AxiosResponse<{
     id: number;
+    is_available: number;
     include_event_detail: boolean;
     include_event_ticket_info: boolean;
   }>
@@ -82,6 +84,28 @@ export const getEventTicket = async ({
     event_ticket_info: EventTicketInfoType;
   }>
 > => API.get(`/event/tickets/${eventId}/${ticketId}`);
+
+export const getEventPreviewPublish = async ({
+  eventId,
+}: {
+  eventId: string | number;
+}): Promise<AxiosResponse<EventPreviewPublishType>> =>
+  API.get(`/event/preview-publish/${eventId}`);
+
+export const getEventPreview = async ({
+  eventId,
+}: {
+  eventId: string | number;
+}): Promise<
+  AxiosResponse<
+    EventBasicInfoType & {
+      event_location: EventLocationType;
+      event_detail: NullablePartial<EventDetailType>;
+      event_ticket_info: EventTicketInfoType[];
+      event_tag: EventTagType[];
+    }
+  >
+> => API.get(`/event/preview/${eventId}`);
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -140,6 +164,15 @@ export const putEventTicket = async ({
   ticketId: string | number;
 }): Promise<AxiosResponse<{ message: string }>> =>
   API.put(`/event/tickets/${eventId}/${ticketId}`, data);
+
+export const putPublishEvent = async ({
+  data,
+  eventId,
+}: {
+  data: unknown;
+  eventId: string | number;
+}): Promise<AxiosResponse<{ message: string }>> =>
+  API.put(`/event/publish/${eventId}`, data);
 
 /* DELETE
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

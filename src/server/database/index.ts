@@ -16,7 +16,7 @@ interface InsertParams {
 interface UpdateParams {
   query: string;
   data?: any;
-  queryValues?: (string | number | null)[];
+  queryValues?: (string | number | boolean | null)[];
 }
 
 interface DeleteParams {

@@ -34,7 +34,11 @@ const event = createEvent();
 const location = createLocation();
 const body = {
   ...event,
-  location,
+  location: {
+    ...location,
+    latitude: +location.latitude,
+    longitude: +location.longitude,
+  },
 };
 
 describe('GET -- api/v1/event/basic-info/[id] -- success request', () => {

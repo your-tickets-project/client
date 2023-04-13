@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { rest } from 'msw';
 import EventPage from 'pages/event/[slug]';
 // fixtures
@@ -20,6 +20,7 @@ jest.mock('next/router', () => ({
   useRouter() {
     return {
       query: { slug: 'valid-slug' },
+      isReady: true,
       push: jest.fn(),
       replace: jest.fn(),
     };
@@ -38,45 +39,47 @@ describe('<EventPage/> integration', () => {
   it(`should show event information`, async () => {
     render(<EventPage />, { wrapper: PrivateWrapper });
 
-    const event = {
+    const data = {
       ...createEvent(),
       event_detail: createEventDetail(),
       event_location: createLocation(),
-      event_ticket_info: createEventTicketInfo(),
+      event_ticket_info: [createEventTicketInfo()],
       event_tag: [createEventTag()],
     };
 
     server.use(
       rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json({ event }));
+        return res(ctx.status(OK_STATUS), ctx.json(data));
       })
     );
 
     expect(
-      await screen.findByRole('heading', { name: event.title })
+      await screen.findByRole('heading', { name: data.title })
     ).toBeInTheDocument();
   });
 
   it(`should show the modal only when the user is authenticated`, async () => {
     render(<EventPage />, { wrapper: PrivateWrapper });
 
-    const event = {
+    const data = {
       ...createEvent(),
       event_detail: createEventDetail(),
       event_location: createLocation(),
-      event_ticket_info: createEventTicketInfo(),
+      event_ticket_info: [createEventTicketInfo()],
       event_tag: [createEventTag()],
     };
 
     server.use(
       rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json({ event }));
+        return res(ctx.status(OK_STATUS), ctx.json(data));
       })
     );
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: /Get tickets/i })
-    );
+    const $getTicketsButton = await screen.findByRole('button', {
+      name: /Get tickets/i,
+    });
+
+    fireEvent.click($getTicketsButton);
 
     expect(screen.getByTestId('ui-modal_overlay-element')).toBeInTheDocument();
   });
@@ -86,39 +89,72 @@ describe('<EventPage/> integration', () => {
 
     const authUser = createUser();
 
-    const event = {
+    const data = {
       ...createEvent(),
       event_detail: createEventDetail(),
       event_location: createLocation(),
-      event_ticket_info: createEventTicketInfo(),
+      event_ticket_info: [createEventTicketInfo()],
       event_tag: [createEventTag()],
     };
 
     server.use(
       rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json({ event }));
+        return res(ctx.status(OK_STATUS), ctx.json(data));
       })
     );
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: /Get tickets/i })
-    );
+    const $getTicketsButton = await screen.findByRole('button', {
+      name: /Get tickets/i,
+    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Checkout/i }));
+    fireEvent.click($getTicketsButton);
+
+    const $modal = screen.getByTestId('ui-modal_overlay-element');
+    expect($modal).toBeInTheDocument();
 
     expect(
-      await screen.findByRole('heading', { name: /contact information/i })
+      within($modal).getByRole('button', { name: /Checkout/i })
+    ).toBeDisabled();
+
+    const $ticketsAmount = within($modal).getAllByRole('combobox');
+    expect($ticketsAmount).toHaveLength(1);
+
+    fireEvent.click($ticketsAmount[0]);
+
+    const $ticketsAmountList = within($modal).getAllByRole('list');
+    expect($ticketsAmountList).toHaveLength(1);
+    expect($ticketsAmountList[0]).toBeVisible();
+
+    const $ticketOptions = within($ticketsAmountList[0]).getAllByRole(
+      'listitem'
+    );
+    expect($ticketOptions).toHaveLength(11);
+
+    fireEvent.click($ticketOptions[1]);
+
+    expect(
+      within($modal).getByRole('button', { name: /Checkout/i })
+    ).not.toBeDisabled();
+
+    fireEvent.click(within($modal).getByRole('button', { name: /Checkout/i }));
+
+    expect(
+      await within($modal).findByRole('heading', {
+        name: /contact information/i,
+      })
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/first name/i)).toHaveValue(
+    expect(within($modal).getByLabelText(/first name/i)).toHaveValue(
       authUser.first_name
     );
 
-    expect(screen.getByLabelText(/last name/i)).toHaveValue(authUser.last_name);
+    expect(within($modal).getByLabelText(/last name/i)).toHaveValue(
+      authUser.last_name
+    );
 
-    expect(screen.getByLabelText(/email/i)).toHaveValue(authUser.email);
+    expect(within($modal).getByLabelText(/email/i)).toHaveValue(authUser.email);
 
-    const $phoneNumberInput = screen.getByLabelText(/phone number/i);
+    const $phoneNumberInput = within($modal).getByLabelText(/phone number/i);
 
     act(() => {
       fireEvent.change($phoneNumberInput, {
@@ -128,10 +164,12 @@ describe('<EventPage/> integration', () => {
 
     expect($phoneNumberInput).toHaveValue('12345678');
 
-    fireEvent.click(screen.getByRole('button', { name: /Register/i }));
+    fireEvent.click(within($modal).getByRole('button', { name: /Register/i }));
 
     expect(
-      await screen.findByRole('heading', { name: /thanks for your order!/i })
+      await within($modal).findByRole('heading', {
+        name: /thanks for your order!/i,
+      })
     ).toBeInTheDocument();
   });
 });

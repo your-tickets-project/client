@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
@@ -53,9 +53,7 @@ const BasicInfoFormWrapper = () => {
         const res = await getEventBasicInfo({ eventId: id as string });
         setEventBasicInfo(res.data);
       } catch (error: any) {
-        toaster.error(
-          error?.response?.data?.message || 'Internal server error.'
-        );
+        toast.error(error?.response?.data?.message || 'Internal server error.');
 
         setTimeout(() => {
           router.replace('/dashboard/events');

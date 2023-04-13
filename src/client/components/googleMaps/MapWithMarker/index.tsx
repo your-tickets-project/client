@@ -11,18 +11,24 @@ import { AddressType } from 'interfaces';
 type onDragEnd = (address: AddressType) => void;
 
 interface Props {
+  draggable?: boolean;
   location: { lat: number; lng: number };
   onDragEnd?: onDragEnd;
 }
 
 export default React.memo(function MapWithMarker({
+  draggable,
   location,
   onDragEnd,
 }: Props) {
   return (
     <Wrapper>
       <Map center={location as unknown as google.maps.LatLng}>
-        <Marker position={location} draggable onDragEnd={onDragEnd} />
+        <Marker
+          position={location}
+          draggable={draggable}
+          onDragEnd={onDragEnd}
+        />
       </Map>
     </Wrapper>
   );
@@ -108,8 +114,10 @@ const Marker: React.FC<
     if (isLoading) return;
     if (marker && infoWindow) {
       marker.setOptions(props);
-      infoWindow.setContent('Move me for more precision');
-      infoWindow.open(props.map, marker);
+      if (props.draggable) {
+        infoWindow.setContent('Move me for more precision');
+        infoWindow.open(props.map, marker);
+      }
       const map = props.map as google.maps.Map;
       map.setCenter(marker.getPosition() as google.maps.LatLng);
     }
@@ -140,7 +148,7 @@ const Marker: React.FC<
             props.onDragEnd?.({ ...address, lat, lng });
           }
         } catch (error) {
-          toast.error('Error with google maps, please try again');
+          toast.error('Error with google maps, please try again.');
         }
       });
     }

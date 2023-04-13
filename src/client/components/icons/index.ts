@@ -17,6 +17,7 @@ export * from './HeartIcon';
 export * from './InvoiceIcon';
 export * from './LeftBackArrowIcon';
 export * from './LinkedinIcon';
+export * from './LinkIcon';
 export * from './LocationIcon';
 export * from './MaskIcon';
 export * from './MenuIcon';

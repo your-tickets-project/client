@@ -13,20 +13,22 @@ import {
   NullablePartial,
   EventTagType,
   ShowEventTicketInfoType,
+  EventPreviewPublishType,
 } from 'interfaces';
 // utils
-import { slug } from 'server/utils';
+import { generateId, slug } from 'server/utils';
 // validations
 import {
   EventBasicInfoDtoType,
   EventDetailDtoType,
   EventTicketDtoType,
 } from 'server/validations/event';
+import { PublishDtoType } from 'server/validations/event/publish.dto';
 
 interface EventRowType {
   event: EventBasicInfoType;
-  event_detail: EventDetailType;
   event_location: EventLocationType;
+  event_detail: EventDetailType;
   event_ticket_info: EventTicketInfoType;
   event_tag: NullablePartial<EventTagType>;
 }
@@ -34,7 +36,7 @@ interface EventRowType {
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const findEvents = async (): Promise<EventType[]> => {
-  const query = `SELECT * FROM event INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id;`;
+  const query = `SELECT * FROM event INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.is_available = true;`;
 
   const rowData = await dbSelect<EventRowType[]>({ query, nestTables: true });
 
@@ -80,7 +82,7 @@ export const findEventBySlug = async ({
 }: {
   slug: string;
 }): Promise<EventType> => {
-  const query = `SELECT * FROM event INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.slug = ?;`;
+  const query = `SELECT * FROM event INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.slug = ? AND event.is_available = true;`;
 
   const rowData = await dbSelect<EventRowType[]>({
     query,
@@ -92,19 +94,28 @@ export const findEventBySlug = async ({
     throw new NotFoundException('Event not found.');
   }
 
+  delete rowData[0].event.user_id;
   const eventData: any = {
     ...rowData[0].event,
-    event_detail: rowData[0].event_detail,
     event_location: rowData[0].event_location,
-    event_ticket_info: rowData[0].event_ticket_info,
+    event_detail: rowData[0].event_detail,
+    event_ticket_info: [],
     event_tag: [],
   };
   const tagIds = new Set();
+  const ticketIds = new Set();
 
   for (const data of rowData) {
     if (data.event_tag.id && !tagIds.has(data.event_tag.id)) {
       eventData.event_tag.push(data.event_tag);
       tagIds.add(data.event_tag.id);
+    }
+    if (
+      data.event_ticket_info.id &&
+      !ticketIds.has(data.event_ticket_info.id)
+    ) {
+      eventData.event_ticket_info.push(data.event_ticket_info);
+      ticketIds.add(data.event_ticket_info.id);
     }
   }
 
@@ -118,11 +129,12 @@ export const findCheckSteps = async ({
   eventId: string | number;
   userId: string | number;
 }) => {
-  const query = `SELECT event.id, COUNT(event_detail.id) AS event_detail_amount, COUNT(event_ticket_info.id) AS event_ticket_info_amount FROM event LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ?;`;
+  const query = `SELECT event.id, event.is_available, COUNT(event_detail.id) AS event_detail_amount, COUNT(event_ticket_info.id) AS event_ticket_info_amount FROM event LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ?;`;
 
   const rowData = await dbSelect<
     {
       id: number;
+      is_available: number;
       event_detail_amount: number;
       event_ticket_info_amount: number;
     }[]
@@ -137,6 +149,7 @@ export const findCheckSteps = async ({
 
   return {
     id: rowData[0].id,
+    is_available: rowData[0].is_available,
     include_event_detail: !!rowData[0].event_detail_amount,
     include_event_ticket_info: !!rowData[0].event_ticket_info_amount,
   };
@@ -300,6 +313,129 @@ export const findEventTicket = async ({
   };
 };
 
+export const findEventPreviewPublish = async ({
+  eventId,
+  userId,
+}: {
+  eventId: string | number;
+  userId: string | number;
+}): Promise<EventPreviewPublishType> => {
+  const query = `SELECT event.id, event.title, event.date_start, event.time_start, event.is_available, event_location.address_1, event_location.city, event_location.state, event_location.country, event_location.postal_code, event_detail.cover_image_url, event_detail.summary, MIN(event_ticket_info.price) as ticket_smallest_price, MAX(event_ticket_info.price) as ticket_largest_price, SUM(event_ticket_info.quantity) as total_quantity FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ?;`;
+
+  const rowData = await dbSelect<
+    {
+      id: number;
+      title: string;
+      date_start: string;
+      time_start: string;
+      is_available: number;
+      address_1: string;
+      city: string;
+      state: string | null;
+      country: string;
+      postal_code: string;
+      cover_image_url: string | null;
+      summary: string | null;
+      ticket_smallest_price: number | null;
+      ticket_largest_price: number | null;
+      total_quantity: number | null;
+    }[]
+  >({
+    query,
+    queryValues: [eventId, userId],
+  });
+
+  if (!rowData.length || !rowData[0] || rowData[0].id === null) {
+    throw new NotFoundException('Event not found.');
+  }
+
+  const data = rowData[0];
+
+  return {
+    id: data.id,
+    title: data.title,
+    date_start: data.date_start,
+    time_start: data.time_start,
+    is_available: data.is_available,
+    ticket_largest_price: data.ticket_largest_price,
+    ticket_smallest_price: data.ticket_smallest_price,
+    total_quantity: data.total_quantity,
+    event_location: {
+      address_1: data.address_1,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      postal_code: data.postal_code,
+    },
+    event_detail: {
+      cover_image_url: data.cover_image_url,
+      summary: data.summary,
+    },
+  };
+};
+
+export const findEventPreview = async ({
+  eventId,
+  userId,
+}: {
+  eventId: string | number;
+  userId: string | number;
+}): Promise<
+  EventBasicInfoType & {
+    event_location: EventLocationType;
+    event_detail: NullablePartial<EventDetailType>;
+    event_ticket_info: EventTicketInfoType[];
+    event_tag: EventTagType[];
+  }
+> => {
+  const query = `SELECT * FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.id = ? AND event.user_id = ?;`;
+
+  const rowData = await dbSelect<
+    {
+      event: EventBasicInfoType;
+      event_location: EventLocationType;
+      event_detail: NullablePartial<EventDetailType>;
+      event_ticket_info: NullablePartial<EventTicketInfoType>;
+      event_tag: NullablePartial<EventTagType>;
+    }[]
+  >({
+    query,
+    nestTables: true,
+    queryValues: [eventId, userId],
+  });
+
+  if (!rowData.length) {
+    throw new NotFoundException('Event not found.');
+  }
+
+  delete rowData[0].event.user_id;
+  const eventData: any = {
+    ...rowData[0].event,
+    event_location: rowData[0].event_location,
+    event_detail: rowData[0].event_detail,
+    event_ticket_info: [],
+    event_tag: [],
+  };
+  const tagIds = new Set();
+  const ticketIds = new Set();
+
+  for (const data of rowData) {
+    if (data.event_tag.id && !tagIds.has(data.event_tag.id)) {
+      eventData.event_tag.push(data.event_tag);
+      tagIds.add(data.event_tag.id);
+    }
+    if (
+      data.event_ticket_info.id &&
+      !ticketIds.has(data.event_ticket_info.id)
+    ) {
+      eventData.event_ticket_info.push(data.event_ticket_info);
+      ticketIds.add(data.event_ticket_info.id);
+    }
+  }
+
+  return eventData;
+};
+
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const createEventBasicInfo = async ({
@@ -310,12 +446,20 @@ export const createEventBasicInfo = async ({
   userId: string | number;
 }) => {
   const { location, tags, ...restData } = data;
-  const slugTitle = slug({ string: restData.title!, options: { lower: true } });
+  const slugTitle = slug({
+    string: `${restData.title!}-${generateId()}`,
+    options: { lower: true },
+  });
 
   let query = `INSERT INTO event SET ?;`;
   const res = await dbInsert({
     query,
-    data: { ...restData, slug: slugTitle, user_id: userId },
+    data: {
+      ...restData,
+      slug: slugTitle,
+      is_available: 0,
+      user_id: userId,
+    },
   });
 
   query = `INSERT INTO event_location SET ?;`;
@@ -499,6 +643,29 @@ export const editEventTicket = async ({
 
   if (!result.affectedRows) {
     throw new NotFoundException('Ticket not found.');
+  }
+
+  return result;
+};
+
+export const editPublishEvent = async ({
+  data,
+  eventId,
+  userId,
+}: {
+  data: PublishDtoType;
+  eventId: string | number;
+  userId: string | number;
+}) => {
+  const query = `UPDATE event SET is_available = ? WHERE event.id = ? AND event.user_id = ?;`;
+
+  const result = await dbUpdate({
+    query,
+    queryValues: [+data.is_available!, eventId, userId],
+  });
+
+  if (!result.affectedRows) {
+    throw new NotFoundException('Event not found.');
   }
 
   return result;

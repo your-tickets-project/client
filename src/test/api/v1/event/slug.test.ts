@@ -27,7 +27,7 @@ afterEach(() => {
 
 describe('GET route -- /api/v1/event/[slug] -- success request', () => {
   test('returns the data', async () => {
-    const eventData = {
+    const data = {
       event: createEvent(),
       event_detail: createEventDetail(),
       event_location: createLocation(),
@@ -36,7 +36,7 @@ describe('GET route -- /api/v1/event/[slug] -- success request', () => {
 
     const RowData = [
       {
-        ...eventData,
+        ...data,
         event_tag: createEventTag({
           id: 1,
           event_id: 1,
@@ -44,7 +44,7 @@ describe('GET route -- /api/v1/event/[slug] -- success request', () => {
         }),
       },
       {
-        ...eventData,
+        ...data,
         event_tag: createEventTag({
           id: 2,
           event_id: 1,
@@ -58,18 +58,16 @@ describe('GET route -- /api/v1/event/[slug] -- success request', () => {
 
     const res = await request({
       handler,
-      query: { slug: eventData.event.slug },
+      query: { slug: data.event.slug },
     });
 
     expect(res.statusCode).toBe(OK_STATUS);
     expect(res.body).toEqual({
-      event: {
-        ...eventData.event,
-        event_detail: eventData.event_detail,
-        event_location: eventData.event_location,
-        event_ticket_info: eventData.event_ticket_info,
-        event_tag: [RowData[0].event_tag, RowData[1].event_tag],
-      },
+      ...data.event,
+      event_detail: data.event_detail,
+      event_location: data.event_location,
+      event_ticket_info: [data.event_ticket_info],
+      event_tag: [RowData[0].event_tag, RowData[1].event_tag],
     });
   });
 

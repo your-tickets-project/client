@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
@@ -21,7 +21,9 @@ import {
 } from 'client/components/ui';
 import { EditIcon, GarbageTrashIcon } from 'client/components/icons';
 // helpers
-import { currencyFormat, debounce, formatTime } from 'client/helpers';
+import { formatCurrency, debounce, formatTime } from 'client/helpers';
+// hooks
+import useVW from 'client/hooks/useVW';
 // interfaces
 import { EventTicketInfoType, ShowEventTicketInfoType } from 'interfaces';
 // services
@@ -33,7 +35,7 @@ import {
   putEventTicket,
 } from 'client/services/event.service';
 // styles
-import { colors } from 'client/styles/variables';
+import { breakPointsPX, colors } from 'client/styles/variables';
 
 interface DataSource extends ShowEventTicketInfoType {
   key: string | number;
@@ -83,6 +85,7 @@ export default function TicketsPage() {
 
 const TicketsWrapper = () => {
   const router = useRouter();
+  const vw = useVW();
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
@@ -116,9 +119,7 @@ const TicketsWrapper = () => {
           }))
         );
       } catch (error: any) {
-        toaster.error(
-          error?.response?.data?.message || 'Internal server error.'
-        );
+        toast.error(error?.response?.data?.message || 'Internal server error.');
 
         setTimeout(() => {
           router.replace('/dashboard/events');
@@ -152,12 +153,12 @@ const TicketsWrapper = () => {
         eventId,
         ticketId: ticketAction.ticketId,
       });
-      toaster.success(res.data.message);
+      toast.success(res.data.message);
       setData((state) =>
         state.filter(({ id }) => id !== ticketAction.ticketId)
       );
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
     setIsShowModal(false);
   };
@@ -166,9 +167,11 @@ const TicketsWrapper = () => {
     <EventFormLayout>
       <div className="container">
         <div className="row hg-48">
-          <div className="col-12">
-            <h1>Tickets</h1>
-          </div>
+          {vw >= breakPointsPX.md && (
+            <div className="col-12">
+              <h1>Tickets</h1>
+            </div>
+          )}
           <div className="col-12">
             <Button
               block
@@ -250,7 +253,11 @@ const TicketsWrapper = () => {
                               )} ${`0${endDate.getDate()}`.slice(
                                 -2
                               )}, ${endDate.getFullYear()}`}{' '}
-                          at {formatTime({ time: record.time_end })}
+                          at{' '}
+                          {formatTime({
+                            time: record.time_end,
+                            timeFormat: 'short',
+                          })}
                         </p>
                       </>
                     );
@@ -272,7 +279,7 @@ const TicketsWrapper = () => {
                   render(value: number, record: DataSource) {
                     return record.type === TYPES_STATES.FREE
                       ? 'Free'
-                      : currencyFormat(value, 'USD');
+                      : formatCurrency(value, 'USD');
                   },
                 },
                 {
@@ -433,9 +440,7 @@ const EditUpdateForm = ({
         setType(event_ticket_info.type as TYPES_STATES);
         setCheckInitialValues(true);
       } catch (error: any) {
-        toaster.error(
-          error?.response?.data?.message || 'Internal server error.'
-        );
+        toast.error(error?.response?.data?.message || 'Internal server error.');
         onAfterFinish();
       }
     };
@@ -443,7 +448,7 @@ const EditUpdateForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
-  const handleFinish = async (values: FormValues) => {
+  const handleFinish = debounce(async (values: FormValues) => {
     if (type === TYPES_STATES.PAID && values.price === 0) return;
 
     setIsSending(true);
@@ -458,23 +463,23 @@ const EditUpdateForm = ({
       };
       if (ticketId === undefined) {
         const res = await postEventTicket(payload);
-        toaster.success(res.data.message);
+        toast.success(res.data.message);
       } else {
         const res = await putEventTicket({
           ...payload,
           ticketId,
         });
-        toaster.success(res.data.message);
+        toast.success(res.data.message);
       }
 
       setTimeout(() => {
         router.reload();
       }, 3000);
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
       onAfterFinish();
     }
-  };
+  }, 800);
 
   if (!checkInitialValues) {
     return (
@@ -701,6 +706,17 @@ const EditUpdateForm = ({
             </div>
 
             <div className="col-12 row vg-sm-8">
+              <div className="col-12">
+                <p
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '8px',
+                    marginTop: '0',
+                  }}
+                >
+                  Tickets per order
+                </p>
+              </div>
               <div className="col-12 col-sm-6">
                 <Form.Item
                   label="Minimun quantity"

@@ -2,22 +2,45 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 // components
+import PrivateRoute from 'client/components/app/PrivateRoute';
 import PublicLayout from 'client/components/Layouts/PublicLayout';
 import ShowEvent from 'client/components/app/ShowEvent';
 import Loader from 'client/components/app/Loader';
 // interfaces
-import { EventType } from 'interfaces';
+import {
+  EventBasicInfoType,
+  EventDetailType,
+  EventLocationType,
+  EventTagType,
+  EventTicketInfoType,
+  NullablePartial,
+} from 'interfaces';
 // services
-import { getEventBySlug } from 'client/services/event.service';
+import { getEventPreview } from 'client/services/event.service';
 
-export default function EventPage() {
+export default function PreviewPage() {
+  return (
+    <PrivateRoute>
+      <PublicLayout>
+        <ShowEventWrapper />
+      </PublicLayout>
+    </PrivateRoute>
+  );
+}
+
+const ShowEventWrapper = () => {
   const router = useRouter();
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
   // data
   const [event, setEvent] = useState<
-    EventType & { ticket_smallest_price: number }
+    EventBasicInfoType & {
+      event_location: EventLocationType;
+      event_detail: NullablePartial<EventDetailType>;
+      event_ticket_info: EventTicketInfoType[];
+      event_tag: EventTagType[];
+    } & { ticket_smallest_price: number }
   >();
 
   useEffect(() => {
@@ -29,13 +52,12 @@ export default function EventPage() {
     if (!router.isReady) return;
 
     const queryAPI = async () => {
-      const { slug } = router.query;
-
+      const { id } = router.query;
       try {
-        const res = await getEventBySlug({ slug: slug as string });
-        const ticket_smallest_price = res.data.event_ticket_info.sort(
-          (a, b) => a.price - b.price
-        )[0].price;
+        const res = await getEventPreview({ eventId: id as string });
+        const ticket_smallest_price =
+          res.data.event_ticket_info.sort((a, b) => a.price - b.price)[0]
+            ?.price || 0;
         setEvent({
           ...res.data,
           ticket_smallest_price,
@@ -63,9 +85,5 @@ export default function EventPage() {
     );
   }
 
-  return (
-    <PublicLayout>
-      <ShowEvent event={event} />
-    </PublicLayout>
-  );
-}
+  return <ShowEvent event={event} isPreview />;
+};

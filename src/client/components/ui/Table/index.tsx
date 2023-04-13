@@ -44,12 +44,12 @@ export const Table = ({ columns, dataSource, style }: Props) => {
               </tr>
             ))
           ) : (
-            <div className="ui-table_empty-container">
-              <div className="ui-table_empty-icon">
+            <tr className="ui-table_empty-container">
+              <td className="ui-table_empty-icon">
                 <NoDataIcon />
-              </div>
-              <p className="ui-table_empty-text">No data</p>
-            </div>
+              </td>
+              <td className="ui-table_empty-text">No data</td>
+            </tr>
           )}
         </tbody>
       </table>

@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import {
   MenuIcon,
@@ -88,7 +88,7 @@ const authLinks: ItemsType[] = [
     handleClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
       e.preventDefault();
       authLogOut();
-      toaster.success('Logged out successfully.');
+      toast.success('Logged out successfully.');
     },
   },
 ];

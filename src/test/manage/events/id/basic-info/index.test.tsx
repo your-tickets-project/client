@@ -13,7 +13,7 @@ import { rest } from 'msw';
 import { server } from 'client/mocks/server';
 import { PrivateWrapper } from 'client/mocks/Wrappers';
 
-const eventData = {
+const data = {
   ...createEvent(),
   event_location: createLocation(),
   event_tag: [createEventTag({ name: 'custom tag' })],
@@ -23,9 +23,9 @@ jest.mock('next/router', () => ({
   useRouter() {
     return {
       isReady: true,
-      asPath: `/manage/events/${eventData.id}/basic-info`,
+      asPath: `/manage/events/${data.id}/basic-info`,
       push: jest.fn(),
-      query: { id: eventData.id },
+      query: { id: data.id },
     };
   },
 }));
@@ -39,14 +39,14 @@ afterAll(() => server.close());
 describe('<BasicInfoPage/> success integration', () => {
   it(`should send the form successfully`, async () => {
     server.use(
-      rest.get(`/event/basic-info/${eventData.id}`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json(eventData));
+      rest.get(`/event/basic-info/${data.id}`, async (req, res, ctx) => {
+        return res(ctx.status(OK_STATUS), ctx.json(data));
       })
     );
 
     const message = 'Event updated.';
     server.use(
-      rest.put(`/event/basic-info/${eventData.id}`, async (req, res, ctx) => {
+      rest.put(`/event/basic-info/${data.id}`, async (req, res, ctx) => {
         return res(ctx.status(OK_STATUS), ctx.json({ message }));
       })
     );
@@ -62,14 +62,14 @@ describe('<BasicInfoPage/> success integration', () => {
     const $postalCodeField = screen.getByLabelText(/postal code/i);
     const $countryField = screen.getByLabelText(/country/i);
 
-    expect($titleField).toHaveValue(eventData.title);
-    expect($venueNameField).toHaveValue(eventData.event_location.venue_name);
-    expect($address1Field).toHaveValue(eventData.event_location.address_1);
+    expect($titleField).toHaveValue(data.title);
+    expect($venueNameField).toHaveValue(data.event_location.venue_name);
+    expect($address1Field).toHaveValue(data.event_location.address_1);
     expect($address2Field).toHaveValue('');
-    expect($cityField).toHaveValue(eventData.event_location.city);
-    expect($stateField).toHaveValue(eventData.event_location.state);
-    expect($postalCodeField).toHaveValue(eventData.event_location.postal_code);
-    expect($countryField).toHaveValue(eventData.event_location.country);
+    expect($cityField).toHaveValue(data.event_location.city);
+    expect($stateField).toHaveValue(data.event_location.state);
+    expect($postalCodeField).toHaveValue(data.event_location.postal_code);
+    expect($countryField).toHaveValue(data.event_location.country);
 
     fireEvent.click(screen.getByRole('button', { name: /save/i }));
 

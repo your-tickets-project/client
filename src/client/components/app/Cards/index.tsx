@@ -6,10 +6,10 @@ import { Card } from 'client/components/ui';
 import Loader from 'client/components/app/Loader';
 // helpers
 import {
-  currencyFormat,
-  formatDate,
+  formatCurrency,
   formatShortLocation,
   formatTime,
+  getDateData,
   shimmer,
   toBase64,
 } from 'client/helpers';
@@ -25,6 +25,15 @@ interface Props {
 }
 
 export default function Cards({ events }: Props) {
+  const formatDate = ({ date }: { date: string }) => {
+    const d = getDateData({
+      date,
+      monthFormat: 'short',
+      weekDayFormat: 'short',
+    });
+    return `${d.weekDay}, ${d.monthText} ${d.day}, ${d.year}`;
+  };
+
   return (
     <>
       <div className="cards">
@@ -51,7 +60,7 @@ export default function Cards({ events }: Props) {
                             blurDataURL={`data:image/svg+xml;base64,${toBase64(
                               shimmer('100%', '100%')
                             )}`}
-                            fill={true}
+                            fill
                             placeholder="blur"
                             src={`${baseURL}/media/${coverImageUrl}`}
                             style={{ objectFit: 'cover' }}
@@ -64,14 +73,17 @@ export default function Cards({ events }: Props) {
                       <p className="title">{title}</p>
                       <p className="date">{`${formatDate({
                         date: dateStart,
-                      })}, ${formatTime({ time: timeStart })}`}</p>
+                      })}, ${formatTime({
+                        time: timeStart,
+                        timeFormat: 'short',
+                      })}`}</p>
                       <p className="location">
                         {formatShortLocation({ location })}
                       </p>
                       <p className="price">
                         {eventTicketInfo.type === 'free'
                           ? 'Free'
-                          : currencyFormat(eventTicketInfo.price, 'USD')}
+                          : formatCurrency(eventTicketInfo.price, 'USD')}
                       </p>
                     </Card>
                   </Link>
