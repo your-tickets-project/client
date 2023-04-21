@@ -1,21 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 // components
-import { CheckCircleIcon } from 'client/components/icons';
-import { Button, Form, Input, Modal, Select } from 'client/components/ui';
-import CountDownTimer from 'client/components/app/CountDownTimer';
-// hooks
-import useVW from 'client/hooks/useVW';
-// interfaces
-import { EventType } from 'interfaces';
+import { CheckCircleIcon, PhotoIcon } from 'client/components/icons';
 import {
-  formatDate,
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Select,
+} from 'client/components/ui';
+import CountDownTimer from 'client/components/app/CountDownTimer';
+// helpers
+import {
+  formatCurrency,
   formatShortLocation,
   formatTime,
+  getDateData,
   shimmer,
   toBase64,
 } from 'client/helpers';
+// hooks
+import useVW from 'client/hooks/useVW';
+// interfaces
+import {
+  EventBasicInfoType,
+  EventDetailType,
+  EventLocationType,
+  EventTagType,
+  EventTicketInfoType,
+  NullablePartial,
+} from 'interfaces';
 // services
 import { baseURL } from 'client/services';
 // store
@@ -29,7 +45,12 @@ import {
 } from 'client/styles/variables';
 
 interface Props {
-  event: EventType;
+  event: EventBasicInfoType & {
+    event_location: EventLocationType;
+    event_detail: NullablePartial<EventDetailType>;
+    event_ticket_info: EventTicketInfoType[];
+    event_tag: EventTagType[];
+  };
   handleShowModal: (state: boolean) => void;
   isShowModal: boolean;
 }
@@ -50,17 +71,42 @@ export default function CheckoutModal({
   isShowModal,
 }: Props) {
   const router = useRouter();
-  const vw = useVW();
   const { user } = AuthSelector();
+  const vw = useVW();
 
   // booleans
+  const [isLoading, setIsLoading] = useState(true);
   const [showLeave, setShowLeave] = useState(false);
   const [timeEnd, setTimeEnd] = useState(false);
   // data
-  const [ticketsNumber, setTicketsNumber] = useState(1);
   const [checkout, setCheckout] = useState<CHECKOUT_STATES>(
     CHECKOUT_STATES.PRE_SALE
   );
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [totalTickets, setTotalTickets] = useState(0);
+  const [tickets, setTickets] = useState<
+    { id: number | string; amount: number; name: string; price: number }[]
+  >([]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    setTotalPrice(tickets.reduce((acc, t) => acc + t.price, 0));
+    setTotalTickets(tickets.reduce((acc, t) => acc + t.amount, 0));
+  }, [isLoading, tickets]);
+
+  const formatDate = ({ date }: { date: string }) => {
+    const d = getDateData({
+      date,
+      monthFormat: 'short',
+      weekDayFormat: 'short',
+    });
+    return `${d.weekDay}, ${d.monthText} ${d.day}, ${d.year}`;
+  };
 
   const handleFinish = async (values: any) => {
     setCheckout(CHECKOUT_STATES.SUCCESS);
@@ -74,6 +120,90 @@ export default function CheckoutModal({
       setTimeEnd(false);
       setCheckout(CHECKOUT_STATES.PRE_SALE);
     }, 500);
+  };
+
+  const checkReleaseDate = (ticket: EventTicketInfoType) => {
+    const nowDate = new Date();
+    const startDate = new Date(
+      `${ticket.sales_start.split('T')[0]}T${ticket.time_start}`
+    );
+    const endDate = new Date(
+      `${ticket.sales_end.split('T')[0]}T${ticket.time_end}`
+    );
+
+    if (nowDate < startDate) {
+      let text = 'Sales start';
+
+      if (nowDate.getDate() === startDate.getDate()) {
+        text += ' today';
+      } else {
+        const { monthText, day, year } = getDateData({
+          date: `${ticket.sales_start.split('T')[0]}T${ticket.time_start}`,
+          monthFormat: 'short',
+        });
+
+        text += ` on ${monthText} ${day}, ${year}`;
+      }
+
+      text += ` at ${formatTime({
+        time: ticket.time_start,
+        timeFormat: 'short',
+      })}`;
+
+      return (
+        <p style={{ color: colors.grayFont, fontWeight: 'bold' }}>{text}</p>
+      );
+    }
+
+    if (nowDate >= endDate) {
+      return (
+        <p style={{ color: colors.grayFont, fontWeight: 'bold' }}>
+          Sales ended
+        </p>
+      );
+    }
+
+    return (
+      <Select
+        placeholder="N° tickets"
+        value={0}
+        options={[
+          { key: 0, value: 0, label: '0' },
+          ...Array.from(
+            { length: ticket.maximum_quantity },
+            (_, index) => index + 1
+          )
+            .filter((n) => n >= ticket.minimum_quantity)
+            .map((n) => ({
+              key: n,
+              label: `${n}`,
+              value: n,
+            })),
+        ]}
+        onChange={(e) => {
+          const value = +e.target.value;
+          setTickets((state) => {
+            if (value === 0) {
+              return state.filter((t) => t.id !== ticket.id);
+            }
+
+            const data = {
+              id: ticket.id,
+              amount: value,
+              name: ticket.name,
+              price: value * ticket.price,
+            };
+
+            const found = state.findIndex((t) => t.id === ticket.id);
+            if (found === -1) {
+              return [...state, data];
+            }
+
+            return state.map((t) => (t.id === ticket.id ? data : t));
+          });
+        }}
+      />
+    );
   };
 
   return (
@@ -103,34 +233,38 @@ export default function CheckoutModal({
                     <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
                       {`${formatTime({
                         time: event.time_start,
-                      })} - ${formatTime({ time: event.time_end })}`}
+                        timeFormat: 'short',
+                      })} - ${formatTime({
+                        time: event.time_end,
+                        timeFormat: 'short',
+                      })}`}
                     </p>
                   </div>
                   <div className="body">
-                    <div className="row vg-8">
-                      <div className="col-7">
-                        <h4>{event.event_ticket_info.name}</h4>
-                        <p>{event.event_ticket_info.price || 'Free'}</p>
-                      </div>
-                      <div className="col-5">
-                        <Select
-                          placeholder="N° tickets"
-                          value="1"
-                          options={[
-                            { key: 1, label: '1', value: '1' },
-                            { key: 2, label: '2', value: '2' },
-                            { key: 3, label: '3', value: '3' },
-                            { key: 4, label: '4', value: '4' },
-                            { key: 5, label: '5', value: '5' },
-                          ]}
-                          onChange={(e) => setTicketsNumber(+e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    {event.event_ticket_info.description && (
-                      <p className="ticket-description">
-                        {event.event_ticket_info.description}
-                      </p>
+                    {event.event_ticket_info.map((ticket) =>
+                      ticket.visibility === 'visible' ? (
+                        <React.Fragment key={ticket.id}>
+                          <div className="row vg-8">
+                            <div className="col-6">
+                              <p className="ticket-name">{ticket.name}</p>
+                              <p>
+                                {ticket.price
+                                  ? formatCurrency(ticket.price, 'USD')
+                                  : 'Free'}
+                              </p>
+                            </div>
+                            <div className="col-6">
+                              {checkReleaseDate(ticket)}
+                            </div>
+                            <div className="col-12">
+                              <p className="ticket-description">
+                                {ticket.description}
+                              </p>
+                            </div>
+                          </div>
+                          <Divider />
+                        </React.Fragment>
+                      ) : null
                     )}
                     <p className="brand">
                       Offered by <span>YourTickets</span>
@@ -138,13 +272,16 @@ export default function CheckoutModal({
                   </div>
                 </div>
                 <div className="footer">
-                  <p className="price">
-                    {event.event_ticket_info.price || 'Free'}
-                  </p>
+                  <p className="price">{formatCurrency(totalPrice, 'USD')}</p>
                   <Button
                     block
+                    disabled={!tickets.length}
                     type="primary"
-                    onClick={() => setCheckout(CHECKOUT_STATES.CHECKOUT)}
+                    onClick={
+                      tickets.length
+                        ? () => setCheckout(CHECKOUT_STATES.CHECKOUT)
+                        : undefined
+                    }
                   >
                     Checkout
                   </Button>
@@ -236,7 +373,7 @@ export default function CheckoutModal({
                       </p>
                       <div className="footer">
                         <p className="price">
-                          {event.event_ticket_info.price || 'Free'}
+                          {formatCurrency(totalPrice, 'USD')}
                         </p>
                         <Button block type="primary" htmlType="submit">
                           Register
@@ -271,12 +408,12 @@ export default function CheckoutModal({
                     </p>
                   </div>
                   <div className="body">
-                    <p style={{ margin: '0' }}>You go to</p>
+                    <p style={{ margin: '0' }}>You&apos;re going to</p>
                     <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
                     <div style={{ marginTop: '1rem' }} className="row hg-24">
                       <div className="col-12">
                         <p style={{ fontWeight: 'bold', margin: '0' }}>
-                          {ticketsNumber} TICKET(S) SENT TO
+                          {totalTickets} TICKET(S) SENT TO
                         </p>
                         <p style={{ margin: '0' }}>{user?.email}</p>
                       </div>
@@ -323,34 +460,45 @@ export default function CheckoutModal({
           {vw >= breakPointsPX.md && (
             <div className="col-md-5">
               <div className="order-summary">
-                <div>
-                  <Image
-                    src={`${baseURL}/media/${event.event_detail.cover_image_url}`}
-                    alt="0"
-                    width={1800}
-                    height={700}
-                    style={{ width: '100%', height: '50%' }}
-                    placeholder="blur"
-                    blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                      shimmer('100%', '100%')
-                    )}`}
-                  />
+                <div className="order-summary_image">
+                  {event.event_detail.cover_image_url ? (
+                    <Image
+                      src={`${baseURL}/media/${event.event_detail.cover_image_url}`}
+                      alt="0"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      placeholder="blur"
+                      blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                        shimmer('100%', '100%')
+                      )}`}
+                    />
+                  ) : (
+                    <div className="order-summary_image_blank">
+                      <PhotoIcon />
+                    </div>
+                  )}
                 </div>
-                {checkout !== CHECKOUT_STATES.SUCCESS && (
+                {checkout !== CHECKOUT_STATES.SUCCESS && !!tickets.length && (
                   <div className="order-summary-info">
                     <p className="order-summary-title">Order Summary</p>
-                    <div className="row vg-8">
-                      <p className="col-8">
-                        {ticketsNumber} x {event.event_ticket_info.name}
-                      </p>
-                      <p className="col-4">
-                        {event.event_ticket_info.price || 'Free'}
-                      </p>
-                    </div>
+                    {tickets.map((ticket) => (
+                      <div key={ticket.id} className="row vg-8">
+                        <p className="col-8">
+                          {ticket.amount} x {ticket.name}
+                        </p>
+                        <p className="col-4">
+                          {ticket.price
+                            ? formatCurrency(ticket.price, 'USD')
+                            : 'Free'}
+                        </p>
+                      </div>
+                    ))}
                     <div className="total row">
                       <p className="total-word col-8">Total</p>
                       <p className="total-price col-4">
-                        {event.event_ticket_info.price || 'Free'}
+                        {totalPrice
+                          ? formatCurrency(totalPrice, 'USD')
+                          : 'Free'}
                       </p>
                     </div>
                   </div>
@@ -415,6 +563,7 @@ export default function CheckoutModal({
         .info-container {
           display: flex;
           flex-direction: column;
+          height: 100%;
           max-height: 100%;
         }
 
@@ -426,6 +575,7 @@ export default function CheckoutModal({
 
         .body {
           flex: 1;
+          height: 100%;
           margin-bottom: 6.75rem;
           overflow-y: auto;
           padding: 1.5rem 1rem 0;
@@ -433,7 +583,7 @@ export default function CheckoutModal({
 
         .body .ticket-description {
           color: ${colors.grayFont};
-          margin-top: 0;
+          margin: 0;
         }
 
         .body .brand {
@@ -444,6 +594,12 @@ export default function CheckoutModal({
         .body .brand span {
           font-size: ${fluidFont.big};
           font-weight: bold;
+        }
+
+        .body .ticket-name {
+          font-size: ${fluidFont.big};
+          font-weight: bold;
+          margin: 0;
         }
 
         .footer {
@@ -465,21 +621,31 @@ export default function CheckoutModal({
         }
 
         .order-summary {
-          background-color: ${colors.lightGray};
           height: 100%;
         }
 
+        .order-summary_image {
+          align-items: center;
+          background-color: ${colors.lightGray};
+          display: flex;
+          height: 40%;
+          justify-content: center;
+          position: relative;
+        }
+
+        .order-summary_image_blank {
+          width: 30px;
+        }
+
         .order-summary-info {
+          height: 60%;
+          overflow-y: auto;
           padding: 1.5rem 1rem;
         }
 
         .order-summary-title {
           font-weight: bold;
           margin-top: 0;
-        }
-
-        .order-summary-info .total {
-          margin-top: 4rem;
         }
 
         .order-summary-info .total-word,

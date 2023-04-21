@@ -1,5 +1,5 @@
 import { request } from 'server/mocks/handlers';
-import handler from 'pages/api/v1/auth/signin';
+import handler from 'pages/api/v1/auth/signup';
 // fixtures
 import { createUser } from 'fixtures/user.fixture';
 // http status codes
@@ -17,7 +17,7 @@ afterEach(() => {
   dbSelect.mockClear();
 });
 
-describe('POST route -- /api/v1/auth/signin -- success request', () => {
+describe('POST route -- /api/v1/auth/signup -- success request', () => {
   test('create a user successfully', async () => {
     const user = createUser();
 
@@ -40,7 +40,7 @@ describe('POST route -- /api/v1/auth/signin -- success request', () => {
   });
 });
 
-describe('POST route -- /api/v1/auth/signin -- bad request', () => {
+describe('POST route -- /api/v1/auth/signup -- bad request', () => {
   test('empty body sent', async () => {
     const res = await request({ handler, method: 'POST', body: {} });
 

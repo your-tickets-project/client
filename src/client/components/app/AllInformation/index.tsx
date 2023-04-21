@@ -13,8 +13,6 @@ import {
   PhotoIcon,
   ShoesIcon,
 } from 'client/components/icons';
-// interfaces
-import { EventType } from 'interfaces';
 // services
 import { getEvents } from 'client/services/event.service';
 // styles
@@ -65,7 +63,20 @@ const categoryCards = [
 
 export default function AllInformation() {
   const [isLoading, setIsLoading] = useState(true);
-  const [events, setEvents] = useState<EventType[]>([]);
+  const [events, setEvents] = useState<
+    {
+      id: number | string;
+      slug: string;
+      title: string;
+      date_start: string;
+      time_start: string;
+      venue_name: string;
+      city: string;
+      state: string | null;
+      cover_image_url: string;
+      ticket_smallest_price: number;
+    }[]
+  >();
 
   useEffect(() => {
     setIsLoading(false);

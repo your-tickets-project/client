@@ -8,3 +8,7 @@ export const appShowDashboardOptions = ({
 }) => {
   store.dispatch(appSlice.actions.showDashboardOptions(isShowOptions));
 };
+
+export const appPublishEvent = ({ canPublish }: { canPublish: boolean }) => {
+  store.dispatch(appSlice.actions.publishEvent(canPublish));
+};

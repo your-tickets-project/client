@@ -58,7 +58,11 @@ export default React.memo(function MapLocation({
         {location && (
           <div className="col-12">
             <div className="map-container">
-              <MapWithMarker location={location} onDragEnd={handleDragEnd} />
+              <MapWithMarker
+                draggable
+                location={location}
+                onDragEnd={handleDragEnd}
+              />
             </div>
           </div>
         )}

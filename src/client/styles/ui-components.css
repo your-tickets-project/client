@@ -989,7 +989,7 @@ th.ui-table_cell:not(:last-of-type):before {
   content: '';
   height: 1.6rem;
   position: absolute;
-  right: 0;
+  right: 1px;
   top: 30%;
   width: 1px;
 }

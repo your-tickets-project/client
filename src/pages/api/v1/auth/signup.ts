@@ -1,9 +1,9 @@
 // controllers
 import {
-  signIn,
-  validateSignIn,
+  signup,
+  validateSignup,
 } from 'server/controllers/auth/auth.controller';
 // router
 import { errorHandler, router } from 'server/router';
 
-export default router().post(validateSignIn, signIn).handler(errorHandler());
+export default router().post(validateSignup, signup).handler(errorHandler());

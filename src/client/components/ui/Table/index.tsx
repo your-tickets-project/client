@@ -7,7 +7,7 @@ interface Props {
     title: React.ReactNode;
     render?: (value: any, record: any) => React.ReactNode;
   }[];
-  dataSource: any[];
+  dataSource: { key: string | number }[];
   style?: React.CSSProperties;
 }
 
@@ -38,18 +38,22 @@ export const Table = ({ columns, dataSource, style }: Props) => {
               <tr key={data.key}>
                 {columns.map(({ key, dataIndex, render }) => (
                   <td key={key} className="ui-table_cell">
-                    {render ? render(data[dataIndex], data) : data[dataIndex]}
+                    {render
+                      ? // @ts-ignore
+                        render(data[dataIndex], data)
+                      : // @ts-ignore
+                        data[dataIndex]}
                   </td>
                 ))}
               </tr>
             ))
           ) : (
-            <div className="ui-table_empty-container">
-              <div className="ui-table_empty-icon">
+            <tr className="ui-table_empty-container">
+              <td className="ui-table_empty-icon">
                 <NoDataIcon />
-              </div>
-              <p className="ui-table_empty-text">No data</p>
-            </div>
+              </td>
+              <td className="ui-table_empty-text">No data</td>
+            </tr>
           )}
         </tbody>
       </table>

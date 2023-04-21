@@ -1,13 +1,5 @@
 import { request } from 'server/mocks/handlers';
 import handler from 'pages/api/v1/event';
-// fixtures
-import {
-  createEvent,
-  createEventDetail,
-  createEventTag,
-  createEventTicketInfo,
-  createLocation,
-} from 'fixtures/event.fixture';
 // http status codes
 import {
   INTERNAL_SERVER_ERROR_STATUS,
@@ -26,60 +18,45 @@ afterEach(() => {
 describe('GET route -- /api/v1/event -- success request', () => {
   test('returns the data', async () => {
     const eventData = {
-      event: createEvent(),
-      event_detail: createEventDetail(),
-      event_location: createLocation(),
-      event_ticket_info: createEventTicketInfo(),
+      id: 1,
+      slug: 'slug-1',
+      title: 'title-1',
+      date_start: '1996-02-09T00:00:00',
+      time_start: '13:00:00',
+      venue_name: 'venue_name-1',
+      city: 'city-1',
+      state: 'state-1',
+      cover_image_url: 'url-1',
+      ticket_smallest_price: 1,
     };
 
     const eventData2 = {
-      event: createEvent({ id: 2 }),
-      event_detail: createEventDetail({ id: 2, event_id: 2 }),
-      event_location: createLocation({ id: 2, event_id: 2 }),
-      event_ticket_info: createEventTicketInfo({ id: 2, event_id: 2 }),
+      id: 2,
+      slug: 'slug-2',
+      title: 'title-2',
+      date_start: '1996-02-09T00:00:00',
+      time_start: '13:00:00',
+      venue_name: 'venue_name-2',
+      city: 'city-2',
+      state: 'state-2',
+      cover_image_url: 'url-2',
+      ticket_smallest_price: 1,
     };
 
     const eventData3 = {
-      event: createEvent({ id: 3 }),
-      event_detail: createEventDetail({ id: 3, event_id: 3 }),
-      event_location: createLocation({ id: 3, event_id: 3 }),
-      event_ticket_info: createEventTicketInfo({ id: 3, event_id: 3 }),
+      id: 3,
+      slug: 'slug-3',
+      title: 'title-3',
+      date_start: '1996-02-09T00:00:00',
+      time_start: '13:00:00',
+      venue_name: 'venue_name-3',
+      city: 'city-3',
+      state: 'state-3',
+      cover_image_url: 'url-3',
+      ticket_smallest_price: 1,
     };
 
-    const RowData = [
-      {
-        ...eventData,
-        event_tag: createEventTag({
-          id: 1,
-          event_id: 1,
-          name: 'Mexico events',
-        }),
-      },
-      {
-        ...eventData,
-        event_tag: createEventTag({
-          id: 2,
-          event_id: 1,
-          name: 'Guadalajara events',
-        }),
-      },
-      {
-        ...eventData2,
-        event_tag: createEventTag({
-          id: 3,
-          event_id: 2,
-          name: 'Jalisco events',
-        }),
-      },
-      {
-        ...eventData3,
-        event_tag: createEventTag({
-          id: null,
-          event_id: null,
-          name: null,
-        }),
-      },
-    ];
+    const RowData = [eventData, eventData2, eventData3];
 
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve(RowData));
@@ -87,29 +64,7 @@ describe('GET route -- /api/v1/event -- success request', () => {
 
     expect(res.statusCode).toBe(OK_STATUS);
     expect(res.body).toEqual({
-      events: [
-        {
-          ...eventData.event,
-          event_detail: eventData.event_detail,
-          event_location: eventData.event_location,
-          event_ticket_info: eventData.event_ticket_info,
-          event_tag: [RowData[0].event_tag, RowData[1].event_tag],
-        },
-        {
-          ...eventData2.event,
-          event_detail: eventData2.event_detail,
-          event_location: eventData2.event_location,
-          event_ticket_info: eventData2.event_ticket_info,
-          event_tag: [RowData[2].event_tag],
-        },
-        {
-          ...eventData3.event,
-          event_detail: eventData3.event_detail,
-          event_location: eventData3.event_location,
-          event_ticket_info: eventData3.event_ticket_info,
-          event_tag: [],
-        },
-      ],
+      events: RowData,
     });
   });
 

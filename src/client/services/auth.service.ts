@@ -9,10 +9,10 @@ export const checkUser = async (): Promise<AxiosResponse<{ user: UserType }>> =>
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-export const signin = async (
+export const signup = async (
   data: unknown
 ): Promise<AxiosResponse<{ message: string }>> =>
-  API.post('/auth/signin', data);
+  API.post('/auth/signup', data);
 
 export const login = async (
   data: unknown

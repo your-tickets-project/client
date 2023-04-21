@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import PrivateRoute from 'client/components/app/PrivateRoute';
 import DashboardLayout from 'client/components/Layouts/DashboardLayout';
@@ -11,6 +11,8 @@ import Loader from 'client/components/app/Loader';
 import { Button, Form, TextArea, Dragger } from 'client/components/ui';
 // helpers
 import { debounce, stringToHTML } from 'client/helpers';
+// hooks
+import useVW from 'client/hooks/useVW';
 // services
 import { baseURL } from 'client/services';
 import {
@@ -20,7 +22,7 @@ import {
 } from 'client/services/event.service';
 import { deleteMedia, postMedia } from 'client/services/media.service';
 // styles
-import { breakPoints } from 'client/styles/variables';
+import { breakPoints, breakPointsPX } from 'client/styles/variables';
 
 interface FileType {
   id: string | number;
@@ -44,6 +46,7 @@ export default function EditDetailsPage() {
 
 const DetailFormWrapper = () => {
   const router = useRouter();
+  const vw = useVW();
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
@@ -98,9 +101,7 @@ const DetailFormWrapper = () => {
           }
         }
       } catch (error: any) {
-        toaster.error(
-          error?.response?.data?.message || 'Internal server error.'
-        );
+        toast.error(error?.response?.data?.message || 'Internal server error.');
 
         setTimeout(() => {
           router.replace('/dashboard/events');
@@ -112,7 +113,7 @@ const DetailFormWrapper = () => {
   }, [isLoading, router.isReady]);
 
   const handleError = ({ message }: { message: string }) => {
-    toaster.error(message);
+    toast.error(message);
   };
 
   const handleDeleteFile = async ({ id }: { id: string | number }) => {
@@ -129,9 +130,7 @@ const DetailFormWrapper = () => {
 
         setFileList((state) => state.filter((file) => file.id !== id));
       } catch (error: any) {
-        toaster.error(
-          error?.response?.data?.message || 'Internal server error.'
-        );
+        toast.error(error?.response?.data?.message || 'Internal server error.');
       }
     }
   };
@@ -181,7 +180,7 @@ const DetailFormWrapper = () => {
         }
       }
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
   };
 
@@ -205,7 +204,7 @@ const DetailFormWrapper = () => {
         });
       }
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
   };
 
@@ -253,13 +252,13 @@ const DetailFormWrapper = () => {
         }
       }
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
   };
 
   const handleFinish = async (values: { summary: string }) => {
     if (!fileList.length) {
-      toaster.error('Main event image is required.');
+      toast.error('Main event image is required.');
       setUploadError(true);
 
       const $container = document.querySelector(
@@ -289,10 +288,10 @@ const DetailFormWrapper = () => {
         setEventDetail((state) =>
           state ? { ...state, summary: values.summary } : state
         );
-        toaster.success(res.data.message);
+        toast.success(res.data.message);
       }
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
     setIsSending(false);
   };
@@ -326,7 +325,7 @@ const DetailFormWrapper = () => {
           <div className="row hg-24">
             <div className="col-12 row hg-8">
               <div className="col-12">
-                <h1>Main event image</h1>
+                {vw >= breakPointsPX.md && <h1>Main event image</h1>}
                 <p>
                   Add the photo to show what your event will be about. You can
                   upload just 1 image.

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import { Button, Form, Input } from 'client/components/ui';
 import PublicRoute from 'client/components/app/PublicRoute';
@@ -8,7 +8,7 @@ import PublicLayout from 'client/components/Layouts/PublicLayout';
 // helpers
 import { debounce } from 'client/helpers';
 // services
-import { signin } from 'client/services/auth.service';
+import { signup } from 'client/services/auth.service';
 // styles
 import { breakPoints } from 'client/styles/variables';
 
@@ -19,7 +19,7 @@ interface FormTypes {
   password: string;
 }
 
-export default function SignInPage() {
+export default function SignupPage() {
   const router = useRouter();
 
   const [isSending, setIsSending] = useState(false);
@@ -28,22 +28,22 @@ export default function SignInPage() {
     setIsSending(true);
 
     try {
-      const res = await signin(values);
-      toaster.success(res.data.message);
+      const res = await signup(values);
+      toast.success(res.data.message);
 
       setTimeout(() => {
         router.push('/login');
       }, 3000);
     } catch (error: any) {
       setIsSending(false);
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
     }
   };
 
   return (
     <PublicRoute>
       <PublicLayout>
-        <h1>Sign in</h1>
+        <h1>Sign up</h1>
         <section className="container">
           <Form
             onFinish={debounce(handleFinish, 800)}
@@ -69,7 +69,7 @@ export default function SignInPage() {
               name="first_name"
               rules={{
                 required: true,
-                requiredMessage: 'First name is a required field',
+                message: 'First name is a required field',
               }}
             >
               <Input />
@@ -79,7 +79,7 @@ export default function SignInPage() {
               name="last_name"
               rules={{
                 required: true,
-                requiredMessage: 'Last name is a required field',
+                message: 'Last name is a required field',
               }}
             >
               <Input />
@@ -89,7 +89,7 @@ export default function SignInPage() {
               name="password"
               rules={{
                 required: true,
-                requiredMessage: 'Password is a required field',
+                message: 'Password is a required field',
               }}
             >
               <Input />

@@ -47,8 +47,7 @@ describe('when <Table/> is mounted', () => {
   it('should render with empty columns or data source array', () => {
     render(<Table columns={[]} dataSource={[]} />);
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.queryAllByRole('columnheader')).toHaveLength(0);
-    expect(screen.queryAllByRole('cell')).toHaveLength(0);
+    expect(screen.getByText(/no data/i)).toBeInTheDocument();
   });
 
   it('should render with optional css style object', () => {

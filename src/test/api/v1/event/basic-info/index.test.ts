@@ -27,9 +27,15 @@ const token = generateJWT({ id: user.id });
 
 describe('POST -- api/v1/event/basic-info -- success request', () => {
   it(`should create an event`, async () => {
+    const event = createEvent();
+    const location = createLocation();
     const body = {
-      ...createEvent(),
-      location: createLocation(),
+      ...event,
+      location: {
+        ...location,
+        latitude: +location.latitude,
+        longitude: +location.longitude,
+      },
     };
     const insertId = 1;
 

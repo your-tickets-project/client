@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import toaster from 'react-hot-toast';
+import toast from 'react-hot-toast';
 // components
 import MapLocation from 'client/components/app/MapLocation';
 import {
@@ -14,6 +14,8 @@ import {
 } from 'client/components/ui';
 // helpers
 import { debounce } from 'client/helpers';
+// hooks
+import useVW from 'client/hooks/useVW';
 // interfaces
 import {
   EventBasicInfoType,
@@ -25,6 +27,8 @@ import {
   postEventBasicInfo,
   putEventBasicInfo,
 } from 'client/services/event.service';
+// styles
+import { breakPointsPX } from 'client/styles/variables';
 
 interface FormValues {
   title: string;
@@ -65,6 +69,7 @@ export default function BasicInfoForm({
   parentScrollToSelector,
 }: Props) {
   const router = useRouter();
+  const vw = useVW();
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
@@ -149,17 +154,17 @@ export default function BasicInfoForm({
     try {
       if (eventData) {
         const res = await putEventBasicInfo({ data, eventId: eventData.id });
-        toaster.success(res.data.message);
+        toast.success(res.data.message);
         setIsSending(false);
       } else {
         const res = await postEventBasicInfo(data);
-        toaster.success(res.data.message);
+        toast.success(res.data.message);
         setTimeout(() => {
           router.push(`/manage/events/${res.data.insertId}/details`);
         }, 3000);
       }
     } catch (error: any) {
-      toaster.error(error?.response?.data?.message || 'Internal server error.');
+      toast.error(error?.response?.data?.message || 'Internal server error.');
 
       setTimeout(() => {
         router.replace('/dashboard/events');
@@ -193,7 +198,8 @@ export default function BasicInfoForm({
       <div className="row hg-16">
         <div className="col-12 row hg-8">
           <div className="col-12">
-            <h1>Basic info</h1>
+            {(router.asPath.includes('/create-event') ||
+              vw >= breakPointsPX.md) && <h1>Basic info</h1>}
             <p>
               Name your event and tell event-goers why they should come. Add
               details that highlight what makes it unique.
