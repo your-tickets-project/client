@@ -6,7 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { rest } from 'msw';
-import SignIn from 'pages/signin';
+import SignUp from 'pages/signup';
 // http status codes
 import {
   CREATED_STATUS,
@@ -17,11 +17,6 @@ import { server } from 'client/mocks/server';
 import { PublicWrapper } from 'client/mocks/Wrappers';
 
 beforeAll(() => server.listen());
-
-beforeEach(() => {
-  localStorage.removeItem('accessToken');
-  render(<SignIn />, { wrapper: PublicWrapper });
-});
 
 afterEach(() => server.resetHandlers());
 
@@ -44,10 +39,12 @@ const submitForm = () => {
   fireEvent.click(screen.getByRole('button', { name: /Send/i }));
 };
 
-describe('<SignIn/> success integration', () => {
+describe('<SignUp/> success integration', () => {
   it(`should send the form successfully`, async () => {
+    render(<SignUp />, { wrapper: PublicWrapper });
+
     server.use(
-      rest.post(`/auth/signin`, async (req, res, ctx) => {
+      rest.post(`/auth/signup`, async (req, res, ctx) => {
         return res(
           ctx.status(CREATED_STATUS),
           ctx.json({ message: 'User created successfully' })
@@ -65,8 +62,10 @@ describe('<SignIn/> success integration', () => {
   }, 10_000);
 });
 
-describe('<SignIn/> check validations', () => {
+describe('<SignUp/> check validations', () => {
   it(`should validate required fields`, async () => {
+    render(<SignUp />, { wrapper: PublicWrapper });
+
     expect(
       screen.queryByText('Email is a required field')
     ).not.toBeInTheDocument();
@@ -97,6 +96,8 @@ describe('<SignIn/> check validations', () => {
   });
 
   it(`should validate a valid email`, async () => {
+    render(<SignUp />, { wrapper: PublicWrapper });
+
     expect(
       screen.queryByText(/email must be a valid email/i)
     ).not.toBeInTheDocument();
@@ -113,8 +114,10 @@ describe('<SignIn/> check validations', () => {
   });
 
   it(`should handle errors on form submit`, async () => {
+    render(<SignUp />, { wrapper: PublicWrapper });
+
     server.use(
-      rest.post(`/auth/signin`, async (req, res, ctx) => {
+      rest.post(`/auth/signup`, async (req, res, ctx) => {
         return res(ctx.status(INTERNAL_SERVER_ERROR_STATUS));
       })
     );

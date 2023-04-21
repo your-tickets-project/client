@@ -54,8 +54,8 @@ const links: ItemsType[] = [
     style: { ...itemStyle, color: colors.color2 },
   },
   {
-    href: '/signin',
-    content: 'Sign in',
+    href: '/signup',
+    content: 'Sign up',
     style: itemStyle,
   },
   {

@@ -20,6 +20,8 @@ import {
   findEventPreview,
   findEventPreviewPublish,
   editPublishEvent,
+  findEventsDashboard,
+  removeEventDashboard,
 } from 'server/data/event/event.data';
 // exceptions
 import { BadRequestException } from 'server/exceptions';
@@ -164,6 +166,16 @@ export const getEventPreview = async (
 
   const data = await findEventPreview({
     eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+  res.status(OK_STATUS).json(data);
+};
+
+export const getEventsDashboard = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  const data = await findEventsDashboard({
     userId: req.user!.id,
   });
   res.status(OK_STATUS).json(data);
@@ -360,13 +372,11 @@ export const putPublishEvent = async (
     userId: req.user!.id,
   });
 
-  res
-    .status(OK_STATUS)
-    .json({
-      message: `Event ${
-        req.body.is_available ? 'published' : 'unpublished'
-      } successfully.`,
-    });
+  res.status(OK_STATUS).json({
+    message: `Event ${
+      req.body.is_available ? 'published' : 'not published'
+    } successfully.`,
+  });
 };
 
 /* DELETE
@@ -390,4 +400,20 @@ export const deleteEventTicket = async (
   });
 
   res.status(OK_STATUS).json({ message: 'Event updated.' });
+};
+
+export const deleteEventDashboard = async (
+  req: NextApiRequestExtended,
+  res: NextApiResponse
+) => {
+  if (!req.query.id) {
+    throw new BadRequestException('Id is required.');
+  }
+
+  await removeEventDashboard({
+    eventId: req.query.id as string,
+    userId: req.user!.id,
+  });
+
+  res.status(OK_STATUS).json({ message: 'Event deleted successfully.' });
 };

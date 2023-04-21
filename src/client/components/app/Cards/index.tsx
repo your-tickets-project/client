@@ -1,9 +1,11 @@
+/* eslint-disable camelcase */
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 // components
-import { Card } from 'client/components/ui';
 import Loader from 'client/components/app/Loader';
+import { CalendarIcon } from 'client/components/icons';
+import { Card } from 'client/components/ui';
 // helpers
 import {
   formatCurrency,
@@ -13,15 +15,24 @@ import {
   shimmer,
   toBase64,
 } from 'client/helpers';
-// interfaces
-import { EventType } from 'interfaces';
 // services
 import { baseURL } from 'client/services';
 // styles
 import { breakPoints, colors, fluidFont } from 'client/styles/variables';
 
 interface Props {
-  events: EventType[];
+  events?: {
+    id: number | string;
+    slug: string;
+    title: string;
+    date_start: string;
+    time_start: string;
+    venue_name: string;
+    city: string;
+    state: string | null;
+    cover_image_url: string;
+    ticket_smallest_price: number;
+  }[];
 }
 
 export default function Cards({ events }: Props) {
@@ -38,57 +49,74 @@ export default function Cards({ events }: Props) {
     <>
       <div className="cards">
         <div className="row hg-32 vg-md-8">
-          {events.length ? (
-            events.map(
-              ({
-                event_detail: { cover_image_url: coverImageUrl },
-                date_start: dateStart,
-                event_location: location,
-                event_ticket_info: eventTicketInfo,
-                id,
-                slug,
-                title,
-                time_start: timeStart,
-              }) => (
-                <div key={id} className="card col-12 col-md-6 col-xl-3">
-                  <Link href={`/event/${slug}`}>
-                    <Card
-                      cover={
-                        coverImageUrl ? (
-                          <Image
-                            alt="0"
-                            blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                              shimmer('100%', '100%')
-                            )}`}
-                            fill
-                            placeholder="blur"
-                            src={`${baseURL}/media/${coverImageUrl}`}
-                            style={{ objectFit: 'cover' }}
-                          />
-                        ) : undefined
-                      }
-                      hoverable
-                      style={{ height: '100%' }}
-                    >
-                      <p className="title">{title}</p>
-                      <p className="date">{`${formatDate({
-                        date: dateStart,
-                      })}, ${formatTime({
-                        time: timeStart,
-                        timeFormat: 'short',
-                      })}`}</p>
-                      <p className="location">
-                        {formatShortLocation({ location })}
-                      </p>
-                      <p className="price">
-                        {eventTicketInfo.type === 'free'
-                          ? 'Free'
-                          : formatCurrency(eventTicketInfo.price, 'USD')}
-                      </p>
-                    </Card>
-                  </Link>
-                </div>
+          {events ? (
+            events.length ? (
+              events.map(
+                ({
+                  id,
+                  slug,
+                  title,
+                  date_start,
+                  time_start,
+                  cover_image_url,
+                  city,
+                  state,
+                  ticket_smallest_price,
+                  venue_name,
+                }) => (
+                  <div key={id} className="card col-12 col-md-6 col-xl-3">
+                    <Link href={`/event/${slug}`}>
+                      <Card
+                        cover={
+                          cover_image_url ? (
+                            <Image
+                              alt="0"
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                shimmer('100%', '100%')
+                              )}`}
+                              fill
+                              placeholder="blur"
+                              src={`${baseURL}/media/${cover_image_url}`}
+                              style={{ objectFit: 'cover' }}
+                            />
+                          ) : undefined
+                        }
+                        hoverable
+                        style={{ height: '100%' }}
+                      >
+                        <p className="title">{title}</p>
+                        <p className="date">{`${formatDate({
+                          date: date_start,
+                        })}, ${formatTime({
+                          time: time_start,
+                          timeFormat: 'short',
+                        })}`}</p>
+                        <p className="location">
+                          {formatShortLocation({
+                            location: { city, state, venue_name },
+                          })}
+                        </p>
+                        <p className="price">
+                          {ticket_smallest_price === 0
+                            ? 'Free'
+                            : `From ${formatCurrency(
+                                ticket_smallest_price,
+                                'USD'
+                              )}`}
+                        </p>
+                      </Card>
+                    </Link>
+                  </div>
+                )
               )
+            ) : (
+              <div className="empty col-12">
+                <div className="empty-icon">
+                  <CalendarIcon />
+                </div>
+                <h3>No events in your area</h3>
+                <p>Try a different location</p>
+              </div>
             )
           ) : (
             <Loader />
@@ -124,6 +152,17 @@ export default function Cards({ events }: Props) {
           justify-content: center;
           width: 60%;
           margin: 1rem auto;
+        }
+
+        .empty {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .empty-icon {
+          width: 48px;
         }
 
         @media (min-width: ${breakPoints.md}) {

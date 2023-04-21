@@ -12,6 +12,15 @@ import {
   Select,
 } from 'client/components/ui';
 import CountDownTimer from 'client/components/app/CountDownTimer';
+// helpers
+import {
+  formatCurrency,
+  formatShortLocation,
+  formatTime,
+  getDateData,
+  shimmer,
+  toBase64,
+} from 'client/helpers';
 // hooks
 import useVW from 'client/hooks/useVW';
 // interfaces
@@ -23,14 +32,6 @@ import {
   EventTicketInfoType,
   NullablePartial,
 } from 'interfaces';
-import {
-  formatCurrency,
-  formatShortLocation,
-  formatTime,
-  getDateData,
-  shimmer,
-  toBase64,
-} from 'client/helpers';
 // services
 import { baseURL } from 'client/services';
 // store
@@ -121,6 +122,90 @@ export default function CheckoutModal({
     }, 500);
   };
 
+  const checkReleaseDate = (ticket: EventTicketInfoType) => {
+    const nowDate = new Date();
+    const startDate = new Date(
+      `${ticket.sales_start.split('T')[0]}T${ticket.time_start}`
+    );
+    const endDate = new Date(
+      `${ticket.sales_end.split('T')[0]}T${ticket.time_end}`
+    );
+
+    if (nowDate < startDate) {
+      let text = 'Sales start';
+
+      if (nowDate.getDate() === startDate.getDate()) {
+        text += ' today';
+      } else {
+        const { monthText, day, year } = getDateData({
+          date: `${ticket.sales_start.split('T')[0]}T${ticket.time_start}`,
+          monthFormat: 'short',
+        });
+
+        text += ` on ${monthText} ${day}, ${year}`;
+      }
+
+      text += ` at ${formatTime({
+        time: ticket.time_start,
+        timeFormat: 'short',
+      })}`;
+
+      return (
+        <p style={{ color: colors.grayFont, fontWeight: 'bold' }}>{text}</p>
+      );
+    }
+
+    if (nowDate >= endDate) {
+      return (
+        <p style={{ color: colors.grayFont, fontWeight: 'bold' }}>
+          Sales ended
+        </p>
+      );
+    }
+
+    return (
+      <Select
+        placeholder="N° tickets"
+        value={0}
+        options={[
+          { key: 0, value: 0, label: '0' },
+          ...Array.from(
+            { length: ticket.maximum_quantity },
+            (_, index) => index + 1
+          )
+            .filter((n) => n >= ticket.minimum_quantity)
+            .map((n) => ({
+              key: n,
+              label: `${n}`,
+              value: n,
+            })),
+        ]}
+        onChange={(e) => {
+          const value = +e.target.value;
+          setTickets((state) => {
+            if (value === 0) {
+              return state.filter((t) => t.id !== ticket.id);
+            }
+
+            const data = {
+              id: ticket.id,
+              amount: value,
+              name: ticket.name,
+              price: value * ticket.price,
+            };
+
+            const found = state.findIndex((t) => t.id === ticket.id);
+            if (found === -1) {
+              return [...state, data];
+            }
+
+            return state.map((t) => (t.id === ticket.id ? data : t));
+          });
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <Modal
@@ -156,80 +241,38 @@ export default function CheckoutModal({
                     </p>
                   </div>
                   <div className="body">
-                    {event.event_ticket_info.map((ticket) => (
-                      <React.Fragment key={ticket.id}>
-                        <div className="row vg-8">
-                          <div className="col-7">
-                            <p className="ticket-name">{ticket.name}</p>
-                            <p>
-                              {ticket.price
-                                ? formatCurrency(ticket.price, 'USD')
-                                : 'Free'}
-                            </p>
-                            <p className="ticket-description">
-                              {ticket.description}
-                            </p>
+                    {event.event_ticket_info.map((ticket) =>
+                      ticket.visibility === 'visible' ? (
+                        <React.Fragment key={ticket.id}>
+                          <div className="row vg-8">
+                            <div className="col-6">
+                              <p className="ticket-name">{ticket.name}</p>
+                              <p>
+                                {ticket.price
+                                  ? formatCurrency(ticket.price, 'USD')
+                                  : 'Free'}
+                              </p>
+                            </div>
+                            <div className="col-6">
+                              {checkReleaseDate(ticket)}
+                            </div>
+                            <div className="col-12">
+                              <p className="ticket-description">
+                                {ticket.description}
+                              </p>
+                            </div>
                           </div>
-                          <div className="col-5">
-                            <Select
-                              placeholder="N° tickets"
-                              value={0}
-                              options={[
-                                { key: 0, value: 0, label: '0' },
-                                ...Array.from(
-                                  { length: ticket.maximum_quantity },
-                                  (_, index) => index + 1
-                                )
-                                  .filter((n) => n >= ticket.minimum_quantity)
-                                  .map((n) => ({
-                                    key: n,
-                                    label: `${n}`,
-                                    value: n,
-                                  })),
-                              ]}
-                              onChange={(e) => {
-                                const value = +e.target.value;
-                                setTickets((state) => {
-                                  if (value === 0) {
-                                    return state.filter(
-                                      (t) => t.id !== ticket.id
-                                    );
-                                  }
-
-                                  const data = {
-                                    id: ticket.id,
-                                    amount: value,
-                                    name: ticket.name,
-                                    price: value * ticket.price,
-                                  };
-
-                                  const found = state.findIndex(
-                                    (t) => t.id === ticket.id
-                                  );
-                                  if (found === -1) {
-                                    return [...state, data];
-                                  }
-
-                                  return state.map((t) =>
-                                    t.id === ticket.id ? data : t
-                                  );
-                                });
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <Divider />
-                      </React.Fragment>
-                    ))}
+                          <Divider />
+                        </React.Fragment>
+                      ) : null
+                    )}
                     <p className="brand">
                       Offered by <span>YourTickets</span>
                     </p>
                   </div>
                 </div>
                 <div className="footer">
-                  <p className="price">
-                    {totalPrice ? formatCurrency(totalPrice, 'USD') : 'Free'}
-                  </p>
+                  <p className="price">{formatCurrency(totalPrice, 'USD')}</p>
                   <Button
                     block
                     disabled={!tickets.length}
@@ -330,9 +373,7 @@ export default function CheckoutModal({
                       </p>
                       <div className="footer">
                         <p className="price">
-                          {totalPrice
-                            ? formatCurrency(totalPrice, 'USD')
-                            : 'Free'}
+                          {formatCurrency(totalPrice, 'USD')}
                         </p>
                         <Button block type="primary" htmlType="submit">
                           Register
@@ -367,7 +408,7 @@ export default function CheckoutModal({
                     </p>
                   </div>
                   <div className="body">
-                    <p style={{ margin: '0' }}>You go to</p>
+                    <p style={{ margin: '0' }}>You&apos;re going to</p>
                     <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
                     <div style={{ marginTop: '1rem' }} className="row hg-24">
                       <div className="col-12">

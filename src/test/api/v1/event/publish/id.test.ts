@@ -46,7 +46,7 @@ describe('PUT -- api/v1/event/publish/[id] -- success request', () => {
     expect(res.body).toEqual({ message: 'Event published successfully.' });
   });
 
-  it('should unpublish the event', async () => {
+  it('should not publish the event', async () => {
     const id = 1;
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
@@ -62,7 +62,7 @@ describe('PUT -- api/v1/event/publish/[id] -- success request', () => {
     });
 
     expect(res.statusCode).toBe(OK_STATUS);
-    expect(res.body).toEqual({ message: 'Event unpublished successfully.' });
+    expect(res.body).toEqual({ message: 'Event not published successfully.' });
   });
 });
 

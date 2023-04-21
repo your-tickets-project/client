@@ -219,10 +219,18 @@ export default function ShowEvent({ event, isPreview }: Props) {
               <p className="title">{formatPriceRange()}</p>
               <Button
                 block
-                disabled={isPreview}
+                disabled={
+                  isPreview ||
+                  event.event_ticket_info.every(
+                    (t) => t.visibility === 'hidden'
+                  )
+                }
                 type="primary"
                 onClick={
-                  isPreview
+                  isPreview ||
+                  event.event_ticket_info.every(
+                    (t) => t.visibility === 'hidden'
+                  )
                     ? undefined
                     : () => {
                         if (!isAuthenticated) router.push('/login');

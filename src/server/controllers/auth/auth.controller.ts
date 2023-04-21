@@ -14,7 +14,7 @@ import {
   strictOptions,
   stripUnknownOptions,
 } from 'server/validations/validationOptions';
-import { loginDto, signinDto } from 'server/validations/auth';
+import { loginDto, signupDto } from 'server/validations/auth';
 
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -28,14 +28,14 @@ export const checkUser = async (
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-export const validateSignIn = async (
+export const validateSignup = async (
   req: NextApiRequestExtended,
   res: NextApiResponse,
   next: NextHandler
 ) => {
   try {
-    const validation = await signinDto.validate(req.body, strictOptions);
-    req.body = await signinDto.validate(validation, stripUnknownOptions);
+    const validation = await signupDto.validate(req.body, strictOptions);
+    req.body = await signupDto.validate(validation, stripUnknownOptions);
   } catch (err: any) {
     throw new BadRequestException('Invalid body.', err.errors);
   }
@@ -43,7 +43,7 @@ export const validateSignIn = async (
   await next();
 };
 
-export const signIn = async (
+export const signup = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
 ) => {

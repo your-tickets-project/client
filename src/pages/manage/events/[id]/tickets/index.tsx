@@ -21,7 +21,12 @@ import {
 } from 'client/components/ui';
 import { EditIcon, GarbageTrashIcon } from 'client/components/icons';
 // helpers
-import { formatCurrency, debounce, formatTime } from 'client/helpers';
+import {
+  formatCurrency,
+  debounce,
+  formatTime,
+  getDateData,
+} from 'client/helpers';
 // hooks
 import useVW from 'client/hooks/useVW';
 // interfaces
@@ -33,6 +38,7 @@ import {
   getEventTickets,
   postEventTicket,
   putEventTicket,
+  putPublishEvent,
 } from 'client/services/event.service';
 // styles
 import { breakPointsPX, colors } from 'client/styles/variables';
@@ -91,7 +97,10 @@ const TicketsWrapper = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isShowModal, setIsShowModal] = useState(false);
   // data
-  const [eventId, setEventId] = useState<string | number>();
+  const [eventInfo, setEventInfo] = useState<{
+    id: string | number;
+    is_available: number;
+  }>();
   const [data, setData] = useState<DataSource[]>([]);
   const [ticketAction, setTicketAction] = useState<{
     action: ACTION_STATES;
@@ -111,7 +120,7 @@ const TicketsWrapper = () => {
       const { id } = router.query;
       try {
         const res = await getEventTickets({ eventId: id as string });
-        setEventId(res.data.id);
+        setEventInfo({ id: res.data.id, is_available: res.data.is_available });
         setData(
           res.data.event_tickets_info.map((ticket) => ({
             ...ticket,
@@ -130,7 +139,7 @@ const TicketsWrapper = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, router.isReady]);
 
-  if (!eventId) {
+  if (!eventInfo) {
     return (
       <div
         style={{
@@ -150,9 +159,16 @@ const TicketsWrapper = () => {
 
     try {
       const res = await deleteEventTicket({
-        eventId,
+        eventId: eventInfo.id,
         ticketId: ticketAction.ticketId,
       });
+      if (eventInfo.is_available && data.length - 1 === 0) {
+        await putPublishEvent({
+          eventId: eventInfo.id as string,
+          data: { is_available: false },
+        });
+      }
+
       toast.success(res.data.message);
       setData((state) =>
         state.filter(({ id }) => id !== ticketAction.ticketId)
@@ -227,9 +243,68 @@ const TicketsWrapper = () => {
                     if (nowDate >= startDate) type = 'started';
                     if (nowDate >= endDate) type = 'ended';
 
+                    let text = '';
+                    if (type === 'scheduled') {
+                      text = 'Starts';
+                      if (nowDate.getDate() === startDate.getDate()) {
+                        text += ' today';
+                      } else {
+                        const { monthText, day, year } = getDateData({
+                          date: `${record.sales_start.split('T')[0]}T${
+                            record.time_start
+                          }`,
+                          monthFormat: 'short',
+                        });
+
+                        text += ` on ${monthText} ${day}, ${year}`;
+                      }
+
+                      text += ` at ${formatTime({
+                        time: record.time_start,
+                        timeFormat: 'short',
+                      })}`;
+                    }
+
+                    if (type === 'started') {
+                      text = 'Ends';
+                      if (nowDate.getDate() === startDate.getDate()) {
+                        text += ' today';
+                      } else {
+                        const { monthText, day, year } = getDateData({
+                          date: `${record.sales_end.split('T')[0]}T${
+                            record.time_end
+                          }`,
+                          monthFormat: 'short',
+                        });
+
+                        text += ` ${monthText} ${day}, ${year}`;
+                      }
+
+                      text += ` at ${formatTime({
+                        time: record.time_end,
+                        timeFormat: 'short',
+                      })}`;
+                    }
+
+                    if (type === 'ended') {
+                      text = 'Ended';
+                      const { monthText, day, year } = getDateData({
+                        date: `${record.sales_end.split('T')[0]}T${
+                          record.time_end
+                        }`,
+                        monthFormat: 'short',
+                      });
+
+                      text += ` ${monthText} ${day}, ${year}`;
+                      text += ` at ${formatTime({
+                        time: record.time_end,
+                        timeFormat: 'short',
+                      })}`;
+                    }
+
                     return (
                       <>
-                        <p style={{ margin: '0 0 8px 0' }}>
+                        <p style={{ margin: '0 0 8px' }}>
                           <span
                             style={{
                               backgroundColor: status[type].color,
@@ -242,23 +317,7 @@ const TicketsWrapper = () => {
                           />{' '}
                           {status[type].name}
                         </p>
-                        <p style={{ margin: '0' }}>
-                          {status[type].text}{' '}
-                          {nowDate.getDate() === endDate.getDate()
-                            ? 'today'
-                            : `${new Intl.DateTimeFormat('en-US', {
-                                month: 'short',
-                              }).format(
-                                endDate
-                              )} ${`0${endDate.getDate()}`.slice(
-                                -2
-                              )}, ${endDate.getFullYear()}`}{' '}
-                          at{' '}
-                          {formatTime({
-                            time: record.time_end,
-                            timeFormat: 'short',
-                          })}
-                        </p>
+                        <p style={{ margin: '0' }}>{text}</p>
                       </>
                     );
                   },
@@ -387,7 +446,7 @@ const TicketsWrapper = () => {
           </div>
         ) : (
           <EditUpdateForm
-            eventId={eventId}
+            eventId={eventInfo.id}
             ticketId={ticketAction.ticketId}
             onAfterFinish={() => setIsShowModal(false)}
           />

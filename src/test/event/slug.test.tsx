@@ -10,6 +10,8 @@ import {
   createLocation,
 } from 'fixtures/event.fixture';
 import { createUser } from 'fixtures/user.fixture';
+// helpers
+import { getDateData } from 'client/helpers';
 // http status codes
 import { OK_STATUS } from 'server/constants/http.status';
 // mocks
@@ -89,11 +91,15 @@ describe('<EventPage/> integration', () => {
 
     const authUser = createUser();
 
+    const d = getDateData();
+    const now = `${d.year}-${d.monthNumber}-${d.day}T00:00:00.000Z`;
     const data = {
       ...createEvent(),
       event_detail: createEventDetail(),
       event_location: createLocation(),
-      event_ticket_info: [createEventTicketInfo()],
+      event_ticket_info: [
+        createEventTicketInfo({ sales_start: now, sales_end: now }),
+      ],
       event_tag: [createEventTag()],
     };
 

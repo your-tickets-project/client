@@ -7,7 +7,7 @@ import { UserType } from 'interfaces';
 // utils
 import { hashPassword, verifyPassword } from 'server/utils';
 // validations
-import { LoginDtoType, SigninDtoType } from 'server/validations/auth';
+import { LoginDtoType, SignupDtoType } from 'server/validations/auth';
 
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -31,7 +31,7 @@ export const findUserByEmail = async ({ email }: { email: string }) => {
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-export const createUser = async ({ data }: { data: SigninDtoType }) => {
+export const createUser = async ({ data }: { data: SignupDtoType }) => {
   const user = await findUserByEmail({ email: data.email! });
   if (user) {
     throw new BadRequestException('This email is already being used.');

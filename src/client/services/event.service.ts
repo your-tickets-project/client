@@ -15,7 +15,20 @@ import {
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const getEvents = async (): Promise<
-  AxiosResponse<{ events: EventType[] }>
+  AxiosResponse<{
+    events: {
+      id: number | string;
+      slug: string;
+      title: string;
+      date_start: string;
+      time_start: string;
+      venue_name: string;
+      city: string;
+      state: string | null;
+      cover_image_url: string;
+      ticket_smallest_price: number;
+    }[];
+  }>
 > => API.get('/event');
 
 export const getEventBySlug = async ({
@@ -68,6 +81,7 @@ export const getEventTickets = async ({
 }): Promise<
   AxiosResponse<{
     id: number;
+    is_available: number;
     event_tickets_info: ShowEventTicketInfoType[];
   }>
 > => API.get(`/event/tickets/${eventId}`);
@@ -106,6 +120,24 @@ export const getEventPreview = async ({
     }
   >
 > => API.get(`/event/preview/${eventId}`);
+
+export const getEventsDashboard = async (): Promise<
+  AxiosResponse<
+    {
+      id: number;
+      date_start: string;
+      time_start: string;
+      title: string;
+      is_available: number;
+      venue_name: string;
+      include_event_detail: number;
+      cover_image_url: string | null;
+      include_event_ticket_info: number;
+      total_sold: number | null;
+      total_quantity: number | null;
+    }[]
+  >
+> => API.get(`/event/dashboard`);
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -184,3 +216,10 @@ export const deleteEventTicket = async ({
   ticketId: string | number;
 }): Promise<AxiosResponse<{ message: string }>> =>
   API.delete(`/event/tickets/${eventId}/${ticketId}`);
+
+export const deleteEventDashboard = async ({
+  eventId,
+}: {
+  eventId: string | number;
+}): Promise<AxiosResponse<{ message: string }>> =>
+  API.delete(`/event/dashboard/${eventId}`);

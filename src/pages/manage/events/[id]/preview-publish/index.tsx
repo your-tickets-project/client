@@ -120,6 +120,10 @@ const PreviewPublishWrapper = () => {
       return 'Free';
     }
 
+    if (event.ticket_smallest_price === event.ticket_largest_price) {
+      return `${formatCurrency(event.ticket_smallest_price, 'USD')}`;
+    }
+
     return `${
       event.ticket_smallest_price
         ? formatCurrency(event.ticket_smallest_price, 'USD')
@@ -233,10 +237,15 @@ const PreviewPublishWrapper = () => {
           </div>
 
           <div className="col-12">
-            <Button block type="primary" onClick={debounce(handlePublish, 800)}>
-              {event.is_available === 0 && canPublishEvent
-                ? 'Publish'
-                : 'Unpublish'}
+            <Button
+              block
+              disabled={!canPublishEvent}
+              type="primary"
+              onClick={
+                canPublishEvent ? debounce(handlePublish, 800) : undefined
+              }
+            >
+              {event.is_available === 0 ? 'Publish' : 'Unpublish'}
             </Button>
           </div>
         </div>

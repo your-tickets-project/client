@@ -14,6 +14,7 @@ export * from './GlassIcon';
 export * from './HamburguerMenuIcon';
 export * from './HandBagIcon';
 export * from './HeartIcon';
+export * from './InfoIcon';
 export * from './InvoiceIcon';
 export * from './LeftBackArrowIcon';
 export * from './LinkedinIcon';
