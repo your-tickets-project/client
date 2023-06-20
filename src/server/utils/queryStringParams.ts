@@ -1,4 +1,4 @@
-export const queryStringParams = ({ str }: { str?: string }) => {
-  const urlString = new URLSearchParams(str);
-  return Object.fromEntries(urlString);
+export const queryStringParams = <T>(str?: string) => {
+  const urlString = new URLSearchParams(str?.split('?')[1]);
+  return Object.fromEntries(urlString) as T;
 };

@@ -34,10 +34,11 @@ afterAll(() => server.close());
 
 const event1 = {
   id: 1,
-  slug: 'slug-1',
   title: 'title-1',
   date_start: '1996-02-09T00:00:00',
   time_start: '13:00:00',
+  date_end: '1996-02-09T00:00:00',
+  time_end: '20:00:00',
   venue_name: 'venue_name-1',
   city: 'city-1',
   state: 'state-1',
@@ -52,10 +53,11 @@ const event1 = {
 
 const event2 = {
   id: 2,
-  slug: 'slug-2',
   title: 'title-2',
   date_start: '1996-02-09T00:00:00',
   time_start: '13:00:00',
+  date_end: '1996-02-09T00:00:00',
+  time_end: '20:00:00',
   venue_name: 'venue_name-2',
   city: 'city-2',
   state: 'state-2',
@@ -70,10 +72,11 @@ const event2 = {
 
 const event3 = {
   id: 3,
-  slug: 'slug-3',
   title: 'title-3',
   date_start: '1996-02-09T00:00:00',
   time_start: '13:00:00',
+  date_end: '1996-02-09T00:00:00',
+  time_end: '20:00:00',
   venue_name: 'venue_name-3',
   city: 'city-3',
   state: 'state-3',
@@ -133,12 +136,12 @@ describe('<DashboardEventsPage/> success integration', () => {
     expect($modal).toBeInTheDocument();
 
     expect(
-      within($modal).getByRole('heading', { name: /delete event/i })
+      within($modal).getByRole('heading', { name: /cancel event/i })
     ).toBeInTheDocument();
 
     expect(
       within($modal).getByText(
-        `Are you sure you want to delete ${event1.title}? This action cannot be undone.`
+        `Are you sure you want to cancel ${event1.title}? This action cannot be undone.`
       )
     ).toBeInTheDocument();
 

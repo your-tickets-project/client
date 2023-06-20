@@ -121,14 +121,21 @@ export const getEventPreview = async ({
   >
 > => API.get(`/event/preview/${eventId}`);
 
-export const getEventsDashboard = async (): Promise<
+export const getEventsDashboard = async ({
+  query,
+}: {
+  query: string;
+}): Promise<
   AxiosResponse<
     {
       id: number;
       date_start: string;
       time_start: string;
+      date_end: string;
+      time_end: string;
       title: string;
       is_available: number;
+      cancelled: number;
       venue_name: string;
       include_event_detail: number;
       cover_image_url: string | null;
@@ -137,7 +144,13 @@ export const getEventsDashboard = async (): Promise<
       total_quantity: number | null;
     }[]
   >
-> => API.get(`/event/dashboard`);
+> => {
+  let URI = `/event/dashboard`;
+  if (query) {
+    URI += `?q=${query}`;
+  }
+  return API.get(URI);
+};
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

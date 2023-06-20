@@ -52,7 +52,7 @@ describe('POST route -- /api/v1/auth/check-user -- bad request', () => {
     expect(res.statusCode).toBe(UNAUTHORIZED_STATUS);
     expect(res.body).toEqual({
       error: 'Unauthorized',
-      message: 'You must provide the authorization header',
+      message: 'You must provide the authorization header.',
       statusCode: UNAUTHORIZED_STATUS,
     });
   });
@@ -66,7 +66,7 @@ describe('POST route -- /api/v1/auth/check-user -- bad request', () => {
     expect(res.statusCode).toBe(FORBIDDEN_STATUS);
     expect(res.body).toEqual({
       error: 'Forbidden',
-      message: 'The authorization header does not contain the word Bearer',
+      message: 'The authorization header does not contain the word Bearer.',
       statusCode: FORBIDDEN_STATUS,
     });
   });
@@ -80,7 +80,7 @@ describe('POST route -- /api/v1/auth/check-user -- bad request', () => {
     expect(res.statusCode).toBe(UNAUTHORIZED_STATUS);
     expect(res.body).toEqual({
       error: 'Unauthorized',
-      message: 'Invalid token',
+      message: 'Invalid token.',
       statusCode: UNAUTHORIZED_STATUS,
     });
   });
@@ -99,7 +99,7 @@ describe('POST route -- /api/v1/auth/check-user -- bad request', () => {
     expect(res.statusCode).toBe(UNAUTHORIZED_STATUS);
     expect(res.body).toEqual({
       error: 'Unauthorized',
-      message: 'Invalid token',
+      message: 'Invalid token.',
       statusCode: UNAUTHORIZED_STATUS,
     });
   });

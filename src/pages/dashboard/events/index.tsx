@@ -23,6 +23,8 @@ import {
   shimmer,
   toBase64,
 } from 'client/helpers';
+// hooks
+import useVW from 'client/hooks/useVW';
 // services
 import { baseURL } from 'client/services';
 import {
@@ -30,15 +32,18 @@ import {
   getEventsDashboard,
 } from 'client/services/event.service';
 // styles
-import { colors } from 'client/styles/variables';
+import { breakPointsPX, colors } from 'client/styles/variables';
 
 interface DataType {
   key: string | number;
   id: number;
   date_start: string;
   time_start: string;
+  date_end: string;
+  time_end: string;
   title: string;
   is_available: number;
+  cancelled: number;
   venue_name: string;
   include_event_detail: number;
   cover_image_url: string | null;
@@ -51,20 +56,22 @@ export default function DashboardEventsPage() {
   return (
     <PrivateRoute>
       <DashboardLayout>
-        <ShowEventsWrapper />
+        <DashboardEventsPageWrapper />
       </DashboardLayout>
     </PrivateRoute>
   );
 }
 
-const ShowEventsWrapper = () => {
+const DashboardEventsPageWrapper = () => {
   const router = useRouter();
+  const vw = useVW();
   // booleans
   const [isLoading, setIsLoading] = useState(true);
   const [isShowModal, setIsShowModal] = useState(false);
   // data
   const [data, setData] = useState<DataType[]>();
   const [event, setEvent] = useState<{ id: string | number; title: string }>();
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setIsLoading(false);
@@ -76,7 +83,7 @@ const ShowEventsWrapper = () => {
 
     const queryAPI = async () => {
       try {
-        const res = await getEventsDashboard();
+        const res = await getEventsDashboard({ query });
         setData(res.data.map((e) => ({ ...e, key: e.id })));
       } catch (error: any) {
         toast.error(error?.response?.data?.message || 'Internal server error.');
@@ -88,7 +95,7 @@ const ShowEventsWrapper = () => {
     };
     queryAPI();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, router.isReady]);
+  }, [isLoading, router.isReady, query]);
 
   const formatDate = ({ date }: { date: string }) => {
     const d = getDateData({
@@ -114,15 +121,15 @@ const ShowEventsWrapper = () => {
     );
   }
 
-  const handleDeleteConfirm = async ({
-    eventId,
-  }: {
-    eventId: string | number;
-  }) => {
+  const handleDelete = async ({ eventId }: { eventId: string | number }) => {
     try {
       const res = await deleteEventDashboard({ eventId });
 
-      setData((state) => state?.filter((e) => e.id !== eventId));
+      setData((state) =>
+        state?.map((e) =>
+          e.id === eventId ? { ...e, cancelled: 1, is_available: 0 } : e
+        )
+      );
       toast.success(res.data.message);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Internal server error.');
@@ -130,15 +137,21 @@ const ShowEventsWrapper = () => {
     setIsShowModal(false);
   };
 
+  const handleSearch = debounce(
+    (e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value),
+    800
+  );
+
   return (
     <>
       <section className="container row hg-16 vg-md-8">
         <h1 className="col-12">Events</h1>
         <div className="col-12 col-md-4">
           <Input
-            placeholder="Search events"
+            placeholder="Search events by event title or venue name"
             addonBefore={<SearchIcon />}
             style={{ height: '32px' }}
+            onChange={handleSearch}
           />
         </div>
         <div className="col-12 col-md-4">
@@ -169,28 +182,30 @@ const ShowEventsWrapper = () => {
               title: 'Event',
               render(_, record: DataType) {
                 return (
-                  <div className="row vg-8">
-                    <div className="col-2">
-                      <div className="event_image-container">
-                        {record.cover_image_url ? (
-                          <Image
-                            alt="0"
-                            blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                              shimmer('100%', '100%')
-                            )}`}
-                            fill
-                            placeholder="blur"
-                            src={`${baseURL}/media/${record.cover_image_url}`}
-                            style={{ objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div className="event_image-blank">
-                            <PhotoIcon />
-                          </div>
-                        )}
+                  <div className="row hg-8 hg-md-0 vg-md-8">
+                    {vw >= breakPointsPX.md && (
+                      <div className="col-md-3 col-lg-2">
+                        <div className="event_image-container">
+                          {record.cover_image_url ? (
+                            <Image
+                              alt="0"
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                shimmer('100%', '100%')
+                              )}`}
+                              fill
+                              placeholder="blur"
+                              src={`${baseURL}/media/${record.cover_image_url}`}
+                              style={{ objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <div className="event_image-blank">
+                              <PhotoIcon />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="col-10">
+                    )}
+                    <div className="col-12 col-md-9 col-lg-10">
                       <p className="event_title">{record.title}</p>
                       <p className="event_venue-name">{record.venue_name}</p>
                       <p className="event_date">
@@ -251,6 +266,20 @@ const ShowEventsWrapper = () => {
                   status.text = 'Draft';
                 }
 
+                const now = new Date();
+                const eventEnd = new Date(
+                  `${record.date_end.split('T')[0]}T${record.time_end}`
+                );
+                if (now >= eventEnd) {
+                  status.color = 'gray';
+                  status.text = 'Event ended';
+                }
+
+                if (record.cancelled) {
+                  status.color = 'red';
+                  status.text = 'Canceled';
+                }
+
                 return (
                   <p>
                     <span
@@ -283,21 +312,32 @@ const ShowEventsWrapper = () => {
                 return (
                   <div className="row hg-8">
                     <div className="col-12">
-                      <Button block>
-                        <Link href={`/manage/events/${record.id}/basic-info`}>
-                          <div style={style}>
-                            <EditIcon />
-                          </div>
-                        </Link>
+                      <Button
+                        block
+                        onClick={() =>
+                          router.push(`/manage/events/${record.id}/basic-info`)
+                        }
+                      >
+                        <div style={style}>
+                          <EditIcon />
+                        </div>
                       </Button>
                     </div>
                     <div className="col-12">
                       <Button
                         block
-                        onClick={() => {
-                          setIsShowModal(true);
-                          setEvent({ id: record.id, title: record.title });
-                        }}
+                        disabled={!!record.cancelled || !record.is_available}
+                        onClick={
+                          !!record.cancelled || !record.is_available
+                            ? undefined
+                            : () => {
+                                setIsShowModal(true);
+                                setEvent({
+                                  id: record.id,
+                                  title: record.title,
+                                });
+                              }
+                        }
                       >
                         <div style={style}>
                           <GarbageTrashIcon />
@@ -321,13 +361,13 @@ const ShowEventsWrapper = () => {
         contentStyle={{ maxWidth: '800px' }}
         footer={undefined}
         isShowModal={isShowModal}
-        title={<h3>Delete Event</h3>}
+        title={<h3>Cancel Event</h3>}
         onCancel={() => {
           setIsShowModal(false);
         }}
         onConfirm={
           event
-            ? debounce(() => handleDeleteConfirm({ eventId: event.id }), 800)
+            ? debounce(() => handleDelete({ eventId: event.id }), 800)
             : undefined
         }
       >
@@ -354,7 +394,7 @@ const ShowEventsWrapper = () => {
             <GarbageTrashIcon />
           </div>
           <p style={{ textAlign: 'center' }}>
-            Are you sure you want to delete {event?.title}? This action cannot
+            Are you sure you want to cancel {event?.title}? This action cannot
             be undone.
           </p>
         </div>

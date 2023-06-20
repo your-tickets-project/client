@@ -53,6 +53,7 @@ export interface EventPreviewPublishType {
   date_start: string;
   time_start: string;
   is_available: number;
+  cancelled: number;
   ticket_smallest_price: number | null;
   ticket_largest_price: number | null;
   total_quantity: number | null;

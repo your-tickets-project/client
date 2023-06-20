@@ -32,10 +32,19 @@ export const downloadMedia = async ({ Key }: { Key: string }) => {
 
 /* POST
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-export const createMedia = async ({ files }: { files: MulterFileType[] }) => {
+export const createMedia = async ({
+  files,
+  addOriginalName,
+}: {
+  files: MulterFileType[];
+  addOriginalName?: boolean;
+}) => {
   const uploadedFiles: { Key: string; name: string }[] = [];
   for await (const file of files) {
-    const Key = generateId();
+    let Key = generateId();
+    if (addOriginalName) {
+      Key = `${file.originalname}-${Key}`;
+    }
     const command = new PutObjectCommand({ Bucket, Body: file.buffer, Key });
     await s3.send(command);
     uploadedFiles.push({ Key, name: file.originalname });

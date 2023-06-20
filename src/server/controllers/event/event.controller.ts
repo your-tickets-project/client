@@ -21,7 +21,7 @@ import {
   findEventPreviewPublish,
   editPublishEvent,
   findEventsDashboard,
-  removeEventDashboard,
+  cancelEventDashboard,
 } from 'server/data/event/event.data';
 // exceptions
 import { BadRequestException } from 'server/exceptions';
@@ -38,6 +38,7 @@ import {
   EventTicketDto,
 } from 'server/validations/event';
 import { PublishDto } from 'server/validations/event/publish.dto';
+import { queryStringParams } from 'server/utils';
 
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -175,7 +176,9 @@ export const getEventsDashboard = async (
   req: NextApiRequestExtended,
   res: NextApiResponse
 ) => {
+  const params = queryStringParams<{ q?: string }>(req.url);
   const data = await findEventsDashboard({
+    q: params.q,
     userId: req.user!.id,
   });
   res.status(OK_STATUS).json(data);
@@ -410,10 +413,10 @@ export const deleteEventDashboard = async (
     throw new BadRequestException('Id is required.');
   }
 
-  await removeEventDashboard({
+  await cancelEventDashboard({
     eventId: req.query.id as string,
     userId: req.user!.id,
   });
 
-  res.status(OK_STATUS).json({ message: 'Event deleted successfully.' });
+  res.status(OK_STATUS).json({ message: 'Event successfully cancelled.' });
 };

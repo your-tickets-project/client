@@ -219,18 +219,22 @@ const PreviewPublishWrapper = () => {
                     </div>
                   </div>
                   <p>{event.event_detail.summary}</p>
-                  <Divider />
-                  <Link
-                    href={`/manage/events/${event.id}/preview`}
-                    legacyBehavior
-                  >
-                    <a className="card_body_link">
-                      Preview your event
-                      <span className="card_body_link_icon">
-                        <LinkIcon fill={colors.color2} />
-                      </span>
-                    </a>
-                  </Link>
+                  {!event.cancelled && (
+                    <>
+                      <Divider />
+                      <Link
+                        href={`/manage/events/${event.id}/preview`}
+                        legacyBehavior
+                      >
+                        <a className="card_body_link">
+                          Preview your event
+                          <span className="card_body_link_icon">
+                            <LinkIcon fill={colors.color2} />
+                          </span>
+                        </a>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -239,10 +243,12 @@ const PreviewPublishWrapper = () => {
           <div className="col-12">
             <Button
               block
-              disabled={!canPublishEvent}
+              disabled={!canPublishEvent || !!event.cancelled}
               type="primary"
               onClick={
-                canPublishEvent ? debounce(handlePublish, 800) : undefined
+                canPublishEvent || !event.cancelled
+                  ? debounce(handlePublish, 800)
+                  : undefined
               }
             >
               {event.is_available === 0 ? 'Publish' : 'Unpublish'}

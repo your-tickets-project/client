@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 // components
@@ -32,7 +32,6 @@ interface FileType {
 }
 
 const parentScrollToSelector = '#event-form-layout';
-let eventDetailId: number | null = null;
 
 export default function EditDetailsPage() {
   return (
@@ -47,6 +46,7 @@ export default function EditDetailsPage() {
 const DetailFormWrapper = () => {
   const router = useRouter();
   const vw = useVW();
+  const eventDetailId = useRef<number>();
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +83,7 @@ const DetailFormWrapper = () => {
             id,
             summary: summary || '',
           });
-          eventDetailId = id;
+          eventDetailId.current = id;
           if (cover_image_url) {
             setFileList([
               {
@@ -154,7 +154,7 @@ const DetailFormWrapper = () => {
             id: res.data.insertId,
             summary: '',
           });
-          eventDetailId = res.data.insertId;
+          eventDetailId.current = res.data.insertId;
           setFileList([
             {
               id: Key,
@@ -193,14 +193,14 @@ const DetailFormWrapper = () => {
   }) => {
     try {
       const Key = previewURL.split('/').at(-1);
-      if (eventDetailId && eventId && Key) {
+      if (eventDetailId.current && eventId && Key) {
         await deleteMedia({ Key });
         await putEventDetail({
           data: {
             description: editorElement.value || null,
           },
           eventId,
-          eventDetailId,
+          eventDetailId: eventDetailId.current,
         });
       }
     } catch (error: any) {
@@ -229,7 +229,7 @@ const DetailFormWrapper = () => {
         url: URI,
       });
       if (eventId) {
-        if (!eventDetailId) {
+        if (!eventDetailId.current) {
           const res = await postEventDetail({
             data: {
               description: editorElement.value,
@@ -240,14 +240,14 @@ const DetailFormWrapper = () => {
             id: res.data.insertId,
             summary: '',
           });
-          eventDetailId = res.data.insertId;
+          eventDetailId.current = res.data.insertId;
         } else {
           await putEventDetail({
             data: {
               description: editorElement.value,
             },
             eventId,
-            eventDetailId,
+            eventDetailId: eventDetailId.current,
           });
         }
       }

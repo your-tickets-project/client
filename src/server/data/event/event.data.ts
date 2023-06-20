@@ -36,7 +36,13 @@ interface EventRowType {
 /* GET
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 export const findEvents = async () => {
-  const query = `SELECT event.id, event.slug, event.title, event.date_start, event.time_start, event_location.venue_name, event_location.city, event_location.state, event_detail.cover_image_url, MIN(event_ticket_info.price) AS ticket_smallest_price FROM event INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.is_available = true GROUP BY event.id, event.slug, event.title, event.date_start, event.time_start, event_location.venue_name, event_location.city, event_location.state, event_detail.cover_image_url;`;
+  const now = new Date();
+  const day = `0${now.getDate()}`.slice(-2);
+  const month = `0${now.getMonth() + 1}`.slice(-2);
+  const year = now.getFullYear().toString();
+  const date = `${year}-${month}-${day}`;
+
+  const query = `SELECT event.id, event.slug, event.title, event.date_start, event.time_start, event_location.venue_name, event_location.city, event_location.state, event_detail.cover_image_url, MIN(event_ticket_info.price) AS ticket_smallest_price FROM event INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.is_available = true AND event.cancelled = false AND event.date_end >= '${date}' GROUP BY event.id, event.slug, event.title, event.date_start, event.time_start, event_location.venue_name, event_location.city, event_location.state, event_detail.cover_image_url;`;
 
   const rowData = await dbSelect<
     {
@@ -61,7 +67,7 @@ export const findEventBySlug = async ({
 }: {
   slug: string;
 }): Promise<EventType> => {
-  const query = `SELECT * FROM event INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.slug = ? AND event.is_available = true;`;
+  const query = `SELECT * FROM event INNER JOIN event_location ON event.id = event_location.event_id INNER JOIN event_detail ON event.id = event_detail.event_id INNER JOIN event_ticket_info ON event.id = event_ticket_info.event_id LEFT JOIN event_tag ON event.id = event_tag.event_id WHERE event.slug = ? AND event.is_available = true AND event.cancelled = false;`;
 
   const rowData = await dbSelect<EventRowType[]>({
     query,
@@ -301,7 +307,7 @@ export const findEventPreviewPublish = async ({
   eventId: string | number;
   userId: string | number;
 }): Promise<EventPreviewPublishType> => {
-  const query = `SELECT event.id, event.title, event.date_start, event.time_start, event.is_available, event_location.address_1, event_location.city, event_location.state, event_location.country, event_location.postal_code, event_detail.cover_image_url, event_detail.summary, MIN(event_ticket_info.price) AS ticket_smallest_price, MAX(event_ticket_info.price) AS ticket_largest_price, SUM(event_ticket_info.quantity) AS total_quantity FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ? GROUP BY event.id, event.title, event.date_start, event.time_start, event.is_available, event_location.address_1, event_location.city, event_location.state, event_location.country, event_location.postal_code, event_detail.cover_image_url, event_detail.summary;`;
+  const query = `SELECT event.id, event.title, event.date_start, event.time_start, event.is_available, event.cancelled, event_location.address_1, event_location.city, event_location.state, event_location.country, event_location.postal_code, event_detail.cover_image_url, event_detail.summary, MIN(event_ticket_info.price) AS ticket_smallest_price, MAX(event_ticket_info.price) AS ticket_largest_price, SUM(event_ticket_info.quantity) AS total_quantity FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ? GROUP BY event.id, event.title, event.date_start, event.time_start, event.is_available, event.cancelled, event_location.address_1, event_location.city, event_location.state, event_location.country, event_location.postal_code, event_detail.cover_image_url, event_detail.summary;`;
 
   const rowData = await dbSelect<
     {
@@ -310,6 +316,7 @@ export const findEventPreviewPublish = async ({
       date_start: string;
       time_start: string;
       is_available: number;
+      cancelled: number;
       address_1: string;
       city: string;
       state: string | null;
@@ -338,6 +345,7 @@ export const findEventPreviewPublish = async ({
     date_start: data.date_start,
     time_start: data.time_start,
     is_available: data.is_available,
+    cancelled: data.cancelled,
     ticket_largest_price: data.ticket_largest_price,
     ticket_smallest_price: data.ticket_smallest_price,
     total_quantity: data.total_quantity,
@@ -418,19 +426,31 @@ export const findEventPreview = async ({
 };
 
 export const findEventsDashboard = async ({
+  q,
   userId,
 }: {
+  q?: string;
   userId: string | number;
 }) => {
-  const query = `SELECT event.id, event.date_start, event.time_start, event.title, event.is_available, event_location.venue_name, IF(COUNT(event_detail.id) > 0, true, false) AS include_event_detail, event_detail.cover_image_url, IF(COUNT(event_ticket_info.id) > 0, true, false) AS include_event_ticket_info, SUM(event_ticket_info.sold) AS total_sold, SUM(event_ticket_info.quantity) AS total_quantity FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.user_id = ? GROUP BY event.id, event.date_start, event.time_start, event.title, event.is_available, event_location.venue_name, event_detail.cover_image_url;`;
+  let query = `SELECT event.id, event.date_start, event.time_start, event.date_end, event.time_end, event.title, event.is_available, event.cancelled, event_location.venue_name, IF(COUNT(event_detail.id) > 0, true, false) AS include_event_detail, event_detail.cover_image_url, IF(COUNT(event_ticket_info.id) > 0, true, false) AS include_event_ticket_info, SUM(event_ticket_info.sold) AS total_sold, SUM(event_ticket_info.quantity) AS total_quantity FROM event INNER JOIN event_location ON event.id = event_location.event_id LEFT JOIN event_detail ON event.id = event_detail.event_id LEFT JOIN event_ticket_info ON event.id = event_ticket_info.event_id WHERE event.user_id = ?`;
+
+  if (q) {
+    query += ` AND (CONCAT(event.title,event_location.venue_name) LIKE "%${q}%")`;
+  }
+
+  query +=
+    ' GROUP BY event.id, event.date_start, event.time_start, event.date_end, event.time_end, event.title, event.is_available, event.cancelled, event_location.venue_name, event_detail.cover_image_url;';
 
   const rowData = await dbSelect<
     {
       id: number;
       date_start: string;
       time_start: string;
+      date_end: string;
+      time_end: string;
       title: string;
       is_available: number;
+      cancelled: number;
       venue_name: string;
       include_event_detail: number;
       cover_image_url: string | null;
@@ -465,6 +485,7 @@ export const createEventBasicInfo = async ({
       ...restData,
       slug: slugTitle,
       is_available: 0,
+      cancelled: 0,
       user_id: userId,
     },
   });
@@ -589,12 +610,15 @@ export const editEventDetail = async ({
     queryValues.push(data.cover_image_url);
   }
   if (data.description !== undefined) {
-    query += data.cover_image_url ? ',' : '';
+    query += data.cover_image_url !== undefined ? ',' : '';
     query += ` event_detail.description = ?`;
     queryValues.push(data.description);
   }
   if (data.summary !== undefined) {
-    query += data.cover_image_url || data.description ? ',' : '';
+    query +=
+      data.cover_image_url !== undefined || data.description !== undefined
+        ? ','
+        : '';
     query += ` event_detail.summary = ?`;
     queryValues.push(data.summary);
   }
@@ -703,37 +727,16 @@ export const removeEventTicket = async ({
   return result;
 };
 
-export const removeEventDashboard = async ({
+export const cancelEventDashboard = async ({
   eventId,
   userId,
 }: {
   eventId: string | number;
   userId: string | number;
 }) => {
-  const queryValues = [eventId, userId];
-
-  await Promise.all([
-    dbDelete({
-      query: `DELETE event_location FROM event_location INNER JOIN event ON event.id = event_location.event_id WHERE event.id = ? AND event.user_id = ?;`,
-      queryValues,
-    }),
-    dbDelete({
-      query: `DELETE event_tag FROM event_tag INNER JOIN event ON event.id = event_tag.event_id WHERE event.id = ? AND event.user_id = ?;`,
-      queryValues,
-    }),
-    dbDelete({
-      query: `DELETE event_detail FROM event_detail INNER JOIN event ON event.id = event_detail.event_id WHERE event.id = ? AND event.user_id = ?;`,
-      queryValues,
-    }),
-    dbDelete({
-      query: `DELETE event_ticket_info FROM event_ticket_info INNER JOIN event ON event.id = event_ticket_info.event_id WHERE event.id = ? AND event.user_id = ?;`,
-      queryValues,
-    }),
-  ]);
-
-  const result = await dbDelete({
-    query: `DELETE FROM event WHERE event.id = ? AND event.user_id = ?;`,
-    queryValues,
+  const result = await dbUpdate({
+    query: `UPDATE event SET cancelled = true, is_available = false WHERE event.id = ? AND event.user_id = ?;`,
+    queryValues: [eventId, userId],
   });
 
   if (!result.affectedRows) {

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { rest } from 'msw';
 import EventPage from 'pages/event/[slug]';
 // fixtures
@@ -37,23 +37,40 @@ afterEach(() => server.resetHandlers());
 
 afterAll(() => server.close());
 
+const d = getDateData();
+const now = `${d.year}-${d.monthNumber}-${d.day}T00:00:00.000Z`;
+
+const data = {
+  ...createEvent(),
+  event_detail: createEventDetail(),
+  event_location: createLocation(),
+  event_ticket_info: [
+    createEventTicketInfo({ sales_start: now, sales_end: now }),
+  ],
+  event_tag: [createEventTag()],
+};
+
+const getEvent = () =>
+  rest.get(`/event/valid-slug`, async (req, res, ctx) => {
+    return res(ctx.status(OK_STATUS), ctx.json(data));
+  });
+
+const postOrder = () =>
+  rest.post(`/orders/${data.id}`, async (req, res, ctx) => {
+    return res(
+      ctx.status(OK_STATUS),
+      ctx.json({
+        message: 'Order created successfully.',
+        insertId: 1,
+      })
+    );
+  });
+
 describe('<EventPage/> integration', () => {
   it(`should show event information`, async () => {
     render(<EventPage />, { wrapper: PrivateWrapper });
 
-    const data = {
-      ...createEvent(),
-      event_detail: createEventDetail(),
-      event_location: createLocation(),
-      event_ticket_info: [createEventTicketInfo()],
-      event_tag: [createEventTag()],
-    };
-
-    server.use(
-      rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json(data));
-      })
-    );
+    server.use(getEvent());
 
     expect(
       await screen.findByRole('heading', { name: data.title })
@@ -63,19 +80,7 @@ describe('<EventPage/> integration', () => {
   it(`should show the modal only when the user is authenticated`, async () => {
     render(<EventPage />, { wrapper: PrivateWrapper });
 
-    const data = {
-      ...createEvent(),
-      event_detail: createEventDetail(),
-      event_location: createLocation(),
-      event_ticket_info: [createEventTicketInfo()],
-      event_tag: [createEventTag()],
-    };
-
-    server.use(
-      rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json(data));
-      })
-    );
+    server.use(getEvent());
 
     const $getTicketsButton = await screen.findByRole('button', {
       name: /Get tickets/i,
@@ -90,24 +95,7 @@ describe('<EventPage/> integration', () => {
     render(<EventPage />, { wrapper: PrivateWrapper });
 
     const authUser = createUser();
-
-    const d = getDateData();
-    const now = `${d.year}-${d.monthNumber}-${d.day}T00:00:00.000Z`;
-    const data = {
-      ...createEvent(),
-      event_detail: createEventDetail(),
-      event_location: createLocation(),
-      event_ticket_info: [
-        createEventTicketInfo({ sales_start: now, sales_end: now }),
-      ],
-      event_tag: [createEventTag()],
-    };
-
-    server.use(
-      rest.get(`/event/valid-slug`, async (req, res, ctx) => {
-        return res(ctx.status(OK_STATUS), ctx.json(data));
-      })
-    );
+    server.use(getEvent(), postOrder());
 
     const $getTicketsButton = await screen.findByRole('button', {
       name: /Get tickets/i,
@@ -159,16 +147,6 @@ describe('<EventPage/> integration', () => {
     );
 
     expect(within($modal).getByLabelText(/email/i)).toHaveValue(authUser.email);
-
-    const $phoneNumberInput = within($modal).getByLabelText(/phone number/i);
-
-    act(() => {
-      fireEvent.change($phoneNumberInput, {
-        target: { value: '12345678' },
-      });
-    });
-
-    expect($phoneNumberInput).toHaveValue('12345678');
 
     fireEvent.click(within($modal).getByRole('button', { name: /Register/i }));
 

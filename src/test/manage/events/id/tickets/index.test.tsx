@@ -216,7 +216,7 @@ describe('<TicketsPage/> success integration', () => {
     expect(within($modal).getByLabelText(/description/i)).toHaveValue(
       eventData.event_tickets_info[0].description
     );
-    expect(within($modal).getByLabelText('Minimun quantity')).toHaveValue(
+    expect(within($modal).getByLabelText('Minimum quantity')).toHaveValue(
       eventData.event_tickets_info[0].minimum_quantity
     );
     expect(within($modal).getByLabelText('Maximum quantity')).toHaveValue(

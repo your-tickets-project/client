@@ -88,6 +88,7 @@ interface FormProps {
   extraOffsetTop?: number;
   initialValues?: Values;
   parentScrollToSelector?: string;
+  style?: React.CSSProperties;
   onFinish?: (values: any) => void;
   onForm?: (form: FormType) => void;
 }
@@ -127,6 +128,7 @@ export const Form = ({
   initialValues,
   extraOffsetTop,
   parentScrollToSelector,
+  style,
   onFinish,
   onForm,
 }: FormProps) => {
@@ -188,7 +190,12 @@ export const Form = ({
     <FormContext.Provider
       value={{ activeFieldName, formik, setActiveFieldName, setValidations }}
     >
-      <form className="ui-form" role="form" onSubmit={formik.handleSubmit}>
+      <form
+        className="ui-form"
+        role="form"
+        style={style}
+        onSubmit={formik.handleSubmit}
+      >
         {children}
       </form>
     </FormContext.Provider>
