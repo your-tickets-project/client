@@ -15,8 +15,10 @@ import {
 import useVW from 'client/hooks/useVW';
 // store
 import { AppSelector } from 'client/store/selectors';
+import { appShowDashboardOptions } from 'client/store/actions/app';
 // styles
 import { breakPoints, breakPointsPX, colors } from 'client/styles/variables';
+
 interface Props {
   children: React.ReactNode;
 }
@@ -104,13 +106,16 @@ const DashboardMenuBar = () => {
         Icon: InvoiceIcon,
         title: 'Orders',
         href: '/dashboard/orders',
-        urlList: [],
+        urlList: [
+          '/dashboard/orders',
+          `/dashboard/orders/${query.eventId}/${query.id}`,
+        ],
       },
       {
         Icon: TicketIcon,
         title: 'Your Tickets',
-        href: '/dashboard/tickets',
-        urlList: [],
+        href: '/dashboard/yourtickets',
+        urlList: [`/dashboard/yourtickets`],
       },
       {
         Icon: DollarIcon,
@@ -128,7 +133,15 @@ const DashboardMenuBar = () => {
         <aside>
           <div className="container row vg-8 hg-48 vg-sm-32 vg-md-0 hg-md-32">
             {links.map(({ href, Icon, title, urlList }) => (
-              <div key={href} className="col-6 col-sm-4 col-md-12">
+              <div
+                key={href}
+                className="col-6 col-sm-4 col-md-12"
+                onClick={() =>
+                  appShowDashboardOptions({
+                    isShowOptions: !isShowingDashboardOptions,
+                  })
+                }
+              >
                 <Link href={href} legacyBehavior>
                   <a
                     className={`dashboard-option ${

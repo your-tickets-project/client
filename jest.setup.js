@@ -25,3 +25,28 @@ jest.mock('next/router', () => ({
     };
   },
 }));
+
+jest.mock('nanoid', () => ({
+  nanoid() {
+    return 'unique-id';
+  },
+  customAlphabet() {
+    return () => '1';
+  },
+}));
+
+jest.mock('server/utils/email', () => ({ sendEmail() {} }));
+jest.mock('server/utils/pdf', () => ({
+  generateBufferTicketPdf() {
+    return Promise.resolve(Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]));
+  },
+  mergeBufferPdf() {
+    return Promise.resolve(Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]));
+  },
+}));
+
+jest.mock('server/data/media/media.data', () => ({
+  createMedia() {
+    return Promise.resolve([{ Key: 'test', name: 'test' }]);
+  },
+}));

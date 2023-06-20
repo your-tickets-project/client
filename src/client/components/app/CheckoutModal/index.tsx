@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 // components
 import { CheckCircleIcon, PhotoIcon } from 'client/components/icons';
 import {
@@ -34,6 +35,7 @@ import {
 } from 'interfaces';
 // services
 import { baseURL } from 'client/services';
+import { postOrder } from 'client/services/orders.service';
 // store
 import { AuthSelector } from 'client/store/selectors';
 // styles
@@ -76,6 +78,7 @@ export default function CheckoutModal({
 
   // booleans
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [showLeave, setShowLeave] = useState(false);
   const [timeEnd, setTimeEnd] = useState(false);
   // data
@@ -87,6 +90,7 @@ export default function CheckoutModal({
   const [tickets, setTickets] = useState<
     { id: number | string; amount: number; name: string; price: number }[]
   >([]);
+  const [orderNumber, setOrderNumber] = useState<number>();
 
   useEffect(() => {
     setIsLoading(false);
@@ -99,6 +103,16 @@ export default function CheckoutModal({
     setTotalTickets(tickets.reduce((acc, t) => acc + t.amount, 0));
   }, [isLoading, tickets]);
 
+  useEffect(() => {
+    if (isLoading) return;
+    if (isShowModal) return;
+
+    setTotalPrice(0);
+    setTotalTickets(0);
+    setTickets([]);
+    setOrderNumber(undefined);
+  }, [isLoading, isShowModal]);
+
   const formatDate = ({ date }: { date: string }) => {
     const d = getDateData({
       date,
@@ -108,8 +122,31 @@ export default function CheckoutModal({
     return `${d.weekDay}, ${d.monthText} ${d.day}, ${d.year}`;
   };
 
-  const handleFinish = async (values: any) => {
-    setCheckout(CHECKOUT_STATES.SUCCESS);
+  const handleFinish = async (data: any) => {
+    setIsSending(true);
+    try {
+      const date = new Date();
+      const d = getDateData({ date: date.toString() });
+      const res = await postOrder({
+        data: {
+          ...data,
+          email: user!.email,
+          tickets: tickets.map(({ name, ...rest }) => rest),
+          purchase_date: `${d.year}-${d.monthNumber}-${d.day}`,
+          purchase_time: `${`0${date.getHours()}`.slice(
+            -2
+          )}:${`0${date.getMinutes()}`.slice(
+            -2
+          )}:${`0${date.getSeconds()}`.slice(-2)}`,
+        },
+        eventId: event.id,
+      });
+      setOrderNumber(res.data.insertId);
+      setCheckout(CHECKOUT_STATES.SUCCESS);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Internal server error.');
+    }
+    setIsSending(false);
   };
 
   const handleCloseModal = () => {
@@ -130,6 +167,16 @@ export default function CheckoutModal({
     const endDate = new Date(
       `${ticket.sales_end.split('T')[0]}T${ticket.time_end}`
     );
+
+    const remainingTickets = ticket.quantity - ticket.sold;
+
+    if (remainingTickets <= 0) {
+      return (
+        <p style={{ color: colors.grayFont, fontWeight: 'bold' }}>
+          Tickets sold out
+        </p>
+      );
+    }
 
     if (nowDate < startDate) {
       let text = 'Sales start';
@@ -164,45 +211,55 @@ export default function CheckoutModal({
     }
 
     return (
-      <Select
-        placeholder="N° tickets"
-        value={0}
-        options={[
-          { key: 0, value: 0, label: '0' },
-          ...Array.from(
-            { length: ticket.maximum_quantity },
-            (_, index) => index + 1
-          )
-            .filter((n) => n >= ticket.minimum_quantity)
-            .map((n) => ({
-              key: n,
-              label: `${n}`,
-              value: n,
-            })),
-        ]}
-        onChange={(e) => {
-          const value = +e.target.value;
-          setTickets((state) => {
-            if (value === 0) {
-              return state.filter((t) => t.id !== ticket.id);
-            }
+      <>
+        <Select
+          placeholder="N° tickets"
+          value={0}
+          options={[
+            { key: 0, value: 0, label: '0' },
+            ...Array.from(
+              { length: ticket.maximum_quantity },
+              (_, index) => index + 1
+            )
+              .filter(
+                (n) => n >= ticket.minimum_quantity && n <= remainingTickets
+              )
+              .map((n) => ({
+                key: n,
+                label: `${n}`,
+                value: n,
+              })),
+          ]}
+          onChange={(e) => {
+            const value = +e.target.value;
+            setTickets((state) => {
+              if (value === 0) {
+                return state.filter((t) => t.id !== ticket.id);
+              }
 
-            const data = {
-              id: ticket.id,
-              amount: value,
-              name: ticket.name,
-              price: value * ticket.price,
-            };
+              const data = {
+                id: ticket.id,
+                amount: value,
+                name: ticket.name,
+                price: value * ticket.price,
+              };
 
-            const found = state.findIndex((t) => t.id === ticket.id);
-            if (found === -1) {
-              return [...state, data];
-            }
+              const found = state.findIndex((t) => t.id === ticket.id);
+              if (found === -1) {
+                return [...state, data];
+              }
 
-            return state.map((t) => (t.id === ticket.id ? data : t));
-          });
-        }}
-      />
+              return state.map((t) => (t.id === ticket.id ? data : t));
+            });
+          }}
+        />
+        {remainingTickets <= 10 && (
+          <p style={{ color: colors.warning }}>
+            only {remainingTickets} ticket{remainingTickets >= 2 ? 's' : ''}{' '}
+            left
+          </p>
+        )}
+      </>
     );
   };
 
@@ -223,53 +280,51 @@ export default function CheckoutModal({
         <div className="modal row">
           <div className="ticket-info col-12 col-md-7">
             {checkout === CHECKOUT_STATES.PRE_SALE && (
-              <>
-                <div className="info-container">
-                  <div className="title">
-                    <h4>{event.title}</h4>
-                    <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
-                      {formatDate({ date: event.date_start })}
-                    </p>
-                    <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
-                      {`${formatTime({
-                        time: event.time_start,
-                        timeFormat: 'short',
-                      })} - ${formatTime({
-                        time: event.time_end,
-                        timeFormat: 'short',
-                      })}`}
-                    </p>
-                  </div>
-                  <div className="body">
-                    {event.event_ticket_info.map((ticket) =>
-                      ticket.visibility === 'visible' ? (
-                        <React.Fragment key={ticket.id}>
-                          <div className="row vg-8">
-                            <div className="col-6">
-                              <p className="ticket-name">{ticket.name}</p>
-                              <p>
-                                {ticket.price
-                                  ? formatCurrency(ticket.price, 'USD')
-                                  : 'Free'}
-                              </p>
-                            </div>
-                            <div className="col-6">
-                              {checkReleaseDate(ticket)}
-                            </div>
-                            <div className="col-12">
-                              <p className="ticket-description">
-                                {ticket.description}
-                              </p>
-                            </div>
+              <div className="info-container">
+                <div className="title">
+                  <h4>{event.title}</h4>
+                  <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
+                    {formatDate({ date: event.date_start })}
+                  </p>
+                  <p style={{ color: colors.grayFont, margin: '0.2rem 0' }}>
+                    {`${formatTime({
+                      time: event.time_start,
+                      timeFormat: 'short',
+                    })} - ${formatTime({
+                      time: event.time_end,
+                      timeFormat: 'short',
+                    })}`}
+                  </p>
+                </div>
+                <div className="body">
+                  {event.event_ticket_info.map((ticket) =>
+                    ticket.visibility === 'visible' ? (
+                      <React.Fragment key={ticket.id}>
+                        <div className="row vg-8">
+                          <div className="col-6">
+                            <p className="ticket-name">{ticket.name}</p>
+                            <p>
+                              {ticket.price
+                                ? formatCurrency(ticket.price, 'USD')
+                                : 'Free'}
+                            </p>
                           </div>
-                          <Divider />
-                        </React.Fragment>
-                      ) : null
-                    )}
-                    <p className="brand">
-                      Offered by <span>YourTickets</span>
-                    </p>
-                  </div>
+                          <div className="col-6">
+                            {checkReleaseDate(ticket)}
+                          </div>
+                          <div className="col-12">
+                            <p className="ticket-description">
+                              {ticket.description}
+                            </p>
+                          </div>
+                        </div>
+                        <Divider />
+                      </React.Fragment>
+                    ) : null
+                  )}
+                  <p className="brand">
+                    Offered by <span>YourTickets</span>
+                  </p>
                 </div>
                 <div className="footer">
                   <p className="price">{formatCurrency(totalPrice, 'USD')}</p>
@@ -286,38 +341,43 @@ export default function CheckoutModal({
                     Checkout
                   </Button>
                 </div>
-              </>
+              </div>
             )}
 
             {checkout === CHECKOUT_STATES.CHECKOUT && (
-              <>
-                <div className="info-container">
-                  <div className="title">
-                    <h4 style={{ textAlign: 'center' }}>Checkout</h4>
-                    <p
-                      style={{
-                        color: colors.grayFont,
-                        margin: '0.2rem 0',
-                        textAlign: 'center',
-                      }}
-                    >
-                      <CountDownTimer
-                        minutes={30}
-                        preffix="Time left"
-                        onTimeEnd={() => setTimeEnd(true)}
-                      />
-                    </p>
-                  </div>
-                  <div className="body">
-                    <Form
-                      onFinish={handleFinish}
-                      initialValues={{
-                        first_name: user?.first_name ?? '',
-                        last_name: user?.last_name ?? '',
-                        email: user?.email ?? '',
-                        phone_number: '',
-                      }}
-                    >
+              <div className="info-container">
+                <div className="title">
+                  <h4 style={{ textAlign: 'center' }}>Checkout</h4>
+                  <p
+                    style={{
+                      color: colors.grayFont,
+                      margin: '0.2rem 0',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <CountDownTimer
+                      minutes={30}
+                      preffix="Time left"
+                      onTimeEnd={() => setTimeEnd(true)}
+                    />
+                  </p>
+                </div>
+                <div className="body">
+                  <Form
+                    onFinish={!isSending ? handleFinish : undefined}
+                    initialValues={{
+                      first_name: user?.first_name ?? '',
+                      last_name: user?.last_name ?? '',
+                      email: user?.email ?? '',
+                    }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%',
+                      margin: 0,
+                    }}
+                  >
+                    <div style={{ flex: '1' }}>
                       <h4 style={{ textAlign: 'center' }}>
                         Contact information
                       </h4>
@@ -328,6 +388,7 @@ export default function CheckoutModal({
                             name="first_name"
                             rules={{
                               required: true,
+                              max: 100,
                             }}
                           >
                             <Input />
@@ -339,6 +400,7 @@ export default function CheckoutModal({
                             name="last_name"
                             rules={{
                               required: true,
+                              max: 100,
                             }}
                           >
                             <Input />
@@ -351,109 +413,108 @@ export default function CheckoutModal({
                             rules={{
                               required: true,
                               type: 'email',
+                              disabled: true,
                             }}
                           >
-                            <Input />
-                          </Form.Item>
-                        </div>
-                        <div className="col-12">
-                          <Form.Item
-                            label="Phone number"
-                            name="phone_number"
-                            rules={{
-                              required: true,
-                            }}
-                          >
-                            <Input />
+                            <Input disabled />
                           </Form.Item>
                         </div>
                       </div>
                       <p className="brand">
                         Offered by <span>YourTickets</span>
                       </p>
-                      <div className="footer">
-                        <p className="price">
-                          {formatCurrency(totalPrice, 'USD')}
-                        </p>
-                        <Button block type="primary" htmlType="submit">
-                          Register
-                        </Button>
-                      </div>
-                    </Form>
-                  </div>
+                    </div>
+                    <div className="footer">
+                      <p className="price">
+                        {formatCurrency(totalPrice, 'USD')}
+                      </p>
+                      <Button
+                        block
+                        disabled={isSending}
+                        type="primary"
+                        htmlType="submit"
+                      >
+                        Register
+                      </Button>
+                    </div>
+                  </Form>
                 </div>
-              </>
+              </div>
             )}
 
             {checkout === CHECKOUT_STATES.SUCCESS && (
-              <>
-                <div className="info-container">
-                  <div className="title">
-                    <div style={{ height: '50px' }}>
-                      <CheckCircleIcon fill={colors.success} />
-                    </div>
-                    <h4 style={{ marginTop: '.5rem', textAlign: 'center' }}>
-                      thanks for your order!
-                    </h4>
-                    <p
-                      style={{
-                        color: colors.color1,
-                        fontWeight: 'bold',
-                        margin: '0',
-                        marginTop: '.5rem',
-                        textAlign: 'center',
-                      }}
-                    >
-                      YourTickets
-                    </p>
+              <div className="info-container">
+                <div className="title">
+                  <div style={{ height: '50px' }}>
+                    <CheckCircleIcon fill={colors.success} />
                   </div>
-                  <div className="body">
-                    <p style={{ margin: '0' }}>You&apos;re going to</p>
-                    <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
-                    <div style={{ marginTop: '1rem' }} className="row hg-24">
-                      <div className="col-12">
-                        <p style={{ fontWeight: 'bold', margin: '0' }}>
-                          {totalTickets} TICKET(S) SENT TO
-                        </p>
-                        <p style={{ margin: '0' }}>{user?.email}</p>
-                      </div>
-                      <div className="col-12">
-                        <p style={{ fontWeight: 'bold', margin: '0' }}>
-                          DATE AND TIME
-                        </p>
-                        <p style={{ margin: 0 }}>
-                          {formatDate({ date: event.date_start })}
-                        </p>
-                      </div>
-                      <div className="col-12">
-                        <p style={{ fontWeight: 'bold', margin: '0' }}>
-                          Location
-                        </p>
-                        <p style={{ margin: 0 }}>
-                          {formatShortLocation({
-                            location: event.event_location,
-                          })}
-                        </p>
-                      </div>
-                      <div className="col-12">
-                        <p style={{ fontWeight: 'bold', margin: '0' }}>
-                          Ticket number
-                        </p>
-                        <p style={{ margin: 0 }}>#123456789</p>
-                      </div>
+                  <h4 style={{ marginTop: '.5rem', textAlign: 'center' }}>
+                    thanks for your order!
+                  </h4>
+                  <p
+                    style={{
+                      color: colors.color1,
+                      fontWeight: 'bold',
+                      margin: '0',
+                      marginTop: '.5rem',
+                      textAlign: 'center',
+                    }}
+                  >
+                    YourTickets
+                  </p>
+                </div>
+                <div className="body">
+                  <p style={{ margin: '0' }}>You&apos;re going to</p>
+                  <h4 style={{ marginTop: '.2rem' }}>{event.title}</h4>
+                  <div style={{ marginTop: '1rem' }} className="row hg-24">
+                    <div className="col-12">
+                      <p style={{ fontWeight: 'bold', margin: '0' }}>
+                        {totalTickets} TICKET(S) SENT TO
+                      </p>
+                      <p style={{ margin: '0' }}>{user?.email}</p>
+                    </div>
+                    <div className="col-12">
+                      <p style={{ fontWeight: 'bold', margin: '0' }}>
+                        DATE AND TIME
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        {formatDate({ date: event.date_start })} at{' '}
+                        {formatTime({
+                          time: event.time_start,
+                          timeFormat: 'short',
+                        })}
+                      </p>
+                    </div>
+                    <div className="col-12">
+                      <p style={{ fontWeight: 'bold', margin: '0' }}>
+                        Location
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        {formatShortLocation({
+                          location: event.event_location,
+                        })}
+                      </p>
+                    </div>
+                    <div className="col-12">
+                      <p style={{ fontWeight: 'bold', margin: '0' }}>
+                        Order number
+                      </p>
+                      <p style={{ margin: 0 }}>#{orderNumber}</p>
                     </div>
                   </div>
                 </div>
-                <div style={{ height: '4.5rem' }} className="footer">
+                <div className="footer">
                   <Button
                     block
                     type="primary"
-                    onClick={() => router.push(`/mytickets/1234567`)}
+                    onClick={() =>
+                      router.push(`/dashboard/yourtickets/${orderNumber}`)
+                    }
                   >
                     See ticket(s)
                   </Button>
                 </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -576,7 +637,6 @@ export default function CheckoutModal({
         .body {
           flex: 1;
           height: 100%;
-          margin-bottom: 6.75rem;
           overflow-y: auto;
           padding: 1.5rem 1rem 0;
         }
@@ -605,12 +665,7 @@ export default function CheckoutModal({
         .footer {
           background-color: ${colors.white};
           border-top: 1px solid #000;
-          bottom: 0;
-          height: 6.75rem;
-          left: 0;
           padding: 1rem 2rem;
-          position: absolute;
-          width: 100%;
         }
 
         .footer .price {

@@ -8,6 +8,7 @@ export * from './Form';
 export * from './Input';
 export * from './InputTag';
 export * from './Modal';
+export * from './Pagination';
 export * from './Select';
 export * from './Table';
 export * from './Tabs';

@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface Props {
+  active?: boolean;
   block?: boolean;
   children?: React.ReactNode;
   disabled?: boolean;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const Button = ({
+  active,
   block,
   children,
   disabled,
@@ -25,7 +27,7 @@ export const Button = ({
     <button
       className={`ui-button ${type || ''} ${block ? 'block' : ''} ${
         disabled ? 'disabled' : ''
-      }`}
+      } ${active ? 'active' : ''}`}
       disabled={disabled}
       style={style}
       type={htmlType ?? 'button'}

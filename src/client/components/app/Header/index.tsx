@@ -73,7 +73,7 @@ const authLinks: ItemsType[] = [
   },
   {
     href: '/dashboard/events',
-    content: 'Manage my events',
+    content: 'Dashboard',
     style: itemStyle,
   },
   {

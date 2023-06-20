@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pagination } from '../index';
 
 interface Props {
   columns: {
@@ -7,57 +8,75 @@ interface Props {
     title: React.ReactNode;
     render?: (value: any, record: any) => React.ReactNode;
   }[];
-  dataSource: { key: string | number }[];
+  dataSource: any[];
+  pagination?: {
+    current?: number;
+    defaultPageSize?: number;
+    showPageSize?: boolean;
+    total?: number;
+    onChange?: (page: number, pageSize: number) => void;
+  } | null;
   style?: React.CSSProperties;
 }
 
-export const Table = ({ columns, dataSource, style }: Props) => {
+export const Table = ({ columns, dataSource, pagination, style }: Props) => {
   return (
-    <div className="ui-table">
-      <table className="ui-table_table" style={style}>
-        <thead className="ui-table_head">
-          <tr>
-            {columns.map(({ key, title }) => (
-              <th key={key} className="ui-table_cell">
-                {title}
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody
-          className="ui-table_body"
-          style={
-            dataSource.length
-              ? undefined
-              : { height: '200px', position: 'relative' }
-          }
-        >
-          {dataSource.length ? (
-            dataSource.map((data) => (
-              <tr key={data.key}>
-                {columns.map(({ key, dataIndex, render }) => (
-                  <td key={key} className="ui-table_cell">
-                    {render
-                      ? // @ts-ignore
-                        render(data[dataIndex], data)
-                      : // @ts-ignore
-                        data[dataIndex]}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr className="ui-table_empty-container">
-              <td className="ui-table_empty-icon">
-                <NoDataIcon />
-              </td>
-              <td className="ui-table_empty-text">No data</td>
+    <>
+      <div className="ui-table">
+        <table className="ui-table_table" style={style}>
+          <thead className="ui-table_head">
+            <tr>
+              {columns.map(({ key, title }) => (
+                <th key={key} className="ui-table_cell">
+                  {title}
+                </th>
+              ))}
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+
+          <tbody
+            className="ui-table_body"
+            style={
+              dataSource.length
+                ? undefined
+                : { height: '200px', position: 'relative' }
+            }
+          >
+            {dataSource.length ? (
+              dataSource.map((data) => (
+                <tr key={data.key}>
+                  {columns.map(({ key, dataIndex, render }) => (
+                    <td key={key} className="ui-table_cell">
+                      {render
+                        ? // @ts-ignore
+                          render(data[dataIndex], data)
+                        : // @ts-ignore
+                          data[dataIndex]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr className="ui-table_empty-container">
+                <td className="ui-table_empty-icon">
+                  <NoDataIcon />
+                </td>
+                <td className="ui-table_empty-text">No data</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {pagination !== null && (
+        <Pagination
+          current={pagination?.current}
+          defaultPageSize={pagination?.defaultPageSize}
+          showPageSize={pagination?.showPageSize}
+          total={pagination?.total}
+          onChange={pagination?.onChange}
+        />
+      )}
+    </>
   );
 };
 

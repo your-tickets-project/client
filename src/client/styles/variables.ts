@@ -38,7 +38,7 @@ export const fluidFont = {
   big: 'clamp(1rem, calc(0.96rem + 0.22vw), 1.13rem)',
   p: 'clamp(0.88rem, calc(0.83rem + 0.22vw), 1rem)',
   h6: 'clamp(0.30rem, calc(0.21rem + 0.52vw), 0.59rem)',
-  h5: 'clamp(0.44rem, calc(0.31rem + 0.77vw), 0.89rem)',
+  h5: 'clamp(1.00rem, calc(0.31rem + 0.77vw), 1.20rem)',
   h4: 'clamp(1.00rem, calc(0.66rem + 1.96vw), 2.13rem)',
   h3: 'clamp(1.25rem, calc(0.91rem + 1.96vw), 2.38rem)',
   h2: 'clamp(1.38rem, calc(1.03rem + 1.96vw), 2.50rem)',

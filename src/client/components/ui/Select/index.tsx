@@ -33,13 +33,6 @@ export const Select = ({
 
   useEffect(() => {
     if (isLoading) return;
-    if (selectedOption === undefined) return;
-    onChange?.({ target: { name, value: selectedOption.value } });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (isLoading) return;
 
     window.addEventListener('click', (e) => {
       if (!e.target) return;

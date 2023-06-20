@@ -2,7 +2,7 @@ import { request } from 'server/mocks/handlers';
 import handler from 'pages/api/v1/event/dashboard/[id]';
 // mocks
 import { createUser } from 'fixtures/user.fixture';
-import { dbDelete, dbSelect } from 'server/database';
+import { dbSelect, dbUpdate } from 'server/database';
 import { generateJWT } from 'server/utils';
 import {
   BAD_REQUEST_STATUS,
@@ -16,18 +16,18 @@ afterEach(() => {
   // @ts-ignore
   dbSelect.mockClear();
   // @ts-ignore
-  dbDelete.mockClear();
+  dbUpdate.mockClear();
 });
 
 const user = createUser();
 const token = generateJWT({ id: user.id });
 
-describe('GET -- api/v1/event/dashboard/[id] -- success request', () => {
+describe('DELETE -- api/v1/event/dashboard/[id] -- success request', () => {
   it('should return the data', async () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
     // @ts-ignore
-    dbDelete.mockReturnValue({ affectedRows: 1 });
+    dbUpdate.mockReturnValue({ affectedRows: 1 });
 
     const res = await request({
       handler,
@@ -37,11 +37,11 @@ describe('GET -- api/v1/event/dashboard/[id] -- success request', () => {
     });
 
     expect(res.statusCode).toBe(OK_STATUS);
-    expect(res.body).toEqual({ message: 'Event deleted successfully.' });
+    expect(res.body).toEqual({ message: 'Event successfully cancelled.' });
   });
 });
 
-describe('GET -- api/v1/event/dashboard/[id] -- bad request', () => {
+describe('DELETE -- api/v1/event/dashboard/[id] -- bad request', () => {
   it('should return "Id is required."', async () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
@@ -64,7 +64,7 @@ describe('GET -- api/v1/event/dashboard/[id] -- bad request', () => {
     // @ts-ignore
     dbSelect.mockReturnValueOnce(Promise.resolve([user]));
     // @ts-ignore
-    dbDelete.mockReturnValue({ affectedRows: 0 });
+    dbUpdate.mockReturnValue({ affectedRows: 0 });
 
     const res = await request({
       handler,

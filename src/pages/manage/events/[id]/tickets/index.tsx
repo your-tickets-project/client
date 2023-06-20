@@ -778,7 +778,7 @@ const EditUpdateForm = ({
               </div>
               <div className="col-12 col-sm-6">
                 <Form.Item
-                  label="Minimun quantity"
+                  label="Minimum quantity"
                   name="minimum_quantity"
                   rules={{
                     required: true,

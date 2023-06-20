@@ -42,12 +42,6 @@ describe('when <Select/> is mounted', () => {
 });
 
 describe('when the user change the value', () => {
-  test('should call the onChange function when it is rendered', () => {
-    expect(handleChange).toHaveBeenCalledWith({
-      target: { name: 'testName', value: '1' },
-    });
-  });
-
   test('should change the value', () => {
     const $select = screen.getByRole('combobox');
     expect($select).toHaveValue('Venezuela');
@@ -59,10 +53,6 @@ describe('when the user change the value', () => {
   });
 
   test('should call the onChange function when the user change the value', () => {
-    expect(handleChange).toHaveBeenCalledWith({
-      target: { name: 'testName', value: '1' },
-    });
-
     fireEvent.click(screen.getByRole('combobox'));
     fireEvent.click(screen.getAllByRole('listitem')[2]);
 

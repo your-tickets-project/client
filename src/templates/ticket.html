@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>PDF Result Template</title>
+    <style>
+      { style }
+    </style>
+  </head>
+  <body>
+    <header class="container row mb-15px" style="margin-top: 50px">
+      <h2 class="color-1 col-6" style="font-size: 30px">Yourtickets</h2>
+      <p class="col-6 d-flex justify-content-end align-items-end">
+        <span> <span class="font-bold">Order</span> #{ id } </span>
+      </p>
+    </header>
+    <main class="container row vg-8 border p-15px">
+      <div class="col-10">
+        <h1 class="mb-15px">{ eventTitle }</h1>
+        <h2 class="mb-20px">{ eventTicketInfoName }</h2>
+        <p>
+          <span class="font-bold">{ venueName }</span>, {address}, { city }
+          {postalCode}, { country }
+        </p>
+        <p class="mb-25px">{ eventStart } - { eventEnd }</p>
+        <p class="color-gray font-bold mb-15px">Order information</p>
+        <p>Order #{ id }. Ordered by { orderName } on { orderDate }</p>
+      </div>
+      <div class="col-2">
+        <img src="{imageUrl}" alt="image" />
+      </div>
+    </main>
+  </body>
+</html>

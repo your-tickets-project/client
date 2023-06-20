@@ -19,7 +19,7 @@ export const authMiddleware = async (
 
   if (!authorization) {
     throw new UnauthorizedException(
-      'You must provide the authorization header'
+      'You must provide the authorization header.'
     );
   }
 
@@ -28,7 +28,7 @@ export const authMiddleware = async (
 
   if (init !== 'Bearer') {
     throw new ForbiddenException(
-      'The authorization header does not contain the word Bearer'
+      'The authorization header does not contain the word Bearer.'
     );
   }
 
@@ -46,7 +46,7 @@ export const authMiddleware = async (
 
     req.user = authUser;
   } catch (error) {
-    throw new UnauthorizedException('Invalid token');
+    throw new UnauthorizedException('Invalid token.');
   }
   await next();
 };
